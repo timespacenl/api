@@ -1,11 +1,20 @@
+using Destructurama;
+using Serilog;
+using Timespace.Api;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddConfiguration(builder.Configuration);
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Host
+    .UseSerilog((_, lc) => lc
+        .ReadFrom.Configuration(builder.Configuration)
+        .Destructure.UsingAttributes()
+    );
+
+// Add services to the container.
+builder.Services.AddServices();
+builder.Services.AddAspnetServices();
 
 var app = builder.Build();
 
