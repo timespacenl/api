@@ -1,0 +1,78 @@
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Timespace.Api.Infrastructure.Persistence.Common;
+
+namespace Timespace.Api.Infrastructure.Persistence;
+
+public class AppDbContext : DbContext
+{
+    // private readonly ISessionInfoProvider _sessionInfoProvider;
+    
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
+
+    public override int SaveChanges()
+    {
+        throw new NotSupportedException();
+    }
+
+    public async override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var entries = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is IBaseEntity && e.State is EntityState.Added or EntityState.Modified);
+
+        foreach (var entityEntry in entries)
+        {
+            ((IBaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
+
+            if (entityEntry.State == EntityState.Added)
+            {
+                ((IBaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
+            }
+        }
+
+        // var tenantEntries = ChangeTracker
+        //     .Entries()
+        //     .Where(e => e.Entity is ITenantEntity && e.State is EntityState.Added or EntityState.Modified);
+        //
+        // foreach (var entityEntry in tenantEntries)
+        // {
+        //     ((ITenantEntity)entityEntry.Entity).TenantId = _sessionInfoProvider.GetGuaranteedSession().Identity.TenantId;
+        // }
+        
+        var softdeleteEntries = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is ISoftDeletable && 
+                e.State == EntityState.Deleted);
+
+        foreach (var entityEntry in softdeleteEntries)
+        {
+            ((ISoftDeletable)entityEntry.Entity).DeletedAt = DateTime.UtcNow;
+            ((ISoftDeletable)entityEntry.Entity).IsDeleted = true;
+        }
+        
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        // Expression<Func<ITenantEntity, bool>> tenantExpression = entity => _sessionInfoProvider.GetGuaranteedSession().Identity.Tenant.Id == Guid.Empty || entity.TenantId == _sessionInfoProvider.GetGuaranteedSession().Identity.Tenant.Id;
+        Expression<Func<ISoftDeletable, bool>> softDeleteExpression = entity => entity.IsDeleted == false;
+        
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes()) {
+            // if (entityType.ClrType.IsAssignableTo(typeof(ITenantEntity))) {
+            //     modelBuilder.Entity(entityType.ClrType).AppendQueryFilter(tenantExpression);
+            // }
+            
+            if (entityType.ClrType.IsAssignableTo(typeof(ISoftDeletable))) {
+                modelBuilder.Entity(entityType.ClrType).AppendQueryFilter(softDeleteExpression);
+            }
+        }
+    }
+}
