@@ -1,8 +1,10 @@
-﻿namespace Timespace.Api.Infrastructure.Persistence.Common;
+﻿using NodaTime;
+
+namespace Timespace.Api.Infrastructure.Persistence.Common;
 
 public interface IBaseEntity
 {
     public Guid Id { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public Instant CreatedAt { get; set; }
+    public Instant UpdatedAt { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Infrastructure.Persistence;
@@ -7,9 +8,11 @@ namespace Timespace.Api.Infrastructure.Persistence;
 public class AppDbContext : DbContext
 {
     // private readonly ISessionInfoProvider _sessionInfoProvider;
+    private readonly IClock _clock;
     
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options, IClock clock) : base(options)
     {
+        _clock = clock;
     }
 
     public override int SaveChanges()
@@ -25,11 +28,11 @@ public class AppDbContext : DbContext
 
         foreach (var entityEntry in entries)
         {
-            ((IBaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
+            ((IBaseEntity)entityEntry.Entity).UpdatedAt = _clock.GetCurrentInstant();
 
             if (entityEntry.State == EntityState.Added)
             {
-                ((IBaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
+                ((IBaseEntity)entityEntry.Entity).CreatedAt = _clock.GetCurrentInstant();
             }
         }
 
@@ -49,7 +52,7 @@ public class AppDbContext : DbContext
 
         foreach (var entityEntry in softdeleteEntries)
         {
-            ((ISoftDeletable)entityEntry.Entity).DeletedAt = DateTime.UtcNow;
+            ((ISoftDeletable)entityEntry.Entity).DeletedAt = _clock.GetCurrentInstant();
             ((ISoftDeletable)entityEntry.Entity).IsDeleted = true;
         }
         
