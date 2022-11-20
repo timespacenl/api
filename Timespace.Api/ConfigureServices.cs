@@ -18,12 +18,10 @@ public static class ConfigureServices
 
     private static void ConfigureProblemDetails(ProblemDetailsOptions options)
     {
-        options.IncludeExceptionDetails = (ctx, ex) => false;
+        options.IncludeExceptionDetails = (_, _) => false;
         // Custom mapping function for FluentValidation's ValidationException.
         // options.MapFluentValidationException();
 
-        // You can configure the middleware to re-throw certain types of exceptions, all exceptions or based on a predicate.
-        // This is useful if you have upstream middleware that needs to do additional handling of exceptions.
         options.Rethrow<NotSupportedException>();
 
         options.MapToStatusCode<NotImplementedException>(StatusCodes.Status501NotImplemented);
@@ -34,16 +32,16 @@ public static class ConfigureServices
         {
             if(ex is IBaseException baseException)
             {
-                var problemDetails = new ProblemDetails()
+                var problemDetails = new ProblemDetails
                 {
                     Type = baseException.Type,
                     Title = baseException.Title,
                     Status = baseException.StatusCode,
                     Instance = context.Request.Path,
-                    Detail = baseException.Detail,
+                    Detail = baseException.Detail
                 };
                 
-                foreach(KeyValuePair<string, object?> kvpair in baseException.Extensions)
+                foreach(var kvpair in baseException.Extensions)
                 {
                     problemDetails.Extensions.Add(kvpair);
                 }
@@ -51,13 +49,13 @@ public static class ConfigureServices
                 return problemDetails;
             }
 
-            var internalErrorProblemDetails = new ProblemDetails()
+            var internalErrorProblemDetails = new ProblemDetails
             {
                 Type = "internal-server-error",
                 Title = "Internal server error",
                 Status = StatusCodes.Status500InternalServerError,
                 Detail = "An internal server error occurred.",
-                Instance = context.Request.Path,
+                Instance = context.Request.Path
             };
 
             return internalErrorProblemDetails;
