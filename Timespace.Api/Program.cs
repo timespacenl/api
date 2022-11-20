@@ -1,4 +1,5 @@
 using Destructurama;
+using Hellang.Middleware.ProblemDetails;
 using Serilog;
 using Timespace.Api;
 
@@ -24,6 +25,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseProblemDetails();
 
 app.UseHttpsRedirection();
 
