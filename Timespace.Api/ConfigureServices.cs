@@ -1,19 +1,42 @@
-﻿using Hellang.Middleware.ProblemDetails;
+﻿using FluentValidation;
+using Hellang.Middleware.ProblemDetails;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NodaTime;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Timespace.Api.Application.Common.Behaviours;
+using Timespace.Api.Infrastructure;
 using Timespace.Api.Infrastructure.Errors;
+using Timespace.Api.Infrastructure.Persistence;
 using Timespace.Api.Infrastructure.Services;
+using Timespace.Api.Infrastructure.Swagger;
 using ProblemDetailsOptions = Hellang.Middleware.ProblemDetails.ProblemDetailsOptions;
 
 namespace Timespace.Api;
 
 public static class ConfigureServices
 {
-    public static void AddServices(this IServiceCollection services)
+    public static void AddServices(this IServiceCollection services, ConfigurationManager configuration)
     {
+        services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.SuppressModelStateInvalidFilter = true;
+        });
+
         services.AddSingleton<IClock, DateTimeProvider>();
+        
         services.AddProblemDetails(ConfigureProblemDetails);
-        //services.AddTransient<ProblemDetailsFactory, TimespaceProblemDetailsFactory>();
+        services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddMediatR(typeof(IAssemblyMarker).Assembly);
+        services.AddValidatorsFromAssembly(typeof(IAssemblyMarker).Assembly);
+        services.RegisterBehaviours();
+        
+        services.AddDistributedMemoryCache();
     }
 
     private static void ConfigureProblemDetails(ProblemDetailsOptions options)
@@ -62,13 +85,32 @@ public static class ConfigureServices
         });
     }
 
+    private static void AddSwagger(this IServiceCollection services)
+    {
+        services.AddApiVersioning(o =>
+        {
+            o.AssumeDefaultVersionWhenUnspecified = true;
+            o.DefaultApiVersion = new ApiVersion(1, 0);
+            o.ApiVersionReader = new UrlSegmentApiVersionReader();
+        });
+        services.AddVersionedApiExplorer(setup =>
+        {
+            setup.GroupNameFormat = "'v'VVV";
+            setup.SubstituteApiVersionInUrl = true;
+        });
+
+        services.AddSwaggerGen(opt =>
+        {
+            opt.OperationFilter<SwaggerDefaultValues>();
+        });
+        
+        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+    }
     
     public static void AddAspnetServices(this IServiceCollection services)
     {
         services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwagger();
     }
     
     public static void AddConfiguration(this IServiceCollection services, ConfigurationManager configuration)
