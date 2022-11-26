@@ -1,6 +1,8 @@
 using Destructurama;
 using Hellang.Middleware.ProblemDetails;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Serilog;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using Timespace.Api;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +16,8 @@ builder.Host
     );
 
 // Add services to the container.
-builder.Services.AddServices();
 builder.Services.AddAspnetServices();
+builder.Services.AddServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -23,7 +25,18 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(opt =>
+    {
+        var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+        
+        foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+        {
+            opt.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+                $"Timespace - {description.GroupName.ToUpper()}");
+            opt.DefaultModelsExpandDepth(-1);
+            opt.DocExpansion(DocExpansion.List);
+        }
+    });
 }
 
 app.UseProblemDetails();
