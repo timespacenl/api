@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Timespace.Api.Application.Features.Authentication.Registration.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Infrastructure.Persistence;
@@ -14,6 +15,9 @@ public class AppDbContext : DbContext
     {
         _clock = clock;
     }
+
+    // Selfservice flows
+    public DbSet<RegistrationFlow> RegistrationFlows { get; init; } = null!;
 
     public override int SaveChanges()
     {
