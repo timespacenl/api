@@ -13,9 +13,13 @@
 
     <ItemGroup>
         <PackageReference Include="Destructurama.Attributed" Version="3.0.0" />
+        <PackageReference Include="FluentValidation" Version="11.4.0" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.4.0" />
         <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
         <PackageReference Include="MediatR" Version="11.0.0" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.3">
             <PrivateAssets>all</PrivateAssets>
@@ -37,7 +41,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application" />
+      <Folder Include="Application\Features\Authentication\Common" />
+      <Folder Include="Application\Features\Authentication\Login\Exceptions" />
+      <Folder Include="Application\Features\Authentication\Login\Queries" />
+      <Folder Include="Application\Features\Authentication\Sessions" />
       <Folder Include="Infrastructure\Configuration" />
     </ItemGroup>
 
