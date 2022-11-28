@@ -1,7 +1,6 @@
-﻿using NodaTime;
-using Timespace.Api.Infrastructure.Persistence.Common;
+﻿using Timespace.Api.Infrastructure.Persistence.Common;
 
-namespace Timespace.Api.Application.Features.Authentication.Registration.Entities;
+namespace Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 
 public class RegistrationFlow : IBaseEntity
 {
