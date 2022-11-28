@@ -17,6 +17,15 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
         foreach (var description in _apiVersionDescriptionProvider.ApiVersionDescriptions)
         {
             options.SwaggerDoc(description.GroupName, CreateOpenApiInfo(description));
+            options.SchemaGeneratorOptions.SchemaIdSelector = (type) =>
+            {
+                if (type.IsNested)
+                {
+                    return type.ToString().Split('.').Last().Replace("+", "");
+                }
+
+                return type.ToString().Split('.').Last();
+            };
         }
     }
 

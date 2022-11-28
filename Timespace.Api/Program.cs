@@ -1,9 +1,11 @@
 using Destructurama;
 using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Timespace.Api;
+using Timespace.Api.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,12 @@ builder.Services.AddServices(builder.Configuration);
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -33,7 +41,7 @@ if (app.Environment.IsDevelopment())
         {
             opt.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
                 $"Timespace - {description.GroupName.ToUpper()}");
-            opt.DefaultModelsExpandDepth(-1);
+            // opt.DefaultModelsExpandDepth(-1);
             opt.DocExpansion(DocExpansion.List);
         }
     });

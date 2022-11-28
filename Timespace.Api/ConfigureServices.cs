@@ -1,11 +1,12 @@
 ﻿using FluentValidation;
 using Hellang.Middleware.ProblemDetails;
 using MediatR;
+using MicroElements.Swashbuckle.NodaTime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using NodaTime;
+using NodaTime.Serialization.SystemTextJson;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Timespace.Api.Application.Common.Behaviours;
 using Timespace.Api.Infrastructure;
@@ -30,7 +31,9 @@ public static class ConfigureServices
         
         services.AddProblemDetails(ConfigureProblemDetails);
         services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"), 
+                opt => opt.UseNodaTime())
+        );
 
         services.AddMediatR(typeof(IAssemblyMarker).Assembly);
         services.AddValidatorsFromAssembly(typeof(IAssemblyMarker).Assembly);
@@ -42,8 +45,6 @@ public static class ConfigureServices
     private static void ConfigureProblemDetails(ProblemDetailsOptions options)
     {
         options.IncludeExceptionDetails = (_, _) => false;
-        // Custom mapping function for FluentValidation's ValidationException.
-        // options.MapFluentValidationException();
 
         options.Rethrow<NotSupportedException>();
 
@@ -64,7 +65,7 @@ public static class ConfigureServices
                     Detail = baseException.Detail
                 };
                 
-                foreach(var kvpair in baseException.Extensions)
+                foreach(var kvpair in baseException.MapExtensions())
                 {
                     problemDetails.Extensions.Add(kvpair);
                 }
@@ -102,6 +103,8 @@ public static class ConfigureServices
         services.AddSwaggerGen(opt =>
         {
             opt.OperationFilter<SwaggerDefaultValues>();
+            opt.SchemaFilter<TestSchemaFilter>();
+            opt.ConfigureForNodaTime();
         });
         
         services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
@@ -109,7 +112,14 @@ public static class ConfigureServices
     
     public static void AddAspnetServices(this IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddControllers(options =>
+            {
+                options.Filters.Add(new ProducesAttribute("application/json"));
+            })
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+            });
         services.AddSwagger();
     }
     

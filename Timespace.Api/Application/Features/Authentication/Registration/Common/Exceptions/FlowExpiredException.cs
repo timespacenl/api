@@ -8,5 +8,5 @@ public class FlowExpiredException : Exception, IBaseException
     public int StatusCode => StatusCodes.Status400BadRequest;
     public string Title => "Flow expired";
     public string? Detail => "Flow expired";
-    public Dictionary<string, object?> Extensions => new();
+    public Dictionary<string, object?> MapExtensions() => new();
 }

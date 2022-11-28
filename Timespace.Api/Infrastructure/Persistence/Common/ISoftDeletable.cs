@@ -1,6 +1,4 @@
-﻿using NodaTime;
-
-namespace Timespace.Api.Infrastructure.Persistence.Common;
+﻿namespace Timespace.Api.Infrastructure.Persistence.Common;
 
 public interface ISoftDeletable
 {
