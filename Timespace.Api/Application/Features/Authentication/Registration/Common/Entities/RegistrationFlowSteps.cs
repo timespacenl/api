@@ -2,16 +2,18 @@
 
 public class RegistrationFlowSteps
 {
-    public const string Email = "email";
-    public const string PersonalInformation = "personal_information";
-    public const string CompanyInformation = "company_information";
-    public const string Credentials = "credentials";
+    public const string SetEmail = "email";
+    public const string SetPersonalInformation = "personal_information";
+    public const string SetCompanyInformation = "company_information";
+    public const string SetCredentials = "credentials";
+    public const string None = "none";
     
-    public static string[] All = new[]
+    public static string[] All =
     {
-        Email,
-        PersonalInformation,
-        CompanyInformation,
-        Credentials
+        SetEmail,
+        SetPersonalInformation,
+        SetCompanyInformation,
+        SetCredentials,
+        None
     };
 }
