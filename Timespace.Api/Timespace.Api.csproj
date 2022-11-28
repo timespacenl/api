@@ -54,4 +54,8 @@
     <ItemGroup>
         <AdditionalFiles Include="$(SolutionDir)\BannedSymbols.txt" />
     </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Timespace.IntegrationTests" />
+    </ItemGroup>
 </Project>
