@@ -1,9 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
-using NodaTime;
 using Timespace.Api.Application.Features.Authentication.Registration.Common;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
-using Timespace.Api.Application.Features.Authentication.Registration.Entities;
 using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
@@ -13,7 +11,8 @@ public static class CreateRegistrationFlow {
 
     public record Response(
         Guid FlowId,
-        string NextStep
+        string NextStep,
+        Instant ExpiresAt
     ) : IRegistrationFlowResponse;
 
     public class Handler : IRequestHandler<Command, Response>
@@ -32,14 +31,14 @@ public static class CreateRegistrationFlow {
             var flow = new RegistrationFlow()
             {
                 Email = request.Email,
-                NextStep = RegistrationFlowSteps.PersonalInformation,
+                NextStep = RegistrationFlowSteps.SetPersonalInformation,
                 ExpiresAt = _clock.GetCurrentInstant() + Duration.FromMinutes(5)
             };
             
             _db.RegistrationFlows.Add(flow);
             await _db.SaveChangesAsync(cancellationToken);
             
-            return new Response(flow.Id, flow.NextStep);
+            return new Response(flow.Id, flow.NextStep, flow.ExpiresAt);
         }
     }
     

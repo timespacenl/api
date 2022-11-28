@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using NodaTime;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
 using Timespace.Api.Infrastructure.Persistence;
 

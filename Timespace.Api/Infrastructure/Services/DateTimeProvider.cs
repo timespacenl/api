@@ -1,6 +1,4 @@
-﻿using NodaTime;
-
-namespace Timespace.Api.Infrastructure.Services;
+﻿namespace Timespace.Api.Infrastructure.Services;
 
 public class DateTimeProvider : IClock
 {

@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using NodaTime;
-using Timespace.Api.Application.Features.Authentication.Registration.Entities;
+using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Infrastructure.Persistence;

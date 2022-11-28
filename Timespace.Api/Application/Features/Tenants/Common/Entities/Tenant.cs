@@ -1,5 +1,4 @@
-﻿using NodaTime;
-using Timespace.Api.Infrastructure.Persistence.Common;
+﻿using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Application.Features.Tenants.Common.Entities;
 
