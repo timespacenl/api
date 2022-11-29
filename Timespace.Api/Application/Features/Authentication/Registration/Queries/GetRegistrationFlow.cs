@@ -1,21 +1,26 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Timespace.Api.Application.Features.Authentication.Registration.Common;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
 using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Queries;
 
 public static class GetRegistrationFlow {
-    public record Query(
-        [property:FromRoute(Name = "flowId")] Guid FlowId
-    ) : IRequest<Response>;
-    
-    public record Response(
-        Guid FlowId,
-        string NextStep
-    );
-    
+    public record Query : IRequest<Response>
+    {
+        [FromRoute(Name = "flowId")] 
+        public Guid FlowId { get; init; }
+    }
+
+    public record Response : IRegistrationFlowResponse
+    {
+        public Guid FlowId { get; init; }
+        public string NextStep { get; init; } = null!;
+        public Instant ExpiresAt { get; init; }
+    } 
+
     public class Handler : IRequestHandler<Query, Response>
     {
         private readonly AppDbContext _db;
@@ -36,7 +41,12 @@ public static class GetRegistrationFlow {
             if (flow.ExpiresAt < _clock.GetCurrentInstant())
                 throw new FlowExpiredException();
             
-            return Task.FromResult(new Response(flow.Id, flow.NextStep));
+            return Task.FromResult(new Response
+            {
+                FlowId = flow.Id,
+                ExpiresAt = flow.ExpiresAt,
+                NextStep = flow.NextStep
+            });
         }
     }
     

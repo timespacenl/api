@@ -9,17 +9,23 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
 public static class SetCredentials {
-    public record Command(
-        [property:FromRoute(Name = "flowId")] Guid FlowId,
-        [property:FromBody] CommandBody Body
-        ) : IRequest<Response>;
+    public record Command : IRequest<Response>
+    {
+        [FromRoute(Name = "flowId")] 
+        public Guid FlowId { get; init; }
+        
+        [FromBody] 
+        public CommandBody Body { get; init; } = null!;
+    }
 
-    public record CommandBody(
-        [property:LogMasked] string? Password,
-        bool AcceptTerms,
-        bool MagicLink
-        );
-    
+    public record CommandBody
+    {
+        [LogMasked] 
+        public string? Password { get; init; }
+        public bool AcceptTerms { get; init; }
+        public bool MagicLink { get; init; }
+    }
+
     public record Response();
     
     public class Handler : IRequestHandler<Command, Response>

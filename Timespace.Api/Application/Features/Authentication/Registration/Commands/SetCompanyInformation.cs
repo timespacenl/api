@@ -9,18 +9,28 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
 public static class SetCompanyInformation {
-    public record Command(
-        [property:FromRoute(Name = "flowId")] Guid FlowId,
-        [property:FromBody] CommandBody Body
-        ) : IRequest<Response>;
-    
-    public record CommandBody(
-        string CompanyName,
-        string Industry,
-        int CompanySize
-        );
-    
-    public record Response(Guid FlowId, string NextStep, Instant ExpiresAt) : IRegistrationFlowResponse;
+    public record Command : IRequest<Response>
+    {
+        [FromRoute(Name = "flowId")] 
+        public Guid FlowId { get; init; }
+        
+        [FromBody] 
+        public CommandBody Body { get; init; } = null!;
+    }
+
+    public record CommandBody
+    {
+        public string CompanyName { get; init; } = null!;
+        public string Industry { get; init; } = null!;
+        public int CompanySize { get; init; }
+    }
+
+    public class Response : IRegistrationFlowResponse
+    {
+        public Guid FlowId { get; init; }
+        public string NextStep { get; init; } = null!;
+        public Instant ExpiresAt { get; init; }
+    }
 
     public class Handler : IRequestHandler<Command, Response>
     {
@@ -53,7 +63,12 @@ public static class SetCompanyInformation {
 
             await _db.SaveChangesAsync(cancellationToken);
             
-            return new Response(flow.Id, flow.NextStep, flow.ExpiresAt);
+            return new Response
+            {
+                FlowId = flow.Id,
+                NextStep = flow.NextStep,
+                ExpiresAt = flow.ExpiresAt
+            };
         }
     }
     
@@ -65,7 +80,7 @@ public static class SetCompanyInformation {
             RuleFor(x => x.Body).NotNull();
             RuleFor(x => x.Body.CompanyName).NotEmpty().MaximumLength(50);
             RuleFor(x => x.Body.Industry).NotEmpty().MaximumLength(50);
-            RuleFor(x => x.Body.CompanySize).NotEmpty().LessThanOrEqualTo(1000);
+            RuleFor(x => x.Body.CompanySize).NotEmpty().LessThanOrEqualTo(1000).GreaterThanOrEqualTo(1);
         }
     }
 }

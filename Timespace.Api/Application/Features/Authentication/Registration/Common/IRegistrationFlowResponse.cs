@@ -4,4 +4,5 @@ public interface IRegistrationFlowResponse
 {
     public Guid FlowId { get; }
     public string NextStep { get; }
+    public Instant ExpiresAt { get; }
 }

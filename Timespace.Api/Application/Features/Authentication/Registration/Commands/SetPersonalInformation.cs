@@ -9,19 +9,29 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
 public static class SetPersonalInformation {
-    public record Command(
-        [property:FromRoute(Name = "flowId")] Guid FlowId,
-        [property:FromBody] CommandBody Body  
-    ) : IRequest<Response>;
-    
-    public record CommandBody(
-        string FirstName,
-        string LastName,
-        string PhoneNumber
-    );
-    
-    public record Response(Guid FlowId, string NextStep, Instant ExpiresAt) : IRegistrationFlowResponse;
-    
+    public record Command : IRequest<Response>
+    {
+        [FromRoute(Name = "flowId")] 
+        public Guid FlowId { get; init; }
+        
+        [FromBody] 
+        public CommandBody Body { get; init; } = null!;
+    }
+
+    public record CommandBody
+    {
+        public string FirstName { get; init; } = null!;
+        public string LastName { get; init; } = null!;
+        public string? PhoneNumber { get; init; }
+    }
+
+    public class Response : IRegistrationFlowResponse
+    {
+        public Guid FlowId { get; init; }
+        public string NextStep { get; init; } = null!;
+        public Instant ExpiresAt { get; init; }
+    }
+
     public class Handler : IRequestHandler<Command, Response>
     {
         private readonly AppDbContext _db;
@@ -53,7 +63,12 @@ public static class SetPersonalInformation {
             
             await _db.SaveChangesAsync(cancellationToken);
             
-            return new Response(flow.Id, flow.NextStep, flow.ExpiresAt);
+            return new Response
+            {
+                FlowId = flow.Id,
+                NextStep = flow.NextStep,
+                ExpiresAt = flow.ExpiresAt
+            };
         }
     }
     
@@ -65,7 +80,7 @@ public static class SetPersonalInformation {
             RuleFor(x => x.Body).NotNull();
             RuleFor(x => x.Body.FirstName).NotEmpty().MaximumLength(80);
             RuleFor(x => x.Body.LastName).NotEmpty().MaximumLength(80);
-            RuleFor(x => x.Body.PhoneNumber).NotEmpty().MaximumLength(80);
+            RuleFor(x => x.Body.PhoneNumber).MaximumLength(80);
         }
     }
 }

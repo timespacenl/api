@@ -7,13 +7,17 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
 public static class CreateRegistrationFlow {
-    public record Command(string Email) : IRequest<Response>;
+    public record Command : IRequest<Response>
+    {
+        public string Email { get; init; } = null!;
+    }
 
-    public record Response(
-        Guid FlowId,
-        string NextStep,
-        Instant ExpiresAt
-    ) : IRegistrationFlowResponse;
+    public record Response : IRegistrationFlowResponse
+    {
+        public Guid FlowId { get; set; }
+        public string NextStep { get; set; } = null!;
+        public Instant ExpiresAt { get; set; }
+    }
 
     public class Handler : IRequestHandler<Command, Response>
     {
@@ -38,7 +42,12 @@ public static class CreateRegistrationFlow {
             _db.RegistrationFlows.Add(flow);
             await _db.SaveChangesAsync(cancellationToken);
             
-            return new Response(flow.Id, flow.NextStep, flow.ExpiresAt);
+            return new Response()
+            {
+                FlowId = flow.Id,
+                NextStep = flow.NextStep,
+                ExpiresAt = flow.ExpiresAt
+            };
         }
     }
     

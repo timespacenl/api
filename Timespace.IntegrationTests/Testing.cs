@@ -3,9 +3,13 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NodaTime;
+using NodaTime.Testing;
+using Npgsql;
 using Respawn;
 using Respawn.Graph;
 using Timespace.Api.Infrastructure.Persistence;
+using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.IntegrationTests;
 
@@ -23,11 +27,31 @@ public partial class Testing
         _factory = new CustomWebApplicationFactory();
         _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
         _configuration = _factory.Services.GetRequiredService<IConfiguration>();
+
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        await dbContext.Database.EnsureCreatedAsync();
+        await dbContext.Database.MigrateAsync();
+
+        var clock = scope.ServiceProvider.GetRequiredService<IClock>();
+
+        if(clock is FakeClock fakeClock)
+            fakeClock.Reset(SystemClock.Instance.GetCurrentInstant());
         
-        _respawner = await Respawner.CreateAsync(_configuration.GetConnectionString("DefaultConnection")!, new RespawnerOptions()
+        using(var connection = new NpgsqlConnection(CustomWebApplicationFactory.IntegrationConfig.GetConnectionString("DefaultConnection")))
         {
-            TablesToIgnore = new Table[] { "__EFMigrationsHistory" }
-        });
+            await connection.OpenAsync();
+            _respawner = await Respawner.CreateAsync(connection, new RespawnerOptions()
+            {
+                SchemasToInclude = new []
+                {
+                    "public"
+                },
+                DbAdapter = DbAdapter.Postgres,
+                TablesToIgnore = new Table[] { "__EFMigrationsHistory" }
+            });
+        }
     }
 
     public static async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
@@ -41,7 +65,12 @@ public partial class Testing
     
     public static async Task ResetState()
     {
-        await _respawner.ResetAsync(_configuration.GetConnectionString("DefaultConnection")!);
+        using(var connection = new NpgsqlConnection(CustomWebApplicationFactory.IntegrationConfig.GetConnectionString("DefaultConnection")))
+        {
+            await connection.OpenAsync();
+
+            await _respawner.ResetAsync(connection);
+        }
     }
     
     public static async Task<TEntity?> FindAsync<TEntity>(params object[] keyValues)
@@ -54,6 +83,16 @@ public partial class Testing
         return await context.FindAsync<TEntity>(keyValues);
     }
 
+    public static async Task<TEntity?> FirstOrDefault<TEntity>(Guid id)
+        where TEntity : class, IBaseEntity
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        return await context.Set<TEntity>().FirstOrDefaultAsync(x => x.Id == id);
+    }
+    
     public static async Task AddAsync<TEntity>(TEntity entity)
         where TEntity : class
     {
@@ -75,6 +114,18 @@ public partial class Testing
         return await context.Set<TEntity>().CountAsync();
     }
 
+    public static void AdvanceTime(Duration duration)
+    {
+        using var scope = _scopeFactory.CreateScope();
+
+        var clock = scope.ServiceProvider.GetRequiredService<IClock>();
+
+        if(clock is FakeClock fakeClock)
+            fakeClock.Advance(duration);
+    }
+    
+    
+    
     [OneTimeTearDown]
     public void RunAfterAnyTests()
     {
