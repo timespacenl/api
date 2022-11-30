@@ -27,15 +27,15 @@ public class AppDbContext : DbContext
     {
         var entries = ChangeTracker
             .Entries()
-            .Where(e => e.Entity is IBaseEntity && e.State is EntityState.Added or EntityState.Modified);
+            .Where(e => e.Entity is IEntity && e.State is EntityState.Added or EntityState.Modified);
 
         foreach (var entityEntry in entries)
         {
-            ((IBaseEntity)entityEntry.Entity).UpdatedAt = _clock.GetCurrentInstant();
+            ((IEntity)entityEntry.Entity).UpdatedAt = _clock.GetCurrentInstant();
 
             if (entityEntry.State == EntityState.Added)
             {
-                ((IBaseEntity)entityEntry.Entity).CreatedAt = _clock.GetCurrentInstant();
+                ((IEntity)entityEntry.Entity).CreatedAt = _clock.GetCurrentInstant();
             }
         }
 

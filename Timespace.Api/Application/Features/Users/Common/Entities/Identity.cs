@@ -3,7 +3,7 @@ using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Application.Features.Users.Common.Entities;
 
-public class Identity : IBaseEntity, ISoftDeletable, ITenantEntity
+public class Identity : IEntity, ISoftDeletable, ITenantEntity
 {
     public Guid Id { get; set; }
     public Instant CreatedAt { get; set; }

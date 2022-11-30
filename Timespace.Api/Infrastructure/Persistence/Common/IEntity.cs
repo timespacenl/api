@@ -1,6 +1,6 @@
 ﻿namespace Timespace.Api.Infrastructure.Persistence.Common;
 
-public interface IBaseEntity
+public interface IEntity
 {
     public Guid Id { get; set; }
     public Instant CreatedAt { get; set; }

@@ -2,7 +2,7 @@
 
 namespace Timespace.Api.Application.Features.Tenants.Common.Entities;
 
-public class Tenant : IBaseEntity, ISoftDeletable
+public class Tenant : IEntity, ISoftDeletable
 {
     public Guid Id { get; set; }
     public Instant CreatedAt { get; set; }

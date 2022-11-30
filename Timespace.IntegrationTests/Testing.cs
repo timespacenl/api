@@ -84,7 +84,7 @@ public partial class Testing
     }
 
     public static async Task<TEntity?> FirstOrDefault<TEntity>(Guid id)
-        where TEntity : class, IBaseEntity
+        where TEntity : class, IEntity
     {
         using var scope = _scopeFactory.CreateScope();
 
