@@ -56,7 +56,6 @@ public class AppDbContext : DbContext
         foreach (var entityEntry in softdeleteEntries)
         {
             ((ISoftDeletable)entityEntry.Entity).DeletedAt = _clock.GetCurrentInstant();
-            ((ISoftDeletable)entityEntry.Entity).IsDeleted = true;
         }
         
         return await base.SaveChangesAsync(cancellationToken);
@@ -69,7 +68,7 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
         // Expression<Func<ITenantEntity, bool>> tenantExpression = entity => _sessionInfoProvider.GetGuaranteedSession().Identity.Tenant.Id == Guid.Empty || entity.TenantId == _sessionInfoProvider.GetGuaranteedSession().Identity.Tenant.Id;
-        Expression<Func<ISoftDeletable, bool>> softDeleteExpression = entity => entity.IsDeleted == false;
+        Expression<Func<ISoftDeletable, bool>> softDeleteExpression = entity => entity.DeletedAt == null;
         
         foreach (var entityType in modelBuilder.Model.GetEntityTypes()) {
             // if (entityType.ClrType.IsAssignableTo(typeof(ITenantEntity))) {
