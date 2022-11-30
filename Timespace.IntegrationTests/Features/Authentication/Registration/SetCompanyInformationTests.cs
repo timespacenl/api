@@ -4,7 +4,7 @@ using Timespace.Api.Application.Features.Authentication.Registration.Common.Enti
 
 namespace Timespace.IntegrationTests.Features.Authentication.Registration;
 
-using static Helpers;
+using static RegistrationFlowTestHelpers;
 
 public class SetCompanyInformationTests : BaseTestFixture
 {

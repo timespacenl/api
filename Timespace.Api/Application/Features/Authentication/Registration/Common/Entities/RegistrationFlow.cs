@@ -2,7 +2,7 @@
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 
-public class RegistrationFlow : IBaseEntity
+public class RegistrationFlow : IEntity
 {
     public Guid Id { get; set; }
     public Instant CreatedAt { get; set; }

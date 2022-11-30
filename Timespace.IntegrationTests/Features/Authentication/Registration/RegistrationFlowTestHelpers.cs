@@ -3,7 +3,7 @@ using Timespace.Api.Application.Features.Authentication.Registration.Common;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Registration;
 
-public static class Helpers
+public static class RegistrationFlowTestHelpers
 {
     public static async Task<IRegistrationFlowResponse> SetEmail()
     {
