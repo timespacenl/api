@@ -2,6 +2,5 @@
 
 public interface ISoftDeletable
 {
-    public bool IsDeleted { get; set; }
-    public Instant DeletedAt { get; set; }
+    public Instant? DeletedAt { get; set; }
 }
