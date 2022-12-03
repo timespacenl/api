@@ -18,4 +18,5 @@ public class RegistrationFlow : IEntity
     public string? CompanyName { get; set; }
     public string? CompanyIndustry { get; set; }
     public int? CompanySize { get; set; }
+    public string? CredentialType { get; set; }
 }

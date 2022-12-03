@@ -2,11 +2,11 @@
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
 
-public class FlowExpiredException : Exception, IBaseException
+public class CredentialMismatchException : Exception, IBaseException
 {
-    public string Type => "flow_expired";
+    public string Type => "credential_mismatch";
     public int StatusCode => StatusCodes.Status400BadRequest;
-    public string Title => "Flow expired";
-    public string? Detail => "Flow expired";
+    public string Title => "Credential mismatch";
+    public string? Detail => "You can only register one type of credential during registration";
     public Dictionary<string, object?> MapExtensions() => new();
 }

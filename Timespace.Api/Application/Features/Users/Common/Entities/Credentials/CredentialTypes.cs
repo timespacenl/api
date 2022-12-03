@@ -2,10 +2,10 @@
 
 public class CredentialTypes
 {
-    public static readonly string Password = "password";
-    public static readonly string Totp = "totp";
-    public static readonly string LookupSecret = "lookup_secret";
-    public static readonly string MagicLink = "magic_link";
+    public const string Password = "password";
+    public const string Totp = "totp";
+    public const string LookupSecret = "lookup_secret";
+    public const string MagicLink = "magic_link";
     // public static readonly string Google = "google";
     // public static readonly string Microsoft = "microsoft";
     

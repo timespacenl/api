@@ -5,11 +5,16 @@ namespace Timespace.IntegrationTests.Features.Authentication.Registration;
 
 public static class RegistrationFlowTestHelpers
 {
-    public static async Task<IRegistrationFlowResponse> SetEmail()
+    private static int _callCounter = 0;
+    
+    public static async Task<IRegistrationFlowResponse> SetEmail(bool count = true)
     {
+        if(count)
+            _callCounter++;
+        
         return await SendAsync(new CreateRegistrationFlow.Command
         {
-            Email = "duke@steenbakkers.cc"
+            Email = $"duke{_callCounter}@steenbakkers.cc"
         });
     }
 
@@ -41,12 +46,12 @@ public static class RegistrationFlowTestHelpers
         });
     }
 
-    public static async Task SetCredentials(Guid flowId)
+    public static async Task CompleteRegistrationFlow(Guid flowId)
     {
-        await SendAsync(new SetCredentials.Command
+        await SendAsync(new CompleteRegistrationFlow.Command
         {
             FlowId = flowId,
-            Body = new SetCredentials.CommandBody
+            Body = new CompleteRegistrationFlow.CommandBody
             {
                 Password = "Test",
                 AcceptTerms = true,

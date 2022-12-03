@@ -57,8 +57,6 @@ M:Microsoft.EntityFrameworkCore.DbSet`1.AddRangeAsync(System.Collections.Generic
 M:Microsoft.EntityFrameworkCore.DbSet`1.AttachRange(System.Collections.Generic.IEnumerable{`0})
 M:Microsoft.EntityFrameworkCore.DbSet`1.UpdateRange(System.Collections.Generic.IEnumerable{`0})
 
-T:System.Convert;Don't use Convert.
-
 F:System.String.Empty;Don't use String.Empty.
 
 M:System.Linq.Queryable.Order``1(System.Linq.IQueryable{``0})

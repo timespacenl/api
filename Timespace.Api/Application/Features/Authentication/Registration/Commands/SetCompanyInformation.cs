@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Registration.Common;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
@@ -59,7 +60,7 @@ public static class SetCompanyInformation {
             flow.CompanyIndustry = request.Body.Industry;
             flow.CompanySize = request.Body.CompanySize;
 
-            flow.NextStep = RegistrationFlowSteps.SetCredentials;
+            flow.NextStep = RegistrationFlowSteps.CompleteRegistrationFlow;
 
             await _db.SaveChangesAsync(cancellationToken);
             

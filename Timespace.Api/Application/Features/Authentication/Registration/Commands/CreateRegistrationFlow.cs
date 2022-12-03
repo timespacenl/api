@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Timespace.Api.Application.Features.Authentication.Registration.Common;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
+using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
 using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
@@ -32,9 +34,16 @@ public static class CreateRegistrationFlow {
     
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
+            var existingCredential = await _db.IdentityIdentifiers.FirstOrDefaultAsync(x => x.Identifier == request.Email, cancellationToken: cancellationToken);
+            var existingFlow = await _db.RegistrationFlows.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken: cancellationToken);
+            
+            if (existingCredential != null || existingFlow != null)
+                throw new DuplicateIdentifierException();
+            
+            
             var flow = new RegistrationFlow()
             {
-                Email = request.Email,
+                Email = request.Email.ToLower(),
                 NextStep = RegistrationFlowSteps.SetPersonalInformation,
                 ExpiresAt = _clock.GetCurrentInstant() + Duration.FromMinutes(5)
             };

@@ -9,8 +9,8 @@ namespace Timespace.Api.Application.Features.Authentication.Registration;
 
 [ApiController]
 [ApiVersion("1.0")]
-[Route("v{version:apiVersion}/registration")]
-public class RegistrationController : Controller
+[Route("v{version:apiVersion}/auth/registration")]
+public class RegistrationController : ControllerBase
 {
     private readonly ISender _sender;
 
@@ -57,9 +57,9 @@ public class RegistrationController : Controller
     
     [HttpPost("{flowId}/credentials")]
     [MapToApiVersion("1.0")]
-    [ProducesResponseType(typeof(SetCredentials.Response), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CompleteRegistrationFlow.Response), StatusCodes.Status200OK)]
     [ProducesDefaultResponseType(typeof(ProblemDetails))]
-    public async Task<SetCredentials.Response> SetCredentials([FromQuery] SetCredentials.Command command)
+    public async Task<CompleteRegistrationFlow.Response> CompleteRegistrationFlow([FromQuery] CompleteRegistrationFlow.Command command)
     {
         return await _sender.Send(command);
     }

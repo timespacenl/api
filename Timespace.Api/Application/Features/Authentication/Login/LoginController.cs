@@ -6,20 +6,45 @@ namespace Timespace.Api.Application.Features.Authentication.Login;
 
 [ApiController]
 [ApiVersion("1.0")]
-[Route("v{version:apiVersion}/login")]
-public class LoginController : Controller
+[Route("v{version:apiVersion}/auth/login")]
+public class LoginController : ControllerBase
 {
     private readonly ISender _sender;
-
-    public LoginController(ISender sender)
+    private readonly IClock _clock;
+    
+    public LoginController(ISender sender, IClock clock)
     {
         _sender = sender;
+        _clock = clock;
+    }
+
+    [HttpGet("{flowId}")]
+    public async Task<IActionResult> Get(string flowId)
+    {
+        // var result = await _sender.Send(new GetLoginFlowQuery(flowId));
+        return Ok();
     }
 
     [HttpPost]
-    [MapToApiVersion("1.0")]
-    public async Task<TestOperation.Response> Index(TestOperation.Command command)
+    public async Task<CreateLoginFlow.Response> CreateLoginFlow(CreateLoginFlow.Command command)
     {
         return await _sender.Send(command);
     }
+    
+    [HttpPost("{flowId}/complete")]
+    public async Task<CompleteLoginFlow.Response> CompleteLoginFlow([FromQuery] CompleteLoginFlow.Command command)
+    {
+        var result = await _sender.Send(command);
+        
+        Response.Cookies.Append("session", result.SessionToken, new CookieOptions
+        {
+            Expires = _clock.GetCurrentInstant().Plus(Duration.FromDays(30)).ToDateTimeOffset(),
+            Secure = true,
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax
+        });
+        
+        return result;
+    }
+    
 }

@@ -24,7 +24,7 @@ public class SetCompanyInformationTests : BaseTestFixture
         // Assert
         setCompanyInformationResult.Should().NotBeNull();
         setCompanyInformationResult.FlowId.Should().Be(result.FlowId);
-        setCompanyInformationResult.NextStep.Should().Be(RegistrationFlowSteps.SetCredentials);
+        setCompanyInformationResult.NextStep.Should().Be(RegistrationFlowSteps.CompleteRegistrationFlow);
         dbEntity.Should().NotBeNull();
         dbEntity!.CompanyName.Should().NotBeNullOrEmpty();
         dbEntity.CompanyIndustry.Should().NotBeNullOrEmpty();

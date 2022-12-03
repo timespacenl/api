@@ -34,7 +34,7 @@ public class InvalidFlowStepTests : BaseTestFixture
         var flow4 = await SetEmail();
         await SetPersonalInformation(flow4.FlowId);
         await SetCompanyInformation(flow4.FlowId);
-        await SetCredentials(flow4.FlowId);
+        await CompleteRegistrationFlow(flow4.FlowId);
         
         await FluentActions.Invoking(() => SetPersonalInformation(flow4.FlowId))
             .Should()
@@ -68,7 +68,7 @@ public class InvalidFlowStepTests : BaseTestFixture
         var flow4 = await SetEmail();
         await SetPersonalInformation(flow4.FlowId);
         await SetCompanyInformation(flow4.FlowId);
-        await SetCredentials(flow4.FlowId);
+        await CompleteRegistrationFlow(flow4.FlowId);
         
         await FluentActions.Invoking(() => SetCompanyInformation(flow4.FlowId))
             .Should()
@@ -76,18 +76,18 @@ public class InvalidFlowStepTests : BaseTestFixture
     }
     
     [Test]
-    public async Task SetCredentials_ShouldThrow_WhenFlowStepIsInvalid()
+    public async Task CompleteRegistrationFlow_ShouldThrow_WhenFlowStepIsInvalid()
     {
         var flow1 = await SetEmail();
         
-        await FluentActions.Invoking(() => SetCredentials(flow1.FlowId))
+        await FluentActions.Invoking(() => CompleteRegistrationFlow(flow1.FlowId))
             .Should()
             .ThrowAsync<InvalidFlowStepException>();
         
         var flow2 = await SetEmail();
         await SetPersonalInformation(flow2.FlowId);
         
-        await FluentActions.Invoking(() => SetCredentials(flow2.FlowId))
+        await FluentActions.Invoking(() => CompleteRegistrationFlow(flow2.FlowId))
             .Should()
             .ThrowAsync<InvalidFlowStepException>();
         
@@ -95,16 +95,16 @@ public class InvalidFlowStepTests : BaseTestFixture
         await SetPersonalInformation(flow3.FlowId);
         await SetCompanyInformation(flow3.FlowId);
         
-        await FluentActions.Invoking(() => SetCredentials(flow3.FlowId))
+        await FluentActions.Invoking(() => CompleteRegistrationFlow(flow3.FlowId))
             .Should()
             .NotThrowAsync<InvalidFlowStepException>();
         
         var flow4 = await SetEmail();
         await SetPersonalInformation(flow4.FlowId);
         await SetCompanyInformation(flow4.FlowId);
-        await SetCredentials(flow4.FlowId);
+        await CompleteRegistrationFlow(flow4.FlowId);
         
-        await FluentActions.Invoking(() => SetCredentials(flow4.FlowId))
+        await FluentActions.Invoking(() => CompleteRegistrationFlow(flow4.FlowId))
             .Should()
             .ThrowAsync<InvalidFlowStepException>();
     }

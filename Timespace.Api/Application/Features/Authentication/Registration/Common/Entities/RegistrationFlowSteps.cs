@@ -5,7 +5,7 @@ public class RegistrationFlowSteps
     public const string SetEmail = "email";
     public const string SetPersonalInformation = "personal_information";
     public const string SetCompanyInformation = "company_information";
-    public const string SetCredentials = "credentials";
+    public const string CompleteRegistrationFlow = "complete";
     public const string None = "none";
     
     public static string[] All =
@@ -13,7 +13,7 @@ public class RegistrationFlowSteps
         SetEmail,
         SetPersonalInformation,
         SetCompanyInformation,
-        SetCredentials,
+        CompleteRegistrationFlow,
         None
     };
 }

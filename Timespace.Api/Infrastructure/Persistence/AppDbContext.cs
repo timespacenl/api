@@ -1,6 +1,11 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
+using Timespace.Api.Application.Features.Authentication.Sessions.Common.Entities;
+using Timespace.Api.Application.Features.Tenants.Common.Entities;
+using Timespace.Api.Application.Features.Users.Common.Entities;
+using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Infrastructure.Persistence;
@@ -17,6 +22,16 @@ public class AppDbContext : DbContext
 
     // Selfservice flows
     public DbSet<RegistrationFlow> RegistrationFlows { get; init; } = null!;
+    public DbSet<LoginFlow> LoginFlows { get; init; } = null!;
+
+    // Identity
+    public DbSet<Identity> Identities { get; init; } = null!;
+    public DbSet<IdentityIdentifier> IdentityIdentifiers { get; init; } = null!;
+    public DbSet<IdentityCredential> IdentityCredentials { get; init; } = null!;
+    public DbSet<Session> Sessions { get; init; } = null!;
+
+    // Tenant
+    public DbSet<Tenant> Tenants { get; init; } = null!;
 
     public override int SaveChanges()
     {
@@ -27,7 +42,7 @@ public class AppDbContext : DbContext
     {
         var entries = ChangeTracker
             .Entries()
-            .Where(e => e.Entity is IEntity && e.State is EntityState.Added or EntityState.Modified);
+            .Where(e => e is { Entity: IEntity, State: EntityState.Added or EntityState.Modified });
 
         foreach (var entityEntry in entries)
         {

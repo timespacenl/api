@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using NodaTime;
+using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Registration.Queries;
 
@@ -40,7 +41,7 @@ public class FlowExpirationTests : BaseTestFixture
     }
     
     [Test]
-    public async Task SetCredentials_ShouldThrow_WhenFlowIsExpired()
+    public async Task CompleteRegistrationFlow_ShouldThrow_WhenFlowIsExpired()
     {
         // Arrange
         var result = await SetEmail();
@@ -51,7 +52,7 @@ public class FlowExpirationTests : BaseTestFixture
         AdvanceTime(Duration.FromMinutes(10));
         
         // Assert
-        await FluentActions.Invoking(() => SetCredentials(result.FlowId))
+        await FluentActions.Invoking(() => CompleteRegistrationFlow(result.FlowId))
             .Should()
             .ThrowAsync<FlowExpiredException>();
     }

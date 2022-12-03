@@ -31,7 +31,8 @@ public partial class Testing
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        await dbContext.Database.EnsureCreatedAsync();
+        // await dbContext.Database.EnsureDeletedAsync();
+        // await dbContext.Database.EnsureCreatedAsync();
         await dbContext.Database.MigrateAsync();
 
         var clock = scope.ServiceProvider.GetRequiredService<IClock>();
