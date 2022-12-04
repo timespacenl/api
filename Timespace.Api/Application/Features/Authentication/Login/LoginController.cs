@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Timespace.Api.Application.Features.Authentication.Login.Commands;
+using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 
 namespace Timespace.Api.Application.Features.Authentication.Login;
 
@@ -21,6 +22,7 @@ public class LoginController : ControllerBase
     [HttpGet("{flowId}")]
     public async Task<IActionResult> Get(string flowId)
     {
+        var cookies = Request.Cookies;
         // var result = await _sender.Send(new GetLoginFlowQuery(flowId));
         return Ok();
     }
@@ -31,20 +33,29 @@ public class LoginController : ControllerBase
         return await _sender.Send(command);
     }
     
-    [HttpPost("{flowId}/complete")]
-    public async Task<CompleteLoginFlow.Response> CompleteLoginFlow([FromQuery] CompleteLoginFlow.Command command)
+    [HttpPost("{flowId}/credentials")]
+    public async Task<SetLoginFlowCredentials.Response> CompleteLoginFlow([FromQuery] SetLoginFlowCredentials.Command command)
     {
         var result = await _sender.Send(command);
-        
-        Response.Cookies.Append("session", result.SessionToken, new CookieOptions
+
+        if (result.SessionToken != null)
         {
-            Expires = _clock.GetCurrentInstant().Plus(Duration.FromDays(30)).ToDateTimeOffset(),
-            Secure = true,
-            HttpOnly = true,
-            SameSite = SameSiteMode.Lax
-        });
+            Response.Cookies.Append("session", result.SessionToken, new CookieOptions
+            {
+                Expires = _clock.GetCurrentInstant().Plus(Duration.FromDays(30)).ToDateTimeOffset(),
+                Secure = true,
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax
+            });
+        }
         
         return result;
+    }
+    
+    [HttpPost("{flowId}/mfa")]
+    public async Task<CompleteLoginFlowMfa.Response> SetLoginFlowMfa([FromQuery] CompleteLoginFlowMfa.Command command)
+    {
+        return await _sender.Send(command);
     }
     
 }

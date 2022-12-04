@@ -155,9 +155,9 @@ namespace Timespace.Api.Migrations
                     CreatedAt = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
                     ExpiresAt = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
+                    NextStep = table.Column<string>(type: "text", nullable: false),
                     IdentityId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AllowedMethods = table.Column<List<string>>(type: "text[]", nullable: false),
-                    Completed = table.Column<bool>(type: "boolean", nullable: false)
+                    AllowedMethodsForNextStep = table.Column<List<string>>(type: "text[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -179,9 +179,7 @@ namespace Timespace.Api.Migrations
                     UpdatedAt = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
                     IdentityId = table.Column<Guid>(type: "uuid", nullable: false),
                     SessionToken = table.Column<string>(type: "text", nullable: false),
-                    ExpiresAt = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
-                    MfaRequired = table.Column<bool>(type: "boolean", nullable: false),
-                    MfaCompletedAt = table.Column<Instant>(type: "timestamp with time zone", nullable: true)
+                    ExpiresAt = table.Column<Instant>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

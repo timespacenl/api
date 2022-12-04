@@ -15,9 +15,4 @@ public class Session : IEntity
     
     public string SessionToken { get; set; } = null!;
     public Instant ExpiresAt { get; set; }
-    
-    public bool MfaRequired { get; set; }
-    public Instant? MfaCompletedAt { get; set; }
-    
-    
 }

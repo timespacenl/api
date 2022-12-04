@@ -6,5 +6,10 @@ public class LoginFlowSteps
     public const string CompleteMfa = "complete_mfa";
     public const string None = "none";
     
-    public static string[] All = { SetCredentials, CompleteMfa, None };
+    public static string[] All =
+    {
+        SetCredentials,
+        CompleteMfa,
+        None
+    };
 }

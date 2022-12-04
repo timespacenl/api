@@ -3,6 +3,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
+using Timespace.Api.Application.Features.Authentication.Login.Common;
+using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Login.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Sessions.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
@@ -12,7 +14,7 @@ using Timespace.Api.Infrastructure.Services;
 
 namespace Timespace.Api.Application.Features.Authentication.Login.Commands;
 
-public static class CompleteLoginFlow {
+public static class SetLoginFlowCredentials {
     public record Command : IRequest<Response>
     {
         [FromRoute(Name = "flowId")]
@@ -28,9 +30,13 @@ public static class CompleteLoginFlow {
         public string CredentialValue { get; init; } = null!;
     }
     
-    public record Response
+    public record Response : ILoginFlowResponse
     {
-        public string SessionToken { get; init; } = null!;
+        public Guid FlowId { get; set; }
+        public string NextStep { get; set; } = null!;
+        public Instant ExpiresAt { get; set; }
+        public string? SessionToken { get; set; }
+        public List<string> NextStepAllowedMethods { get; set; } = new();
     }
     
     public class Handler : IRequestHandler<Command, Response>
@@ -54,7 +60,7 @@ public static class CompleteLoginFlow {
             if(flow.ExpiresAt < _clock.GetCurrentInstant())
                 throw new FlowExpiredException();
 
-            if (!flow.AllowedMethods.Contains(request.Body.CredentialType))
+            if (!flow.AllowedMethodsForNextStep.Contains(request.Body.CredentialType))
                 throw new CredentialTypeNotConfiguredException();
             
             bool authenticated = request.Body.CredentialType switch
@@ -68,22 +74,48 @@ public static class CompleteLoginFlow {
             
             var identity = await _db.Identities.FirstOrDefaultAsync(x => x.Id == flow.IdentityId, cancellationToken);
 
+            if (identity!.RequiresMfa)
+            {
+                var mfaMethods = await _db.IdentityCredentials
+                    .Where(x => CredentialTypes.AllSecondFactor.Contains(x.CredentialType) &&
+                                x.IdentityId == identity.Id)
+                    .Select(x => x.CredentialType)
+                    .ToListAsync(cancellationToken: cancellationToken);
+                
+                flow.NextStep = LoginFlowSteps.CompleteMfa;
+                flow.AllowedMethodsForNextStep = mfaMethods;
+                
+                await _db.SaveChangesAsync(cancellationToken);
+                
+                return new Response
+                {
+                    FlowId = flow.Id,
+                    NextStep = flow.NextStep,
+                    ExpiresAt = flow.ExpiresAt,
+                    SessionToken = null,
+                    NextStepAllowedMethods = flow.AllowedMethodsForNextStep
+                };
+            }
+
             var session = new Session
             {
                 IdentityId = flow.IdentityId,
-                MfaRequired = identity!.RequiresMfa,
                 SessionToken = RandomStringGenerator.CreateSecureRandomString(128)
             };
 
-            flow.Completed = true;
-            
+            flow.NextStep = LoginFlowSteps.None;
+                
             _db.Sessions.Add(session);
             await _db.SaveChangesAsync(cancellationToken);
 
             return new Response
             {
+                FlowId = flow.Id,
+                ExpiresAt = flow.ExpiresAt,
+                NextStep = flow.NextStep,
                 SessionToken = session.SessionToken
             };
+
         }
 
         private async Task<bool> AuthenticatePasswordAsync(string password, Guid identityId)

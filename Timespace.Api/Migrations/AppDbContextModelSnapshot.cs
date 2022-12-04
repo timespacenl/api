@@ -31,12 +31,9 @@ namespace Timespace.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<List<string>>("AllowedMethods")
+                    b.Property<List<string>>("AllowedMethodsForNextStep")
                         .IsRequired()
                         .HasColumnType("text[]");
-
-                    b.Property<bool>("Completed")
-                        .HasColumnType("boolean");
 
                     b.Property<Instant>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -46,6 +43,10 @@ namespace Timespace.Api.Migrations
 
                     b.Property<Guid>("IdentityId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("NextStep")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -120,12 +121,6 @@ namespace Timespace.Api.Migrations
 
                     b.Property<Guid>("IdentityId")
                         .HasColumnType("uuid");
-
-                    b.Property<Instant?>("MfaCompletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("MfaRequired")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("SessionToken")
                         .IsRequired()

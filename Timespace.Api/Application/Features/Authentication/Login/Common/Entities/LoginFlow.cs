@@ -9,10 +9,10 @@ public class LoginFlow : IEntity
     public Instant CreatedAt { get; set; }
     public Instant UpdatedAt { get; set; }
     public required Instant ExpiresAt { get; set; }
+    public required string NextStep { get; set; }
     
     public Identity Identity { get; set; } = null!;
     public Guid IdentityId { get; set; }
     
-    public required List<string> AllowedMethods { get; set; }
-    public bool Completed { get; set; }
+    public required List<string> AllowedMethodsForNextStep { get; set; }
 }

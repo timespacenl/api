@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Timespace.Api.Application.Features.Authentication.Login.Common;
 using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Login.Exceptions;
 using Timespace.Api.Infrastructure.Persistence;
@@ -13,11 +14,13 @@ public static class CreateLoginFlow {
         public string Email { get; init; } = null!;
     }
 
-    public record Response
+    public record Response : ILoginFlowResponse
     {
-        public Guid FlowId { get; init; }
-        public Instant ExpiresAt { get; init; }
-        public List<string> Methods { get; init; } = null!;
+        public Guid FlowId { get; set; }
+        public Instant ExpiresAt { get; set; }
+        public string NextStep { get; set; } = null!;
+        public string? SessionToken { get; set; }
+        public List<string> NextStepAllowedMethods { get; set; } = new();
     }
     
     public class Handler : IRequestHandler<Command, Response>
@@ -36,7 +39,7 @@ public static class CreateLoginFlow {
             var identityIdentifier = await _db.IdentityIdentifiers
                 .FirstOrDefaultAsync(x => x.Identifier == request.Email, cancellationToken: cancellationToken);
 
-            if (identityIdentifier == null)
+            if (identityIdentifier == null || identityIdentifier.AllowLogin == false)
                 throw new IdentifierNotFoundException();
             
             var credentialMethods = await _db.IdentityCredentials.Where(x => x.IdentityId == identityIdentifier.IdentityId)
@@ -47,7 +50,8 @@ public static class CreateLoginFlow {
             {
                 IdentityId = identityIdentifier.IdentityId,
                 ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromMinutes(5)),
-                AllowedMethods = credentialMethods
+                AllowedMethodsForNextStep = credentialMethods,
+                NextStep = LoginFlowSteps.SetCredentials
             };
 
             _db.LoginFlows.Add(flow);
@@ -57,7 +61,8 @@ public static class CreateLoginFlow {
             {
                 FlowId = flow.Id,
                 ExpiresAt = flow.ExpiresAt,
-                Methods = flow.AllowedMethods
+                NextStepAllowedMethods = flow.AllowedMethodsForNextStep,
+                SessionToken = null
             };
         }
     }
