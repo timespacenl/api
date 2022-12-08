@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Timespace.Api;
+using Timespace.Api.Infrastructure.Middleware;
 using Timespace.Api.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,6 +51,8 @@ if (app.Environment.IsDevelopment())
 app.UseProblemDetails();
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<AuthenticationTokenExtractor>();
 
 app.UseAuthorization();
 

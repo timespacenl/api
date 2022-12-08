@@ -11,8 +11,8 @@ public class Session : IEntity
     public Instant UpdatedAt { get; set; }
     
     public Identity Identity { get; set; } = null!;
-    public Guid IdentityId { get; set; }
+    public required Guid IdentityId { get; set; }
     
-    public string SessionToken { get; set; } = null!;
-    public Instant ExpiresAt { get; set; }
+    public required string SessionToken { get; set; }
+    public required Instant ExpiresAt { get; set; }
 }

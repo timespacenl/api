@@ -10,6 +10,7 @@ public class LoginFlow : IEntity
     public Instant UpdatedAt { get; set; }
     public required Instant ExpiresAt { get; set; }
     public required string NextStep { get; set; }
+    public bool RememberMe { get; set; }
     
     public Identity Identity { get; set; } = null!;
     public Guid IdentityId { get; set; }

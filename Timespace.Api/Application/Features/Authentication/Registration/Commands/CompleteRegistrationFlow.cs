@@ -2,12 +2,16 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
+using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
+using Timespace.Api.Application.Features.Authentication.Sessions.Common.Entities;
 using Timespace.Api.Application.Features.Tenants.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
+using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Persistence;
 using Timespace.Api.Infrastructure.Services;
 
@@ -37,11 +41,15 @@ public static class CompleteRegistrationFlow {
     {
         private readonly AppDbContext _db;
         private readonly IClock _clock;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly AuthenticationConfiguration _authConfiguration;
         
-        public Handler(AppDbContext db, IClock clock)
+        public Handler(AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, IOptions<AuthenticationConfiguration> authConfiguration)
         {
             _db = db;
             _clock = clock;
+            _httpContextAccessor = httpContextAccessor;
+            _authConfiguration = authConfiguration.Value;
         }
     
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
@@ -109,6 +117,26 @@ public static class CompleteRegistrationFlow {
             
             await _db.SaveChangesAsync(cancellationToken);
 
+            var session = new Session
+            {
+                IdentityId = identity.Id,
+                SessionToken = RandomStringGenerator.CreateSecureRandomString(128),
+                ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromDays(_authConfiguration.SessionCookieExpirationDays))
+            };
+
+            flow.NextStep = LoginFlowSteps.None;
+                
+            _db.Sessions.Add(session);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            _httpContextAccessor.HttpContext!.Response.Cookies.Append(_authConfiguration.SessionCookieName, session.SessionToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = null
+            });
+            
             return new Response();
         }
     }

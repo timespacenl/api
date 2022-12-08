@@ -36,20 +36,7 @@ public class LoginController : ControllerBase
     [HttpPost("{flowId}/credentials")]
     public async Task<SetLoginFlowCredentials.Response> CompleteLoginFlow([FromQuery] SetLoginFlowCredentials.Command command)
     {
-        var result = await _sender.Send(command);
-
-        if (result.SessionToken != null)
-        {
-            Response.Cookies.Append("session", result.SessionToken, new CookieOptions
-            {
-                Expires = _clock.GetCurrentInstant().Plus(Duration.FromDays(30)).ToDateTimeOffset(),
-                Secure = true,
-                HttpOnly = true,
-                SameSite = SameSiteMode.Lax
-            });
-        }
-        
-        return result;
+        return await _sender.Send(command);
     }
     
     [HttpPost("{flowId}/mfa")]

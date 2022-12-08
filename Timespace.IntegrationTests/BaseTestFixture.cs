@@ -9,5 +9,6 @@ public abstract class BaseTestFixture
     public async Task TestSetUp()
     {
         await ResetState();
+        ResetHttpContext();
     }
 }

@@ -10,7 +10,9 @@ using NodaTime.Serialization.SystemTextJson;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Timespace.Api.Application.Common.Behaviours;
 using Timespace.Api.Infrastructure;
+using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Errors;
+using Timespace.Api.Infrastructure.Middleware;
 using Timespace.Api.Infrastructure.Persistence;
 using Timespace.Api.Infrastructure.Services;
 using Timespace.Api.Infrastructure.Swagger;
@@ -40,6 +42,10 @@ public static class ConfigureServices
         services.RegisterBehaviours();
         
         services.AddDistributedMemoryCache();
+        
+        // Middleware
+        services.AddTransient<AuthenticationTokenExtractor>();
+
     }
 
     private static void ConfigureProblemDetails(ProblemDetailsOptions options)
@@ -120,12 +126,13 @@ public static class ConfigureServices
             {
                 options.JsonSerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
             });
+        
         services.AddSwagger();
+        services.AddHttpContextAccessor();
     }
     
     public static void AddConfiguration(this IServiceCollection services, ConfigurationManager configuration)
     {
-        // services.Configure<AuthenticationSettings>(configuration.GetSection(AuthenticationSettings.SectionName));
-        // services.Configure<SessionCookieSettings>(configuration.GetSection(SessionCookieSettings.SectionName));
+        services.Configure<AuthenticationConfiguration>(configuration.GetSection(AuthenticationConfiguration.SectionName));
     }
 }

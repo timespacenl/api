@@ -1,9 +1,11 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.Authentication.Login.Common;
 using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Login.Exceptions;
+using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Authentication.Login.Commands;
@@ -12,6 +14,7 @@ public static class CreateLoginFlow {
     public record Command : IRequest<Response>
     {
         public string Email { get; init; } = null!;
+        public bool RememberMe { get; init; }
     }
 
     public record Response : ILoginFlowResponse
@@ -27,11 +30,13 @@ public static class CreateLoginFlow {
     {
         private readonly AppDbContext _db;
         private readonly IClock _clock;
+        private readonly AuthenticationConfiguration _authconfiguration;
         
-        public Handler(AppDbContext db, IClock clock)
+        public Handler(AppDbContext db, IClock clock, IOptions<AuthenticationConfiguration> authconfiguration)
         {
             _db = db;
             _clock = clock;
+            _authconfiguration = authconfiguration.Value;
         }
     
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
@@ -49,7 +54,7 @@ public static class CreateLoginFlow {
             var flow = new LoginFlow
             {
                 IdentityId = identityIdentifier.IdentityId,
-                ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromMinutes(5)),
+                ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromMinutes(_authconfiguration.LoginFlowTimeoutMinutes)),
                 AllowedMethodsForNextStep = credentialMethods,
                 NextStep = LoginFlowSteps.SetCredentials
             };

@@ -1,9 +1,11 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.Authentication.Registration.Common;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
+using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
@@ -25,11 +27,13 @@ public static class CreateRegistrationFlow {
     {
         private readonly AppDbContext _db;
         private readonly IClock _clock;
+        private readonly AuthenticationConfiguration _authConfiguration;
     
-        public Handler(AppDbContext db, IClock clock)
+        public Handler(AppDbContext db, IClock clock, IOptions<AuthenticationConfiguration> authConfiguration)
         {
             _db = db;
             _clock = clock;
+            _authConfiguration = authConfiguration.Value;
         }
     
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
@@ -45,7 +49,7 @@ public static class CreateRegistrationFlow {
             {
                 Email = request.Email.ToLower(),
                 NextStep = RegistrationFlowSteps.SetPersonalInformation,
-                ExpiresAt = _clock.GetCurrentInstant() + Duration.FromMinutes(5)
+                ExpiresAt = _clock.GetCurrentInstant() + Duration.FromMinutes(_authConfiguration.RegistrationFlowTimeoutMinutes)
             };
             
             _db.RegistrationFlows.Add(flow);

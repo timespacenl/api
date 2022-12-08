@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,15 +32,13 @@ public partial class Testing
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        // await dbContext.Database.EnsureDeletedAsync();
-        // await dbContext.Database.EnsureCreatedAsync();
         await dbContext.Database.MigrateAsync();
 
         var clock = scope.ServiceProvider.GetRequiredService<IClock>();
 
         if(clock is FakeClock fakeClock)
             fakeClock.Reset(SystemClock.Instance.GetCurrentInstant());
-        
+
         using(var connection = new NpgsqlConnection(CustomWebApplicationFactory.IntegrationConfig.GetConnectionString("DefaultConnection")))
         {
             await connection.OpenAsync();
@@ -72,6 +71,13 @@ public partial class Testing
 
             await _respawner.ResetAsync(connection);
         }
+    }
+
+    public static void ResetHttpContext()
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var httpContextAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+        httpContextAccessor.HttpContext = new DefaultHttpContext();
     }
     
     public static async Task<TEntity?> FindAsync<TEntity>(params object[] keyValues)
@@ -124,9 +130,7 @@ public partial class Testing
         if(clock is FakeClock fakeClock)
             fakeClock.Advance(duration);
     }
-    
-    
-    
+
     [OneTimeTearDown]
     public void RunAfterAnyTests()
     {

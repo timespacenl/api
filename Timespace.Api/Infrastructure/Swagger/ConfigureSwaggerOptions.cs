@@ -14,6 +14,8 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 
     public void Configure(SwaggerGenOptions options)
     {
+        options.SupportNonNullableReferenceTypes();
+        
         foreach (var description in _apiVersionDescriptionProvider.ApiVersionDescriptions)
         {
             options.SwaggerDoc(description.GroupName, CreateOpenApiInfo(description));

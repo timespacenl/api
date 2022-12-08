@@ -48,7 +48,7 @@
       <Folder Include="Application\Features\Authentication\Login\Queries" />
       <Folder Include="Application\Features\Authentication\Mfa\Commands" />
       <Folder Include="Application\Features\Authentication\Mfa\Exceptions" />
-      <Folder Include="Infrastructure\Configuration" />
+      <Folder Include="Application\Features\Users\Settings\Mfa\Exceptions" />
       <Folder Include="Migrations" />
     </ItemGroup>
 

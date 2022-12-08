@@ -2,12 +2,14 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Login.Common;
 using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Login.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Sessions.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
+using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Extensions;
 using Timespace.Api.Infrastructure.Persistence;
 using Timespace.Api.Infrastructure.Services;
@@ -43,11 +45,15 @@ public static class SetLoginFlowCredentials {
     {
         private readonly AppDbContext _db;
         private readonly IClock _clock;
+        private readonly AuthenticationConfiguration _authConfiguration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         
-        public Handler(AppDbContext db, IClock clock)
+        public Handler(AppDbContext db, IClock clock, IOptions<AuthenticationConfiguration> authConfiguration, IHttpContextAccessor httpContextAccessor)
         {
             _db = db;
             _clock = clock;
+            _httpContextAccessor = httpContextAccessor;
+            _authConfiguration = authConfiguration.Value;
         }
     
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
@@ -100,7 +106,8 @@ public static class SetLoginFlowCredentials {
             var session = new Session
             {
                 IdentityId = flow.IdentityId,
-                SessionToken = RandomStringGenerator.CreateSecureRandomString(128)
+                SessionToken = RandomStringGenerator.CreateSecureRandomString(128),
+                ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromDays(_authConfiguration.SessionCookieExpirationDays))
             };
 
             flow.NextStep = LoginFlowSteps.None;
@@ -108,6 +115,14 @@ public static class SetLoginFlowCredentials {
             _db.Sessions.Add(session);
             await _db.SaveChangesAsync(cancellationToken);
 
+            _httpContextAccessor.HttpContext!.Response.Cookies.Append(_authConfiguration.SessionCookieName, session.SessionToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = flow.RememberMe ? _clock.GetCurrentInstant().Plus(Duration.FromDays(_authConfiguration.SessionCookieExpirationDays)).ToDateTimeOffset() : null
+            });
+            
             return new Response
             {
                 FlowId = flow.Id,
