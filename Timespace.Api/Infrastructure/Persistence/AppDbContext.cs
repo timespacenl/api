@@ -6,6 +6,7 @@ using Timespace.Api.Application.Features.Authentication.Sessions.Common.Entities
 using Timespace.Api.Application.Features.Tenants.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
+using Timespace.Api.Application.Features.Users.Settings.Mfa.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Infrastructure.Persistence;
@@ -23,6 +24,7 @@ public class AppDbContext : DbContext
     // Selfservice flows
     public DbSet<RegistrationFlow> RegistrationFlows { get; init; } = null!;
     public DbSet<LoginFlow> LoginFlows { get; init; } = null!;
+    public DbSet<MfaSetupFlow> MfaSetupFlows { get; init; } = null!;
 
     // Identity
     public DbSet<Identity> Identities { get; init; } = null!;

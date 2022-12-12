@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Timespace.Api.Application.Features.Authentication.Login.Commands;
-using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 
 namespace Timespace.Api.Application.Features.Authentication.Login;
 

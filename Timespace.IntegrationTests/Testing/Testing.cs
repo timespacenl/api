@@ -21,7 +21,9 @@ public partial class Testing
     private static IConfiguration _configuration = null!;
     private static IServiceScopeFactory _scopeFactory = null!;
     private static Respawner _respawner = null!;
-
+    private static string? _currentSessionToken = null;
+    private static IClock _clock;
+    
     [OneTimeSetUp]
     public async Task RunBeforeAnyTests()
     {
@@ -39,6 +41,9 @@ public partial class Testing
         if(clock is FakeClock fakeClock)
             fakeClock.Reset(SystemClock.Instance.GetCurrentInstant());
 
+        var httpContextAccessor = _factory.Services.GetRequiredService<IHttpContextAccessor>();
+        httpContextAccessor.HttpContext = new DefaultHttpContext();
+        
         using(var connection = new NpgsqlConnection(CustomWebApplicationFactory.IntegrationConfig.GetConnectionString("DefaultConnection")))
         {
             await connection.OpenAsync();
@@ -71,61 +76,21 @@ public partial class Testing
 
             await _respawner.ResetAsync(connection);
         }
-    }
-
-    public static void ResetHttpContext()
-    {
-        using var scope = _scopeFactory.CreateScope();
-        var httpContextAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+        
+        var httpContextAccessor = _factory.Services.GetRequiredService<IHttpContextAccessor>();
         httpContextAccessor.HttpContext = new DefaultHttpContext();
-    }
-    
-    public static async Task<TEntity?> FindAsync<TEntity>(params object[] keyValues)
-        where TEntity : class
-    {
-        using var scope = _scopeFactory.CreateScope();
+        
+        _currentSessionToken = null;
+        
+        var clock = _factory.Services.GetRequiredService<IClock>();
 
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        return await context.FindAsync<TEntity>(keyValues);
-    }
-
-    public static async Task<TEntity?> FirstOrDefault<TEntity>(Guid id)
-        where TEntity : class, IEntity
-    {
-        using var scope = _scopeFactory.CreateScope();
-
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        return await context.Set<TEntity>().FirstOrDefaultAsync(x => x.Id == id);
-    }
-    
-    public static async Task AddAsync<TEntity>(TEntity entity)
-        where TEntity : class
-    {
-        using var scope = _scopeFactory.CreateScope();
-
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        context.Add(entity);
-
-        await context.SaveChangesAsync();
-    }
-
-    public static async Task<int> CountAsync<TEntity>() where TEntity : class
-    {
-        using var scope = _scopeFactory.CreateScope();
-
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        return await context.Set<TEntity>().CountAsync();
+        if(clock is FakeClock fakeClock)
+            fakeClock.Reset(Instant.FromUtc(2021, 1, 1, 0, 0));
     }
 
     public static void AdvanceTime(Duration duration)
     {
-        using var scope = _scopeFactory.CreateScope();
-
-        var clock = scope.ServiceProvider.GetRequiredService<IClock>();
+        var clock = _factory.Services.GetRequiredService<IClock>();
 
         if(clock is FakeClock fakeClock)
             fakeClock.Advance(duration);

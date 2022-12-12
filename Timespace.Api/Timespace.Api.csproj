@@ -36,6 +36,7 @@
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="7.0.0" />
         <PackageReference Include="Npgsql.NodaTime" Version="7.0.0" />
+        <PackageReference Include="Otp.NET" Version="1.2.2" />
         <PackageReference Include="Serilog" Version="2.12.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
         <PackageReference Include="Serilog.NodaTime" Version="3.0.0" />
@@ -44,11 +45,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\Features\ApiKeys" />
-      <Folder Include="Application\Features\Authentication\Login\Queries" />
-      <Folder Include="Application\Features\Authentication\Mfa\Commands" />
-      <Folder Include="Application\Features\Authentication\Mfa\Exceptions" />
-      <Folder Include="Application\Features\Users\Settings\Mfa\Exceptions" />
       <Folder Include="Migrations" />
     </ItemGroup>
 

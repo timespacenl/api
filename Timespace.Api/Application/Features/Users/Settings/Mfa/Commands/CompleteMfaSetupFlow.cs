@@ -1,6 +1,12 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OtpNet;
+using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
+using Timespace.Api.Application.Features.Users.Settings.Mfa.Exceptions;
+using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Users.Settings.Mfa.Commands;
@@ -17,29 +23,67 @@ public static class CompleteMfaSetupFlow {
 
     public record CommandBody
     {
-        public int TotpCode { get; init; }
+        public string TotpCode { get; init; } = null!;
     }
     
     public record Response()
     {
-        bool Success { get; init; }
+        public bool Success { get; init; }
     }
     
     public class Handler : IRequestHandler<Command, Response>
     {
         private readonly AppDbContext _db;
+        private readonly IClock _clock;
+        private readonly UserSettingsConfiguration _userSettingsConfiguration;
     
-        public Handler(AppDbContext db)
+        public Handler(AppDbContext db, IClock clock, IOptions<UserSettingsConfiguration> userSettingsConfiguration)
         {
             _db = db;
+            _clock = clock;
+            _userSettingsConfiguration = userSettingsConfiguration.Value;
         }
     
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
-            return new Response
-            {
+            var flow = await _db.MfaSetupFlows.FirstOrDefaultAsync(x => x.Id == request.FlowId, cancellationToken);
+
+            if (flow == null)
+                throw new MfaSetupFlowNotFoundException();
             
-            };
+            if(flow.ExpiresAt < _clock.GetCurrentInstant())
+                throw new MfaSetupFlowExpiredException();
+
+            var existingTotpCredentials = await _db.IdentityCredentials.Where(x => x.IdentityId == flow.IdentityId && x.CredentialType == CredentialTypes.Totp).ToListAsync(cancellationToken);
+
+            if (existingTotpCredentials.Any())
+                throw new MfaAlreadySetUpException();
+            
+            var totp = new Totp(Base32Encoding.ToBytes(flow.Secret));
+            var verificationWindow = new VerificationWindow(1, 1);
+            if (totp.VerifyTotp(request.Body.TotpCode, out _, verificationWindow))
+            {
+                var credential = new IdentityCredential()
+                {
+                    IdentityId = flow.IdentityId,
+                    CredentialType = CredentialTypes.Totp,
+                    Configuration = flow.Secret,
+                };
+
+                var identity = await _db.Identities.FirstOrDefaultAsync(x => x.Id == flow.IdentityId, cancellationToken);
+
+                _db.IdentityCredentials.Add(credential);
+                identity!.RequiresMfa = true;
+                
+                await _db.SaveChangesAsync(cancellationToken);
+
+                return new Response
+                {
+                    Success = true
+                };
+            }
+
+            throw new VerificationTotpInvalidException();
         }
     }
     

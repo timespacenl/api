@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Timespace.Api.Application.Features.Authentication.Registration.Commands;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Registration;

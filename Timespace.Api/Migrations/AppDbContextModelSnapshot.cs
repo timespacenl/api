@@ -48,6 +48,9 @@ namespace Timespace.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("RememberMe")
+                        .HasColumnType("boolean");
+
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -302,6 +305,35 @@ namespace Timespace.Api.Migrations
                     b.ToTable("IdentityLookupSecret");
                 });
 
+            modelBuilder.Entity("Timespace.Api.Application.Features.Users.Settings.Mfa.Entities.MfaSetupFlow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Instant>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Instant>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("IdentityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Secret")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Instant>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdentityId");
+
+                    b.ToTable("MfaSetupFlows");
+                });
+
             modelBuilder.Entity("Timespace.Api.Application.Features.Authentication.Login.Common.Entities.LoginFlow", b =>
                 {
                     b.HasOne("Timespace.Api.Application.Features.Users.Common.Entities.Identity", "Identity")
@@ -358,6 +390,17 @@ namespace Timespace.Api.Migrations
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Users.Common.Entities.IdentityLookupSecret", b =>
+                {
+                    b.HasOne("Timespace.Api.Application.Features.Users.Common.Entities.Identity", "Identity")
+                        .WithMany()
+                        .HasForeignKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Identity");
+                });
+
+            modelBuilder.Entity("Timespace.Api.Application.Features.Users.Settings.Mfa.Entities.MfaSetupFlow", b =>
                 {
                     b.HasOne("Timespace.Api.Application.Features.Users.Common.Entities.Identity", "Identity")
                         .WithMany()

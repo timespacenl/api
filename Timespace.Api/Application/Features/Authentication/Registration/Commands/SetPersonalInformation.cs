@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Registration.Common;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
@@ -10,6 +11,8 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
 public static class SetPersonalInformation {
+
+    [AllowUnauthenticated]
     public record Command : IRequest<Response>
     {
         [FromRoute(Name = "flowId")] 

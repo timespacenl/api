@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using NodaTime;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
-using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Registration.Queries;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Registration;

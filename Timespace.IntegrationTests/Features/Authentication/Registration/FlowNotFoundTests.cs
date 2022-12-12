@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
-using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Registration;
 

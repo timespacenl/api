@@ -1,14 +1,16 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Registration.Common;
-using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
 using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Queries;
 
 public static class GetRegistrationFlow {
+    
+    [AllowUnauthenticated]
     public record Query : IRequest<Response>
     {
         [FromRoute(Name = "flowId")] 

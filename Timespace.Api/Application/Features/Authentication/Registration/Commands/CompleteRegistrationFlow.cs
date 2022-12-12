@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
@@ -18,6 +19,8 @@ using Timespace.Api.Infrastructure.Services;
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
 public static class CompleteRegistrationFlow {
+    
+    [AllowUnauthenticated]
     public record Command : IRequest<Response>
     {
         [FromRoute(Name = "flowId")] 
@@ -35,7 +38,10 @@ public static class CompleteRegistrationFlow {
         public bool MagicLink { get; init; }
     }
 
-    public record Response();
+    public record Response
+    {
+        public string? SessionToken { get; init; } = null!;
+    }
     
     public class Handler : IRequestHandler<Command, Response>
     {
@@ -125,7 +131,7 @@ public static class CompleteRegistrationFlow {
             };
 
             flow.NextStep = LoginFlowSteps.None;
-                
+            
             _db.Sessions.Add(session);
             await _db.SaveChangesAsync(cancellationToken);
 
@@ -137,7 +143,10 @@ public static class CompleteRegistrationFlow {
                 Expires = null
             });
             
-            return new Response();
+            return new Response
+            {
+                SessionToken = session.SessionToken
+            };
         }
     }
     

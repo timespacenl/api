@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Login.Common;
 using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
@@ -17,6 +18,8 @@ using Timespace.Api.Infrastructure.Services;
 namespace Timespace.Api.Application.Features.Authentication.Login.Commands;
 
 public static class SetLoginFlowCredentials {
+    
+    [AllowUnauthenticated]
     public record Command : IRequest<Response>
     {
         [FromRoute(Name = "flowId")]
@@ -56,6 +59,7 @@ public static class SetLoginFlowCredentials {
             _authConfiguration = authConfiguration.Value;
         }
     
+        //todo: check for current login step
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
             var flow = await _db.LoginFlows.FirstOrDefaultAsync(x => x.Id == request.FlowId, cancellationToken);
@@ -130,7 +134,6 @@ public static class SetLoginFlowCredentials {
                 NextStep = flow.NextStep,
                 SessionToken = session.SessionToken
             };
-
         }
 
         private async Task<bool> AuthenticatePasswordAsync(string password, Guid identityId)

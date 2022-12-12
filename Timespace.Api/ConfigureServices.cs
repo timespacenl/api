@@ -30,6 +30,8 @@ public static class ConfigureServices
         });
 
         services.AddSingleton<IClock, DateTimeProvider>();
+        services.AddScoped<IAuthenticationTokenProvider, AuthenticationTokenProvider>();
+        services.AddScoped<IUsageContext, UsageContext>();
         
         services.AddProblemDetails(ConfigureProblemDetails);
         services.AddDbContext<AppDbContext>(options =>
@@ -134,5 +136,6 @@ public static class ConfigureServices
     public static void AddConfiguration(this IServiceCollection services, ConfigurationManager configuration)
     {
         services.Configure<AuthenticationConfiguration>(configuration.GetSection(AuthenticationConfiguration.SectionName));
+        services.Configure<UserSettingsConfiguration>(configuration.GetSection(UserSettingsConfiguration.SectionName));
     }
 }

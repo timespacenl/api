@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Authentication.Login.Common;
 using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Login.Exceptions;
@@ -11,6 +12,8 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Application.Features.Authentication.Login.Commands;
 
 public static class CreateLoginFlow {
+    
+    [AllowUnauthenticated]
     public record Command : IRequest<Response>
     {
         public string Email { get; init; } = null!;
@@ -66,6 +69,7 @@ public static class CreateLoginFlow {
             {
                 FlowId = flow.Id,
                 ExpiresAt = flow.ExpiresAt,
+                NextStep = flow.NextStep,
                 NextStepAllowedMethods = flow.AllowedMethodsForNextStep,
                 SessionToken = null
             };

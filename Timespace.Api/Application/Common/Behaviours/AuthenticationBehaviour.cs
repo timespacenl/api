@@ -26,6 +26,9 @@ public class AuthenticationBehaviour<TRequest, TResponse> : IPipelineBehavior<TR
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
+        if(request.GetType().GetCustomAttribute<InternalAttribute>() != null)
+            return await next();
+        
         if (_authenticationTokenProvider.AuthenticationToken == null)
         {
             if (request.GetType().GetCustomAttribute<AllowUnauthenticatedAttribute>() != null)

@@ -1,5 +1,4 @@
 ﻿using Microsoft.OpenApi.Models;
-using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Timespace.Api.Infrastructure.Swagger;

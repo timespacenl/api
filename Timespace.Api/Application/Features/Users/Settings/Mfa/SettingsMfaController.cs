@@ -10,11 +10,11 @@ namespace Timespace.Api.Application.Features.Users.Settings.Mfa;
 [ApiController]
 [Route("/v{version:apiVersion}/users/settings/mfa")]
 [ApiVersion("1.0")]
-public class SettingsMfaController : ControllerBase
+public class UserSettingsMfaController : ControllerBase
 {
     private readonly ISender _sender;
 
-    public SettingsMfaController(ISender sender)
+    public UserSettingsMfaController(ISender sender)
     {
         _sender = sender;
     }
@@ -26,7 +26,7 @@ public class SettingsMfaController : ControllerBase
     }
     
     [HttpPost("{flowId}/complete")]
-    public async Task<CompleteMfaSetupFlow.Response> CompleteMfa([FromBody] CompleteMfaSetupFlow.Command command)
+    public async Task<CompleteMfaSetupFlow.Response> CompleteMfa([FromQuery] CompleteMfaSetupFlow.Command command)
     {
         return await _sender.Send(command);
     }

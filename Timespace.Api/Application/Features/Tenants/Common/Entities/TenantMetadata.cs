@@ -4,5 +4,5 @@ public partial class Tenant
 {
     public string CompanyName { get; set; } = null!;
     public string CompanyIndustry { get; set; } = null!;
-    public int CompanySize { get; set; } 
+    public int CompanySize { get; set; }
 }

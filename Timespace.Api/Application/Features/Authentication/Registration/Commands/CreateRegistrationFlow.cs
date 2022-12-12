@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Authentication.Registration.Common;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
@@ -11,6 +12,8 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
 public static class CreateRegistrationFlow {
+    
+    [AllowUnauthenticated]
     public record Command : IRequest<Response>
     {
         public string Email { get; init; } = null!;
