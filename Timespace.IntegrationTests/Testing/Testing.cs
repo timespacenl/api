@@ -10,13 +10,13 @@ using Npgsql;
 using Respawn;
 using Respawn.Graph;
 using Timespace.Api.Infrastructure.Persistence;
-using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.IntegrationTests;
 
 [SetUpFixture]
 public partial class Testing
 {
+    public static string CurrentMfaSecret { get; set; } = "";
     private static WebApplicationFactory<Program> _factory = null!;
     private static IConfiguration _configuration = null!;
     private static IServiceScopeFactory _scopeFactory = null!;
@@ -34,6 +34,8 @@ public partial class Testing
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+        await dbContext.Database.ExecuteSqlRawAsync("drop schema public cascade;");
+        await dbContext.Database.ExecuteSqlRawAsync("create schema public;");
         await dbContext.Database.MigrateAsync();
 
         var clock = scope.ServiceProvider.GetRequiredService<IClock>();
@@ -94,6 +96,11 @@ public partial class Testing
 
         if(clock is FakeClock fakeClock)
             fakeClock.Advance(duration);
+    }
+    
+    public static IClock GetClock()
+    {
+        return _factory.Services.GetRequiredService<IClock>();
     }
 
     [OneTimeTearDown]

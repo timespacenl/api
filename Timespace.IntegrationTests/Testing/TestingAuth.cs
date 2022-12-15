@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Timespace.Api.Application.Features.Authentication.Registration.Commands;
-using Timespace.Api.Infrastructure.Services;
+﻿using Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
 namespace Timespace.IntegrationTests;
 

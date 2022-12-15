@@ -70,6 +70,9 @@ public static class SetLoginFlowCredentials {
             if(flow.ExpiresAt < _clock.GetCurrentInstant())
                 throw new FlowExpiredException();
 
+            if(flow.NextStep != LoginFlowSteps.SetCredentials)
+                throw new InvalidFlowStepException(flow.NextStep);
+
             if (!flow.AllowedMethodsForNextStep.Contains(request.Body.CredentialType))
                 throw new CredentialTypeNotConfiguredException();
             

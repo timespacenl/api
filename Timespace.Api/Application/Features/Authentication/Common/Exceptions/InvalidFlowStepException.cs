@@ -1,6 +1,6 @@
 ﻿using Timespace.Api.Infrastructure.Errors;
 
-namespace Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
+namespace Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 
 public class InvalidFlowStepException : Exception, IBaseException
 {
@@ -20,13 +20,4 @@ public class InvalidFlowStepException : Exception, IBaseException
     {
         { nameof(NextStep), NextStep }
     };
-}
-
-public class InvalidFlowStepErrorResponse
-{
-    public string Type => "invalid_flow_step";
-    public int StatusCode => StatusCodes.Status400BadRequest;
-    public string Title => "Invalid flow step";
-    public string? Detail => null;
-    public string NextStep => null!;
 }

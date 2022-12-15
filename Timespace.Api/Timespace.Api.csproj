@@ -45,6 +45,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Application\Features\Departments" />
+      <Folder Include="Application\Features\Modules\Common" />
+      <Folder Include="Application\Features\Modules\Customers" />
+      <Folder Include="Application\Features\Modules\Projects" />
+      <Folder Include="Application\Features\Modules\Schedules" />
+      <Folder Include="Application\Features\Modules\Timesheet" />
       <Folder Include="Migrations" />
     </ItemGroup>
 

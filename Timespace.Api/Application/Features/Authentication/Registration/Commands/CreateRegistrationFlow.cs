@@ -47,7 +47,6 @@ public static class CreateRegistrationFlow {
             if (existingCredential != null || existingFlow != null)
                 throw new DuplicateIdentifierException();
             
-            
             var flow = new RegistrationFlow()
             {
                 Email = request.Email.ToLower(),

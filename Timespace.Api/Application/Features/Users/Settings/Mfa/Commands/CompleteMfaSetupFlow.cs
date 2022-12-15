@@ -35,13 +35,11 @@ public static class CompleteMfaSetupFlow {
     {
         private readonly AppDbContext _db;
         private readonly IClock _clock;
-        private readonly UserSettingsConfiguration _userSettingsConfiguration;
-    
-        public Handler(AppDbContext db, IClock clock, IOptions<UserSettingsConfiguration> userSettingsConfiguration)
+
+        public Handler(AppDbContext db, IClock clock)
         {
             _db = db;
             _clock = clock;
-            _userSettingsConfiguration = userSettingsConfiguration.Value;
         }
     
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
@@ -61,7 +59,7 @@ public static class CompleteMfaSetupFlow {
             
             var totp = new Totp(Base32Encoding.ToBytes(flow.Secret));
             var verificationWindow = new VerificationWindow(1, 1);
-            if (totp.VerifyTotp(request.Body.TotpCode, out _, verificationWindow))
+            if (totp.VerifyTotp(_clock.GetCurrentInstant().ToDateTimeUtc(), request.Body.TotpCode, out _, verificationWindow))
             {
                 var credential = new IdentityCredential()
                 {

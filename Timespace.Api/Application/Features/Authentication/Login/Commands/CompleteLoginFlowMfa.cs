@@ -28,7 +28,7 @@ public static class CompleteLoginFlowMfa {
         [FromBody]
         public CommandBody Body { get; init; } = null!;
     }
-
+    
     public record CommandBody
     {
         public string CredentialType { get; init; } = null!;
@@ -69,12 +69,15 @@ public static class CompleteLoginFlowMfa {
             if(flow.ExpiresAt < _clock.GetCurrentInstant())
                 throw new FlowExpiredException();
 
+            if(flow.NextStep != LoginFlowSteps.CompleteMfa)
+                throw new InvalidFlowStepException(flow.NextStep);
+            
             if (!flow.AllowedMethodsForNextStep.Contains(request.Body.CredentialType))
                 throw new CredentialTypeNotConfiguredException();
             
             bool authenticated = request.Body.CredentialType switch
             {
-                CredentialTypes.Password => await AuthenticateTotpAsync(request.Body.CredentialValue, flow.IdentityId),
+                CredentialTypes.Totp => await AuthenticateTotpAsync(request.Body.CredentialValue, flow.IdentityId),
                 _ => false
             };
             
@@ -120,7 +123,7 @@ public static class CompleteLoginFlowMfa {
 
             var totpMgr = new Totp(Base32Encoding.ToBytes(identityCredential.Configuration));
             
-            return totpMgr.VerifyTotp(totp, out _, new VerificationWindow(1, 1));
+            return totpMgr.VerifyTotp(_clock.GetCurrentInstant().ToDateTimeUtc(), totp, out _, new VerificationWindow(1, 1));
         }
     }
     
