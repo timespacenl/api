@@ -2,4 +2,9 @@
 
 public partial class Permissions
 {
+    [PermissionGroup("department", PermissionScope.Department)]
+    public class DepartmentTest
+    {
+        
+    }
 }

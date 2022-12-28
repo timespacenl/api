@@ -12,12 +12,12 @@ public class PermissionMetadataAttribute : Attribute
 
 public class PermissionGroupAttribute : Attribute
 {
-    public PermissionGroupAttribute(string groupCode, string? parentGroupCode = null)
+    public PermissionGroupAttribute(string groupCode, PermissionScope scope)
     {
         GroupCode = groupCode;
-        ParentGroupCode = parentGroupCode;
+        Scope = scope;
     }
     
     public string GroupCode { get; set; }
-    public string? ParentGroupCode { get; set; }
+    public PermissionScope Scope { get; set; }
 }

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Timespace.Api;
+using Timespace.Api.Infrastructure.AccessControl;
 using Timespace.Api.Infrastructure.Middleware;
 using Timespace.Api.Infrastructure.Persistence;
 
@@ -21,6 +22,7 @@ builder.Host
 // Add services to the container.
 builder.Services.AddAspnetServices();
 builder.Services.AddServices(builder.Configuration);
+builder.Services.AddPermissionTree();
 
 var app = builder.Build();
 
