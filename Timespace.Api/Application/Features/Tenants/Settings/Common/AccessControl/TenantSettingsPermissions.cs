@@ -35,7 +35,7 @@ public partial class Permissions
                 public static readonly Permission Read = new("tenant:settings:employees:read");
                 public static readonly Permission Create = new("tenant:settings:employees:create");
                 public static readonly Permission Update = new("tenant:settings:employees:update");
-                public static readonly Permission Delete = new("tenant:settings:employees:delete");    
+                public static readonly Permission Delete = new("tenant:settings:employees:delete");
                 
                 // Data such as bsn, etc
                 public static readonly Permission ReadExtended = new("tenant:settings:employees:read_extended");

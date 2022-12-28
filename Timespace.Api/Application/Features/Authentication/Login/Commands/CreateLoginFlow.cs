@@ -6,6 +6,7 @@ using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Authentication.Login.Common;
 using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Login.Exceptions;
+using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Persistence;
 
@@ -45,12 +46,12 @@ public static class CreateLoginFlow {
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
             var identityIdentifier = await _db.IdentityIdentifiers
-                .FirstOrDefaultAsync(x => x.Identifier == request.Email, cancellationToken: cancellationToken);
+                .FirstOrDefaultAsync(x => x.Identifier == request.Email.ToLower(), cancellationToken: cancellationToken);
 
             if (identityIdentifier == null || identityIdentifier.AllowLogin == false)
                 throw new IdentifierNotFoundException();
             
-            var credentialMethods = await _db.IdentityCredentials.Where(x => x.IdentityId == identityIdentifier.IdentityId)
+            var credentialMethods = await _db.IdentityCredentials.Where(x => x.IdentityId == identityIdentifier.IdentityId && CredentialTypes.AllFirstFactor.Contains(x.CredentialType))
                 .Select(x => x.CredentialType)
                 .ToListAsync(cancellationToken);
             

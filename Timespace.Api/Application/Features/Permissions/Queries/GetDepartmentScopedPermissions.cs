@@ -5,7 +5,7 @@ using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Permissions.Queries;
 
-public static class GetTenantScopedPermissions {
+public static class GetDepartmentScopedPermissions {
     public record Query : IRequest<PermissionTree>
     {
         
@@ -22,7 +22,7 @@ public static class GetTenantScopedPermissions {
     
         public async Task<PermissionTree> Handle(Query request, CancellationToken cancellationToken)
         {
-            return _permissionCollections.AllTenantScoped;
+            return _permissionCollections.AllDepartmentScoped;
         }
     }
     

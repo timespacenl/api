@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Timespace.Api.Application.Features.Permissions.Queries;
 using Timespace.Api.Infrastructure.AccessControl;
 
 namespace Timespace.Api.Application.Features.Permissions;
@@ -19,14 +20,14 @@ public class PermissionsController
     }
 
     [HttpGet("tenant")]
-    public Task<PermissionTree> GetAvailableTenantScopedPermissions()
+    public async Task<PermissionTree> GetAvailableTenantScopedPermissions()
     {
-        return Task.FromResult(_permissionCollections.AllTenantScoped);
+        return await _sender.Send(new GetTenantScopedPermissions.Query());
     }
     
     [HttpGet("department")]
-    public Task<PermissionTree> GetAvailableDepartmentScopedPermissions()
+    public async Task<PermissionTree> GetAvailableDepartmentScopedPermissions()
     {
-        return Task.FromResult(_permissionCollections.AllDepartmentScoped);
+        return await _sender.Send(new GetDepartmentScopedPermissions.Query());
     }
 }
