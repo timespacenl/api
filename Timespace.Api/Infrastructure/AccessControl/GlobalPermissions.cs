@@ -5,7 +5,6 @@ public partial class Permissions
     [PermissionGroup("global")]
     public class GlobalPermissions
     {
-        [PermissionMetadata(Administrator)]
-        public const string Administrator = "global:administrator";
+        public static readonly Permission Administrator = new("global:administrator", PermissionScope.Tenant);
     }
 }

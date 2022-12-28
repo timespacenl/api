@@ -51,6 +51,9 @@
       <Folder Include="Application\Features\Modules\Projects" />
       <Folder Include="Application\Features\Modules\Schedules" />
       <Folder Include="Application\Features\Modules\Timesheet" />
+      <Folder Include="Application\Features\Tenants\Settings\ApiKeys" />
+      <Folder Include="Application\Features\Tenants\Settings\Employees" />
+      <Folder Include="Application\Features\Users\Me" />
       <Folder Include="Migrations" />
     </ItemGroup>
 

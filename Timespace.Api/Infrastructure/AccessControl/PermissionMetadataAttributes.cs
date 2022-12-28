@@ -2,9 +2,9 @@
 
 public class PermissionMetadataAttribute : Attribute
 {
-    public PermissionMetadataAttribute(string permissionString)
+    public PermissionMetadataAttribute(Permission permission)
     {
-        PermissionString = permissionString;
+        PermissionString = permission.Key;
     }
 
     public string PermissionString { get; set; }
