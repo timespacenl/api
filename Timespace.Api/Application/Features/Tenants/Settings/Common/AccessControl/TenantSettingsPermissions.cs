@@ -8,8 +8,8 @@ public partial class Permissions
         [PermissionGroup("tenant_settings", PermissionScope.Tenant)]
         public class Settings
         {
-            public static readonly Permission ReadAll = new Permission("tenant:settings:read_all");
-            public static readonly Permission UpdateAll = new Permission("tenant:settings:update_all");
+            public static readonly Permission ReadAll = new("tenant:settings:read_all");
+            public static readonly Permission UpdateAll = new("tenant:settings:update_all");
 
             [PermissionGroup("tenant_settings_apikeys", PermissionScope.Tenant)]
             public class ApiKeys
