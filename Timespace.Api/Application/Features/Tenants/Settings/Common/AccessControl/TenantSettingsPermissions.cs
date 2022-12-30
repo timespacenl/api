@@ -8,39 +8,49 @@ public partial class Permissions
         [PermissionGroup("tenant_settings", PermissionScope.Tenant)]
         public class Settings
         {
-            public static readonly Permission ReadAll = new("tenant:settings:read_all");
-            public static readonly Permission UpdateAll = new("tenant:settings:update_all");
+            public const string ReadAll = "tenant:settings:read_all";
+            public const string UpdateAll = "tenant:settings:update_all";
 
             [PermissionGroup("tenant_settings_apikeys", PermissionScope.Tenant)]
             public class ApiKeys
             {
-                public static readonly Permission Read = new("tenant:settings:apikeys:read");
-                public static readonly Permission Create = new("tenant:settings:apikeys:create");
-                public static readonly Permission Update = new("tenant:settings:apikeys:update");
-                public static readonly Permission Delete = new("tenant:settings:apikeys:delete");
+                public const string Read = "tenant:settings:apikeys:read";
+                public const string Create = "tenant:settings:apikeys:create";
+                public const string Update = "tenant:settings:apikeys:update";
+                public const string Delete = "tenant:settings:apikeys:delete";
             }
             
             [PermissionGroup("tenant_settings_roles", PermissionScope.Tenant)]
             public class Roles
             {
-                public static readonly Permission Read = new("tenant:settings:roles:read");
-                public static readonly Permission Create = new("tenant:settings:roles:create");
-                public static readonly Permission Update = new("tenant:settings:roles:update");
-                public static readonly Permission Delete = new("tenant:settings:roles:delete");            
+                public const string Read = "tenant:settings:roles:read";
+                public const string Create = "tenant:settings:roles:create";
+                public const string Update = "tenant:settings:roles:update";
+                public const string Delete = "tenant:settings:roles:delete";            
             }
             
             [PermissionGroup("tenant_settings_employees", PermissionScope.Tenant)]
             public class Employees
             {
-                public static readonly Permission Read = new("tenant:settings:employees:read");
-                public static readonly Permission Create = new("tenant:settings:employees:create");
-                public static readonly Permission Update = new("tenant:settings:employees:update");
-                public static readonly Permission Delete = new("tenant:settings:employees:delete");
+                public const string Read = "tenant:settings:employees:read";
+                public const string Create = "tenant:settings:employees:create";
+                public const string Update = "tenant:settings:employees:update";
+                public const string Delete = "tenant:settings:employees:delete";
                 
                 // Data such as bsn, etc
-                public static readonly Permission ReadExtended = new("tenant:settings:employees:read_extended");
-                public static readonly Permission UpdateExtended = new("tenant:settings:employees:update_extended");
+                public const string ReadExtended = "tenant:settings:employees:read_extended";
+                public const string UpdateExtended = "tenant:settings:employees:update_extended";
             }
+            
+            [PermissionGroup("tenant_settings_departments", PermissionScope.Tenant)]
+            public class Departments
+            {
+                public const string Read = "tenant:settings:departments:read";
+                public const string Create = "tenant:settings:departments:create";
+                public const string Update = "tenant:settings:departments:update";
+                public const string Delete = "tenant:settings:departments:delete";            
+            }
+
         }
     }
 }

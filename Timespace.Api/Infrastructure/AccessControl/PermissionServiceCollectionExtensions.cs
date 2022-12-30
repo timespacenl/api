@@ -37,18 +37,18 @@ public static class PermissionServiceCollectionExtensions
             var treeNode = new PermissionTreeNode()
             {
                 GroupName = rootType.GetCustomAttribute<PermissionGroupAttribute>()?.GroupCode!,
-                Permissions = properties.Select(x => (x.GetValue(null) as Permission)?.Key).ToList(),
+                Permissions = properties.Select(x => (x.GetValue(null) as string)).ToList(),
                 Children = new List<PermissionTreeNode>()
             };
 
-            treeNode = DiscoverChildNodes(rootType, treeNode, scope);
+            treeNode = DiscoverChildNodes(rootType, treeNode);
             permissionTree.Nodes.Add(treeNode);
         }
 
         return permissionTree;
     }
 
-    private static PermissionTreeNode DiscoverChildNodes(Type rootType, PermissionTreeNode currentNode, PermissionScope? scope = null)
+    private static PermissionTreeNode DiscoverChildNodes(Type rootType, PermissionTreeNode currentNode)
     {
         var childTypes = rootType.GetNestedTypes();
         var childNodes = new List<PermissionTreeNode>();
@@ -62,11 +62,11 @@ public static class PermissionServiceCollectionExtensions
                 var treeNode = new PermissionTreeNode()
                 {
                     GroupName = childType.GetCustomAttribute<PermissionGroupAttribute>()?.GroupCode!,
-                    Permissions = properties.Select(x => (x.GetValue(null) as Permission)?.Key).ToList()!,
+                    Permissions = properties.Select(x => x.GetValue(null) as string).ToList(),
                     Children = new List<PermissionTreeNode>()
                 };
 
-                treeNode = DiscoverChildNodes(childType, treeNode, scope);
+                treeNode = DiscoverChildNodes(childType, treeNode);
                 
                 childNodes.Add(treeNode);
             }
