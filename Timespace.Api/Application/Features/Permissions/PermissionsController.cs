@@ -7,7 +7,7 @@ namespace Timespace.Api.Application.Features.Permissions;
 
 [ApiController]
 [ApiVersion("1.0")]
-[Route("v{version:apiVersion}/[controller]")]
+[Route("v{version:apiVersion}/permissions")]
 public class PermissionsController
 {
     private readonly ISender _sender;
