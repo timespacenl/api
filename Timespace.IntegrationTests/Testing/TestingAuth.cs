@@ -1,6 +1,6 @@
 ﻿using Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
-namespace Timespace.IntegrationTests;
+namespace Timespace.IntegrationTests.Testing;
 
 public partial class Testing
 {

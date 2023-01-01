@@ -12,7 +12,7 @@ using Timespace.Api.Infrastructure.Services;
 
 namespace Timespace.IntegrationTests;
 
-using static Testing;
+using static Testing.Testing;
 
 internal class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {

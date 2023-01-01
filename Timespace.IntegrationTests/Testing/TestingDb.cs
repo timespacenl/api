@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Timespace.Api.Infrastructure.Persistence;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
-namespace Timespace.IntegrationTests;
+namespace Timespace.IntegrationTests.Testing;
 
 public partial class Testing
 {

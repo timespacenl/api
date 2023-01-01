@@ -11,7 +11,7 @@ using Respawn;
 using Respawn.Graph;
 using Timespace.Api.Infrastructure.Persistence;
 
-namespace Timespace.IntegrationTests;
+namespace Timespace.IntegrationTests.Testing;
 
 [SetUpFixture]
 public partial class Testing
