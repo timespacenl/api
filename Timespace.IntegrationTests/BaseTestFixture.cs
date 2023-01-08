@@ -1,6 +1,6 @@
 ﻿namespace Timespace.IntegrationTests;
 
-using static Testing.Testing;
+using static Testing;
 
 [TestFixture]
 public abstract class BaseTestFixture

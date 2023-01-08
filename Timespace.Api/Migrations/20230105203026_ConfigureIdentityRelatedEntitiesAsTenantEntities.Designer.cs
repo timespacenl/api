@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,11 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230105203026_ConfigureIdentityRelatedEntitiesAsTenantEntities")]
+    partial class ConfigureIdentityRelatedEntitiesAsTenantEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -283,9 +286,6 @@ namespace Timespace.Api.Migrations
                     b.Property<bool>("Primary")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -295,8 +295,6 @@ namespace Timespace.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("IdentityId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("IdentityIdentifiers");
                 });
@@ -443,15 +441,7 @@ namespace Timespace.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Timespace.Api.Application.Features.Tenants.Common.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Identity");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Users.Common.Entities.IdentityLookupSecret", b =>

@@ -12,7 +12,7 @@ public class DepartmentMembership : IEntity, ITenantEntity, ISoftDeletable
     public Instant CreatedAt { get; set; }
     public Instant UpdatedAt { get; set; }
     public Tenant Tenant { get; set; } = null!;
-    public Guid TenantId { get; set; }
+    public required Guid TenantId { get; set; }
     public Instant? DeletedAt { get; set; }
     
     public Department Department { get; set; } = null!;

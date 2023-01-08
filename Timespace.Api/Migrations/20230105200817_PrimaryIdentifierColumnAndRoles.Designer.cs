@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,11 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230105200817_PrimaryIdentifierColumnAndRoles")]
+    partial class PrimaryIdentifierColumnAndRoles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,17 +54,12 @@ namespace Timespace.Api.Migrations
                     b.Property<bool>("RememberMe")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("IdentityId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("LoginFlows");
                 });
@@ -134,17 +132,12 @@ namespace Timespace.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("IdentityId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("Sessions");
                 });
@@ -200,15 +193,10 @@ namespace Timespace.Api.Migrations
                     b.Property<Guid>("IdentityId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TenantId");
 
                     b.HasIndex("IdentityId", "CredentialType")
                         .IsUnique();
@@ -283,9 +271,6 @@ namespace Timespace.Api.Migrations
                     b.Property<bool>("Primary")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -295,8 +280,6 @@ namespace Timespace.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("IdentityId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("IdentityIdentifiers");
                 });
@@ -317,9 +300,6 @@ namespace Timespace.Api.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -327,8 +307,6 @@ namespace Timespace.Api.Migrations
 
                     b.HasIndex("IdentityId")
                         .IsUnique();
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("IdentityLookupSecret");
                 });
@@ -352,17 +330,12 @@ namespace Timespace.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("IdentityId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("MfaSetupFlows");
                 });
@@ -375,15 +348,7 @@ namespace Timespace.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Timespace.Api.Application.Features.Tenants.Common.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Identity");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Authentication.Sessions.Common.Entities.Session", b =>
@@ -394,15 +359,7 @@ namespace Timespace.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Timespace.Api.Application.Features.Tenants.Common.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Identity");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Users.Common.Entities.Credentials.IdentityCredential", b =>
@@ -413,15 +370,7 @@ namespace Timespace.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Timespace.Api.Application.Features.Tenants.Common.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Identity");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Users.Common.Entities.Identity", b =>
@@ -443,15 +392,7 @@ namespace Timespace.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Timespace.Api.Application.Features.Tenants.Common.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Identity");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Users.Common.Entities.IdentityLookupSecret", b =>
@@ -462,15 +403,7 @@ namespace Timespace.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Timespace.Api.Application.Features.Tenants.Common.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Identity");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Users.Settings.Mfa.Entities.MfaSetupFlow", b =>
@@ -481,15 +414,7 @@ namespace Timespace.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Timespace.Api.Application.Features.Tenants.Common.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Identity");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Tenants.Common.Entities.Tenant", b =>

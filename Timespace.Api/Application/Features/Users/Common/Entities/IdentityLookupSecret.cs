@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Timespace.Api.Application.Features.Tenants.Common.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Application.Features.Users.Common.Entities;
 
-public class IdentityLookupSecret : IEntity
+public class IdentityLookupSecret : IEntity, ITenantEntity
 {
     public Guid Id { get; set; }
     public Instant CreatedAt { get; set; }
@@ -14,8 +15,12 @@ public class IdentityLookupSecret : IEntity
     public Identity Identity { get; set; } = null!;
     public required Guid IdentityId { get; set; }
     
+    public Tenant Tenant { get; set; } = null!;
+    public required Guid TenantId { get; set; }
+    
     [Column(TypeName = "jsonb")]
     public required List<LookupSecret> Secrets { get; set; }
+
 }
 
 public class LookupSecret

@@ -58,11 +58,12 @@ public static class SetLoginFlowCredentials {
             _httpContextAccessor = httpContextAccessor;
             _authConfiguration = authConfiguration.Value;
         }
-    
-        //todo: check for current login step
+        
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
-            var flow = await _db.LoginFlows.FirstOrDefaultAsync(x => x.Id == request.FlowId, cancellationToken);
+            var flow = await _db.LoginFlows
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.FlowId, cancellationToken);
             
             if(flow == null)
                 throw new FlowNotFoundException();
@@ -85,11 +86,14 @@ public static class SetLoginFlowCredentials {
             if(!authenticated)
                 throw new IncorrectCredentialValueException();
             
-            var identity = await _db.Identities.FirstOrDefaultAsync(x => x.Id == flow.IdentityId, cancellationToken);
+            var identity = await _db.Identities
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == flow.IdentityId, cancellationToken);
 
             if (identity!.RequiresMfa)
             {
                 var mfaMethods = await _db.IdentityCredentials
+                    .IgnoreQueryFilters()
                     .Where(x => CredentialTypes.AllSecondFactor.Contains(x.CredentialType) &&
                                 x.IdentityId == identity.Id)
                     .Select(x => x.CredentialType)
@@ -109,10 +113,11 @@ public static class SetLoginFlowCredentials {
                     NextStepAllowedMethods = flow.AllowedMethodsForNextStep
                 };
             }
-
+            
             var session = new Session
             {
                 IdentityId = flow.IdentityId,
+                TenantId = flow.TenantId,
                 SessionToken = RandomStringGenerator.CreateSecureRandomString(128),
                 ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromDays(_authConfiguration.SessionCookieExpirationDays))
             };
@@ -141,7 +146,9 @@ public static class SetLoginFlowCredentials {
 
         private async Task<bool> AuthenticatePasswordAsync(string password, Guid identityId)
         {
-            var passwordCredential = await _db.IdentityCredentials.FirstOrDefaultAsync(
+            var passwordCredential = await _db.IdentityCredentials
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(
                 x => x.IdentityId == identityId && x.CredentialType == CredentialTypes.Password);
                 
             if(passwordCredential == null)

@@ -44,19 +44,21 @@ public static class CreateMfaSetupFlow
         {
             var key = KeyGeneration.GenerateRandomKey(20);
 
-            var user = _usageContext.GetGuaranteedIdentity();
+            var userId = _usageContext.GetGuaranteedIdentityId();
+            var tenantId = _usageContext.GetGuaranteedTenantId();
 
-            var existingTotpCredentials = await _db.IdentityCredentials.Where(x => x.IdentityId == user.Id && x.CredentialType == CredentialTypes.Totp).ToListAsync(cancellationToken);
+            var existingTotpCredentials = await _db.IdentityCredentials.Where(x => x.IdentityId == userId && x.CredentialType == CredentialTypes.Totp).ToListAsync(cancellationToken);
 
             if (existingTotpCredentials.Any())
                 throw new MfaAlreadySetUpException();
             
-            var identifier = await _db.IdentityIdentifiers.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(x => x.IdentityId == user.Id, cancellationToken);
+            var identifier = await _db.IdentityIdentifiers.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(x => x.IdentityId == userId, cancellationToken);
 
             var flow = new MfaSetupFlow()
             {
                 Secret = Base32Encoding.ToString(key),
-                IdentityId = user.Id,
+                IdentityId = userId,
+                TenantId = tenantId,
                 ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromMinutes(_userSettingsConfiguration.MfaSetupFlowExpirationInMinutes))
             };
 

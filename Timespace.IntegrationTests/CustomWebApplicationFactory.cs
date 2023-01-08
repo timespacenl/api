@@ -12,7 +12,7 @@ using Timespace.Api.Infrastructure.Services;
 
 namespace Timespace.IntegrationTests;
 
-using static Testing.Testing;
+using static Testing;
 
 internal class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
@@ -20,6 +20,7 @@ internal class CustomWebApplicationFactory : WebApplicationFactory<Program>
         .AddJsonFile("appsettings.json")
         .AddEnvironmentVariables()
         .Build();
+    
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureAppConfiguration(configurationBuilder =>

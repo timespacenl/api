@@ -41,8 +41,16 @@ public static class CreateRegistrationFlow {
     
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
-            var existingCredential = await _db.IdentityIdentifiers.FirstOrDefaultAsync(x => x.Identifier == request.Email, cancellationToken: cancellationToken);
-            var existingFlow = await _db.RegistrationFlows.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken: cancellationToken);
+            request = request with { Email = request.Email.ToLower() };
+            
+            var existingCredential = await _db.IdentityIdentifiers
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Identifier == request.Email, cancellationToken: cancellationToken);
+            
+            var existingFlow = await _db.RegistrationFlows
+                .IgnoreQueryFilters()
+                .Where(x => x.ExpiresAt > _clock.GetCurrentInstant())
+                .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken: cancellationToken);
             
             if (existingCredential != null || existingFlow != null)
                 throw new DuplicateIdentifierException();

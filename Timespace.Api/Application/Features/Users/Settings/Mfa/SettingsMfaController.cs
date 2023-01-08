@@ -1,15 +1,14 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Timespace.Api.Application.Features.Users.Settings.Mfa.Commands;
+using Timespace.Api.Infrastructure.Swagger;
 
 namespace Timespace.Api.Application.Features.Users.Settings.Mfa;
 
-/// <summary>
-/// 
-/// </summary>
 [ApiController]
 [Route("/v{version:apiVersion}/users/settings/mfa")]
 [ApiVersion("1.0")]
+[Tags("User MFA settings")]
 public class UserSettingsMfaController : ControllerBase
 {
     private readonly ISender _sender;

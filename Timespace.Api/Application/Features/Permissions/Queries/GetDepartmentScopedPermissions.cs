@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
 using Timespace.Api.Infrastructure.AccessControl;
-using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Permissions.Queries;
 

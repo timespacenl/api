@@ -29,19 +29,19 @@ public class AuthenticationBehaviour<TRequest, TResponse> : IPipelineBehavior<TR
         if(request.GetType().GetCustomAttribute<InternalAttribute>() != null)
             return await next();
         
+        if (request.GetType().GetCustomAttribute<AllowUnauthenticatedAttribute>() != null)
+            return await next();
+        
         if (_authenticationTokenProvider.AuthenticationToken == null)
         {
-            if (request.GetType().GetCustomAttribute<AllowUnauthenticatedAttribute>() != null)
-                return await next();
-
             throw new UnauthenticatedException();
         }
 
         if (_authenticationTokenProvider.AuthenticationTokenType == AuthenticationTokenType.UserSession)
         {
             var session = await _db.Sessions
+                .IgnoreQueryFilters()
                 .Include(x => x.Identity)
-                .ThenInclude(x => x.Tenant)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.SessionToken == _authenticationTokenProvider.AuthenticationToken,
                     cancellationToken);
@@ -52,8 +52,8 @@ public class AuthenticationBehaviour<TRequest, TResponse> : IPipelineBehavior<TR
             if(session.ExpiresAt < _clock.GetCurrentInstant())
                 throw new SessionExpiredException();
             
-            _usageContext.Identity = session.Identity;
-            _usageContext.Tenant = session.Identity.Tenant;
+            _usageContext.IdentityId = session.IdentityId;
+            _usageContext.TenantId = session.TenantId;
         }
         
         // TODO: Add api key authentication

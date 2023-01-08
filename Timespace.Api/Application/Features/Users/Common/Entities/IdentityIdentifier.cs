@@ -1,8 +1,9 @@
-﻿using Timespace.Api.Infrastructure.Persistence.Common;
+﻿using Timespace.Api.Application.Features.Tenants.Common.Entities;
+using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Application.Features.Users.Common.Entities;
 
-public class IdentityIdentifier : IEntity, ISoftDeletable
+public class IdentityIdentifier : IEntity, ISoftDeletable, ITenantEntity
 {
     public Guid Id { get; set; }
     public Instant CreatedAt { get; set; }
@@ -11,6 +12,11 @@ public class IdentityIdentifier : IEntity, ISoftDeletable
     
     public Identity Identity { get; set; } = null!;
     public Guid IdentityId { get; set; }
+    
+    public Tenant Tenant { get; set; } = null!;
+    public required Guid TenantId { get; set; }
+    
+    public required bool Primary { get; set; }
     
     public bool Verified { get; set; }
     public required string Identifier { get; set; }

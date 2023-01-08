@@ -1,6 +1,4 @@
-﻿using System.Net.Sockets;
-using System.Reflection;
-using FluentValidation;
+﻿using FluentValidation;
 using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using MicroElements.Swashbuckle.NodaTime;
@@ -12,7 +10,6 @@ using NodaTime.Serialization.SystemTextJson;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Timespace.Api.Application.Common.Behaviours;
 using Timespace.Api.Infrastructure;
-using Timespace.Api.Infrastructure.AccessControl;
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Errors;
 using Timespace.Api.Infrastructure.Middleware;
@@ -115,6 +112,7 @@ public static class ConfigureServices
         {
             opt.OperationFilter<SwaggerDefaultValues>();
             opt.SchemaFilter<TestSchemaFilter>();
+            opt.DocumentFilter<GlobalTagsDocumentFilter>();
             opt.ConfigureForNodaTime();
         });
         

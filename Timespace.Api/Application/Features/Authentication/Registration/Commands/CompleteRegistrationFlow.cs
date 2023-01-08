@@ -49,12 +49,14 @@ public static class CompleteRegistrationFlow {
         private readonly IClock _clock;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AuthenticationConfiguration _authConfiguration;
+        private readonly IUsageContext _usageContext;
         
-        public Handler(AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, IOptions<AuthenticationConfiguration> authConfiguration)
+        public Handler(AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, IOptions<AuthenticationConfiguration> authConfiguration, IUsageContext usageContext)
         {
             _db = db;
             _clock = clock;
             _httpContextAccessor = httpContextAccessor;
+            _usageContext = usageContext;
             _authConfiguration = authConfiguration.Value;
         }
     
@@ -86,6 +88,8 @@ public static class CompleteRegistrationFlow {
             _db.Tenants.Add(tenant);
             await _db.SaveChangesAsync(cancellationToken);
 
+            _usageContext.TenantId = tenant.Id;
+            
             var identity = new Identity()
             {
                 FirstName = flow.FirstName!,
@@ -102,7 +106,9 @@ public static class CompleteRegistrationFlow {
                 Identifier = flow.Email,
                 Verified = false,
                 AllowLogin = true,
-                IdentityId = identity.Id
+                IdentityId = identity.Id,
+                TenantId = tenant.Id,
+                Primary = true
             };
             
             _db.IdentityIdentifiers.Add(identifier);
@@ -111,6 +117,7 @@ public static class CompleteRegistrationFlow {
             var credential = new IdentityCredential()
             {
                 IdentityId = identity.Id,
+                TenantId = tenant.Id,
                 CredentialType = request.Body.MagicLink ? CredentialTypes.MagicLink : CredentialTypes.Password,
                 Configuration = request.Body.MagicLink ? "" : PasswordHasher.HashPasswordV3(request.Body.Password!)
             };
@@ -126,6 +133,7 @@ public static class CompleteRegistrationFlow {
             var session = new Session
             {
                 IdentityId = identity.Id,
+                TenantId = tenant.Id,
                 SessionToken = RandomStringGenerator.CreateSecureRandomString(128),
                 ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromDays(_authConfiguration.SessionCookieExpirationDays))
             };

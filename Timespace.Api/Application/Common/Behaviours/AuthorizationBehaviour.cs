@@ -27,7 +27,7 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
         if(request.GetType().GetCustomAttribute<InternalAttribute>() != null)
             return await next();
         
-        if(_usageContext.Identity is null && _usageContext.Tenant is null)
+        if(_usageContext.IdentityId is null && _usageContext.TenantId is null)
             if (request.GetType().GetCustomAttribute<AllowUnauthenticatedAttribute>() == null)
                 throw new UnauthenticatedException();
 

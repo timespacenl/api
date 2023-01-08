@@ -2,11 +2,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using OtpNet;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
 using Timespace.Api.Application.Features.Users.Settings.Mfa.Exceptions;
-using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Users.Settings.Mfa.Commands;
@@ -64,6 +62,7 @@ public static class CompleteMfaSetupFlow {
                 var credential = new IdentityCredential()
                 {
                     IdentityId = flow.IdentityId,
+                    TenantId = flow.TenantId,
                     CredentialType = CredentialTypes.Totp,
                     Configuration = flow.Secret,
                 };

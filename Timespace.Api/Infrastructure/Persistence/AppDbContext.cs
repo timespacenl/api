@@ -8,6 +8,7 @@ using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
 using Timespace.Api.Application.Features.Users.Settings.Mfa.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
+using Timespace.Api.Infrastructure.Services;
 
 namespace Timespace.Api.Infrastructure.Persistence;
 
@@ -15,10 +16,12 @@ public class AppDbContext : DbContext
 {
     // private readonly ISessionInfoProvider _sessionInfoProvider;
     private readonly IClock _clock;
+    private readonly IUsageContext _usageContext;
     
-    public AppDbContext(DbContextOptions<AppDbContext> options, IClock clock) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options, IClock clock, IUsageContext usageContext) : base(options)
     {
         _clock = clock;
+        _usageContext = usageContext;
     }
 
     // Selfservice flows
@@ -56,19 +59,9 @@ public class AppDbContext : DbContext
             }
         }
 
-        // var tenantEntries = ChangeTracker
-        //     .Entries()
-        //     .Where(e => e.Entity is ITenantEntity && e.State is EntityState.Added or EntityState.Modified);
-        //
-        // foreach (var entityEntry in tenantEntries)
-        // {
-        //     ((ITenantEntity)entityEntry.Entity).TenantId = _sessionInfoProvider.GetGuaranteedSession().Identity.TenantId;
-        // }
-        
         var softdeleteEntries = ChangeTracker
             .Entries()
-            .Where(e => e.Entity is ISoftDeletable && 
-                e.State == EntityState.Deleted);
+            .Where(e => e is { Entity: ISoftDeletable, State: EntityState.Deleted });
 
         foreach (var entityEntry in softdeleteEntries)
         {
@@ -84,13 +77,13 @@ public class AppDbContext : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-        // Expression<Func<ITenantEntity, bool>> tenantExpression = entity => _sessionInfoProvider.GetGuaranteedSession().Identity.Tenant.Id == Guid.Empty || entity.TenantId == _sessionInfoProvider.GetGuaranteedSession().Identity.Tenant.Id;
+        Expression<Func<ITenantEntity, bool>> tenantExpression = entity => _usageContext.TenantId == null || entity.TenantId == _usageContext.GetGuaranteedTenantId();
         Expression<Func<ISoftDeletable, bool>> softDeleteExpression = entity => entity.DeletedAt == null;
         
         foreach (var entityType in modelBuilder.Model.GetEntityTypes()) {
-            // if (entityType.ClrType.IsAssignableTo(typeof(ITenantEntity))) {
-            //     modelBuilder.Entity(entityType.ClrType).AppendQueryFilter(tenantExpression);
-            // }
+            if (entityType.ClrType.IsAssignableTo(typeof(ITenantEntity))) {
+                modelBuilder.Entity(entityType.ClrType).AppendQueryFilter(tenantExpression);
+            }
             
             if (entityType.ClrType.IsAssignableTo(typeof(ISoftDeletable))) {
                 modelBuilder.Entity(entityType.ClrType).AppendQueryFilter(softDeleteExpression);

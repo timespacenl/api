@@ -12,7 +12,8 @@ public partial class Identity : IEntity, ISoftDeletable, ITenantEntity
     public Instant? DeletedAt { get; set; }
     
     public Tenant Tenant { get; set; } = null!;
-    public Guid TenantId { get; set; }
+    public required Guid TenantId { get; set; }
     
     public List<IdentityCredential> Credentials { get; set; } = new();
+    public List<IdentityIdentifier> Identifiers { get; set; } = new();
 }

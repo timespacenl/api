@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Timespace.Api.Application.Features.Tenants.Common.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
 
-public class IdentityCredential : IEntity
+public class IdentityCredential : IEntity, ITenantEntity
 {
     public Guid Id { get; set; }
     public Instant CreatedAt { get; set; }
@@ -12,6 +13,9 @@ public class IdentityCredential : IEntity
     
     public Identity Identity { get; set; } = null!;
     public Guid IdentityId { get; set; }
+    
+    public Tenant Tenant { get; set; } = null!;
+    public required Guid TenantId { get; set; }
     
     public required string CredentialType { get; set; }
     public required string Configuration { get; set; }

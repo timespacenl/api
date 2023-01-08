@@ -50,7 +50,7 @@ public static class CompleteLoginFlowMfa {
         private readonly IClock _clock;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AuthenticationConfiguration _authenticationConfiguration;
-        
+
         public Handler(AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, IOptions<AuthenticationConfiguration> authenticationConfiguration)
         {
             _db = db;
@@ -61,7 +61,9 @@ public static class CompleteLoginFlowMfa {
     
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
-            var flow = await _db.LoginFlows.FirstOrDefaultAsync(x => x.Id == request.FlowId, cancellationToken);
+            var flow = await _db.LoginFlows
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.FlowId, cancellationToken);
             
             if(flow == null)
                 throw new FlowNotFoundException();
@@ -87,6 +89,7 @@ public static class CompleteLoginFlowMfa {
             var session = new Session
             {
                 IdentityId = flow.IdentityId,
+                TenantId = flow.TenantId,
                 SessionToken = RandomStringGenerator.CreateSecureRandomString(128),
                 ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromDays(_authenticationConfiguration.SessionCookieExpirationDays))
             };
@@ -115,7 +118,9 @@ public static class CompleteLoginFlowMfa {
 
         private async Task<bool> AuthenticateTotpAsync(string totp, Guid identityId)
         {
-            var identityCredential = await _db.IdentityCredentials.FirstOrDefaultAsync(
+            var identityCredential = await _db.IdentityCredentials
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(
                 x => x.IdentityId == identityId && x.CredentialType == CredentialTypes.Totp, CancellationToken.None);
 
             if (identityCredential == null)

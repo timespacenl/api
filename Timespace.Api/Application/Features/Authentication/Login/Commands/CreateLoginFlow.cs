@@ -46,18 +46,22 @@ public static class CreateLoginFlow {
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
             var identityIdentifier = await _db.IdentityIdentifiers
+                .IgnoreQueryFilters()
+                .Include(x => x.Identity)
                 .FirstOrDefaultAsync(x => x.Identifier == request.Email.ToLower(), cancellationToken: cancellationToken);
 
             if (identityIdentifier == null || identityIdentifier.AllowLogin == false)
                 throw new IdentifierNotFoundException();
             
             var credentialMethods = await _db.IdentityCredentials.Where(x => x.IdentityId == identityIdentifier.IdentityId && CredentialTypes.AllFirstFactor.Contains(x.CredentialType))
+                .IgnoreQueryFilters()
                 .Select(x => x.CredentialType)
                 .ToListAsync(cancellationToken);
-            
+
             var flow = new LoginFlow
             {
                 IdentityId = identityIdentifier.IdentityId,
+                TenantId = identityIdentifier.Identity.TenantId,
                 ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromMinutes(_authconfiguration.LoginFlowTimeoutMinutes)),
                 AllowedMethodsForNextStep = credentialMethods,
                 NextStep = LoginFlowSteps.SetCredentials

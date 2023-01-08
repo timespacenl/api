@@ -9,7 +9,7 @@ public class TenantRole : IEntity, ITenantEntity, ISoftDeletable
     public Instant CreatedAt { get; set; }
     public Instant UpdatedAt { get; set; }
     public Tenant Tenant { get; set; } = null!;
-    public Guid TenantId { get; set; }
+    public required Guid TenantId { get; set; }
     public Instant? DeletedAt { get; set; }
     
     public string Name { get; set; } = null!;
