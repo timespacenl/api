@@ -61,5 +61,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Timespace.IntegrationTests" />
+        <InternalsVisibleTo Include="Timespace.IntegrationTests2" />
     </ItemGroup>
 </Project>

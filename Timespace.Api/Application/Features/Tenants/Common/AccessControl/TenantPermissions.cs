@@ -7,8 +7,8 @@ public partial class Permissions
     public partial class Tenant
     {
         public const string Administrator = "tenant:administrator";
-        public const string TenantRead = "tenant:read";
-        public const string TenantUpdate = "tenant:update";
-        public const string TenantDelete = "tenant:delete";
+        public const string Read = "tenant:read";
+        public const string Update = "tenant:update";
+        public const string Delete = "tenant:delete";
     }
 }
