@@ -24,7 +24,7 @@ public abstract class IntegrationTest : IDisposable, IAsyncLifetime
         where T : notnull
         => service = _serviceScope.ServiceProvider.GetRequiredService<T>();
 
-    public Task DisposeAsync() => throw new NotImplementedException();
+    public Task DisposeAsync() => Task.CompletedTask;
     
     public void Dispose()
     {
