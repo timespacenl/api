@@ -60,12 +60,9 @@ public sealed class SharedFixture : WebApplicationFactory<Program>, IAsyncLifeti
         await dbContext.Database.ExecuteSqlRawAsync("drop schema public cascade;");
         await dbContext.Database.ExecuteSqlRawAsync("create schema public;");
         await dbContext.Database.MigrateAsync();
-        
     }
 
-    public async Task DisposeAsync()
-    {
-    }
+    Task IAsyncLifetime.DisposeAsync() => Task.CompletedTask;
 
     public async Task ResetDatabase()
     {
