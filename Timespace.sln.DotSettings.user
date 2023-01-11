@@ -1,10 +1,17 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0fd78f29_002D12ae_002D4043_002Db9a4_002D8dd0f44a9fe0/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="CreateRegistrationFlowTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::8327EC82-A951-4C12-A9AB-82CE39FB55E0::net7.0::Timespace.IntegrationTests.Features.Authentication.Registration.CreateRegistrationFlowTests&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1ead6c6a_002D1543_002D4cb3_002Da53b_002Dbbff51bb0351/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from Solution #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=26091946_002D68dc_002D4028_002Da2a5_002D99f9ac8647dc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1 #4" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;xUnit::8327EC82-A951-4C12-A9AB-82CE39FB55E0::net7.0::Timespace.IntegrationTests.Test.Test1&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::8327EC82-A951-4C12-A9AB-82CE39FB55E0::net7.0::Timespace.IntegrationTests.Features.Authentication.Registration.CreateRegistrationFlowTests.ShouldCreateRegistrationFlow_WithValidEmail&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::8327EC82-A951-4C12-A9AB-82CE39FB55E0::net7.0::Timespace.IntegrationTests.Features.Authentication.Registration.CreateRegistrationFlowTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2b01ec32_002D4483_002D42d1_002D9e1f_002D140c3a5c8f1a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestTenantEntityRequired" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;

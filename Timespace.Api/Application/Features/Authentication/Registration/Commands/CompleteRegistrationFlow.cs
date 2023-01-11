@@ -40,7 +40,7 @@ public static class CompleteRegistrationFlow {
 
     public record Response
     {
-        public string? SessionToken { get; init; } = null!;
+        public string SessionToken { get; init; } = null!;
     }
     
     public class Handler : IRequestHandler<Command, Response>
