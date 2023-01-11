@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Timespace.Api.Application.Features.Users.Settings.Mfa.Commands;
-using Timespace.Api.Infrastructure.Swagger;
 
 namespace Timespace.Api.Application.Features.Users.Settings.Mfa;
 

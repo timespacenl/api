@@ -49,14 +49,12 @@ public static class CompleteRegistrationFlow {
         private readonly IClock _clock;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AuthenticationConfiguration _authConfiguration;
-        private readonly IUsageContext _usageContext;
         
-        public Handler(AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, IOptions<AuthenticationConfiguration> authConfiguration, IUsageContext usageContext)
+        public Handler(AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, IOptions<AuthenticationConfiguration> authConfiguration)
         {
             _db = db;
             _clock = clock;
             _httpContextAccessor = httpContextAccessor;
-            _usageContext = usageContext;
             _authConfiguration = authConfiguration.Value;
         }
     
@@ -87,8 +85,6 @@ public static class CompleteRegistrationFlow {
 
             _db.Tenants.Add(tenant);
             await _db.SaveChangesAsync(cancellationToken);
-
-            _usageContext.TenantId = tenant.Id;
             
             var identity = new Identity()
             {
