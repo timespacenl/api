@@ -41,7 +41,7 @@ public static class CompleteLoginFlowMfa {
         public string NextStep { get; set; } = null!;
         public Instant ExpiresAt { get; set; }
         public string? SessionToken { get; set; }
-        public List<string> NextStepAllowedMethods { get; set; } = new();
+        public List<string> AllowedMethodsForNextStep { get; set; } = new();
     }
     
     public class Handler : IRequestHandler<Command, Response>

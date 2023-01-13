@@ -23,17 +23,17 @@ public class CreateLoginFlowTests : IntegrationTest
         
         await LoginFlowTestHelpers.RegisterUserAsync(sender, email);
 
-        var registrationFlow = await sender.Send(new CreateLoginFlow.Command
+        var loginFlow = await sender.Send(new CreateLoginFlow.Command
         {
             Email = email,
             RememberMe = true
         });
         
-        registrationFlow.Should().NotBeNull();
-        registrationFlow.FlowId.Should().NotBeEmpty();
-        registrationFlow.SessionToken.Should().BeNull();
-        registrationFlow.NextStep.Should().Be(LoginFlowSteps.SetCredentials);
-        registrationFlow.ExpiresAt.Should().BeCloseTo(clock.GetCurrentInstant().Plus(Duration.FromMinutes(authenticationConfiguration.Value.LoginFlowTimeoutMinutes)), Duration.FromSeconds(5));
+        loginFlow.Should().NotBeNull();
+        loginFlow.FlowId.Should().NotBeEmpty();
+        loginFlow.SessionToken.Should().BeNull();
+        loginFlow.NextStep.Should().Be(LoginFlowSteps.SetCredentials);
+        loginFlow.ExpiresAt.Should().BeCloseTo(clock.GetCurrentInstant().Plus(Duration.FromMinutes(authenticationConfiguration.Value.LoginFlowTimeoutMinutes)), Duration.FromSeconds(5));
     }
 
     [Fact]

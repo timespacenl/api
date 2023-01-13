@@ -1,12 +1,17 @@
 ﻿using System.Security.Authentication;
 using FluentAssertions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NodaTime;
+using NodaTime.Testing;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Login.Commands;
 using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Login.Exceptions;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
+using Timespace.Api.Infrastructure.Configuration;
+using Timespace.Api.Infrastructure.Persistence;
 using Timespace.Api.Infrastructure.Services;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Login;
@@ -42,7 +47,7 @@ public class SetLoginFlowCredentialsTests : IntegrationTest
         setCredentialsResult.Should().NotBeNull();
         setCredentialsResult.SessionToken.Should().NotBeNullOrWhiteSpace();
         setCredentialsResult.NextStep.Should().Be(LoginFlowSteps.None);
-        setCredentialsResult.NextStepAllowedMethods.Should().BeEmpty();
+        setCredentialsResult.AllowedMethodsForNextStep.Should().BeEmpty();
     }
 
     [Fact]
@@ -84,7 +89,7 @@ public class SetLoginFlowCredentialsTests : IntegrationTest
         setCredentialsResult.Should().NotBeNull();
         setCredentialsResult.SessionToken.Should().BeNull();
         setCredentialsResult.NextStep.Should().Be(LoginFlowSteps.CompleteMfa);
-        setCredentialsResult.NextStepAllowedMethods.Should().BeEquivalentTo(new[] { CredentialTypes.Totp });
+        setCredentialsResult.AllowedMethodsForNextStep.Should().BeEquivalentTo(new[] { CredentialTypes.Totp });
     }
 
     [Fact]
@@ -199,6 +204,68 @@ public class SetLoginFlowCredentialsTests : IntegrationTest
                 CredentialValue = password
             }
         })).Should().ThrowAsync<InvalidFlowStepException>();
+    }
+
+    [Fact]
+    public async Task ShouldThrowException_WhenFlowExpires()
+    {
+        GetService(out ISender sender);
+
+        var email = "test@example.com";
+        var password = "TestPassword123!";
+        
+        await LoginFlowTestHelpers.RegisterUserAsync(sender, email, password);
+
+        var flow = await sender.Send(new CreateLoginFlow.Command
+        {
+            Email = email,
+            RememberMe = true
+        });
+
+        GetService(out IClock clock);
+        GetService(out IOptions<AuthenticationConfiguration> authenticationConfiguration);
+        if(clock is FakeClock fakeClock)
+            fakeClock.AdvanceMinutes(authenticationConfiguration.Value.LoginFlowTimeoutMinutes + 1);
+        
+        await FluentActions.Invoking(() => sender.Send(new SetLoginFlowCredentials.Command
+        {
+            FlowId = flow.FlowId,
+            Body = new SetLoginFlowCredentials.CommandBody
+            {
+                CredentialType = CredentialTypes.Password,
+                CredentialValue = password
+            }
+        })).Should().ThrowAsync<FlowExpiredException>();
+    }
+    
+    [Fact]
+    public async Task ShouldThrowException_WhenCredentialDoesNotExist()
+    {
+        GetService(out ISender sender);
+
+        var email = "test@example.com";
+        var password = "TestPassword123!";
+        
+        await LoginFlowTestHelpers.RegisterUserAsync(sender, email, password);
+
+        var flow = await sender.Send(new CreateLoginFlow.Command
+        {
+            Email = email,
+            RememberMe = true
+        });
+
+        GetService(out AppDbContext db);
+        await db.IdentityCredentials.IgnoreQueryFilters().ExecuteDeleteAsync();
+        
+        await FluentActions.Invoking(() => sender.Send(new SetLoginFlowCredentials.Command
+        {
+            FlowId = flow.FlowId,
+            Body = new SetLoginFlowCredentials.CommandBody
+            {
+                CredentialType = CredentialTypes.Password,
+                CredentialValue = password
+            }
+        })).Should().ThrowAsync<CredentialTypeNotConfiguredException>();
     }
     
     public SetLoginFlowCredentialsTests(SharedFixture sharedFixture) : base(sharedFixture)
