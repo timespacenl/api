@@ -19,6 +19,7 @@ public class CompleteRegistrationFlowTests : IntegrationTest
         var flow = await sender.Send(new CreateRegistrationFlow.Command
         {
             Email = email,
+            CaptchaToken = "irrelevant"
         });
         
         await sender.Send(new SetPersonalInformation.Command

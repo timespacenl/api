@@ -42,6 +42,8 @@ public static class ConfigureServices
         services.AddMediatR(typeof(IAssemblyMarker).Assembly);
         services.AddValidatorsFromAssembly(typeof(IAssemblyMarker).Assembly);
         services.RegisterBehaviours();
+
+        services.AddHttpClient();
         
         services.AddDistributedMemoryCache();
         
@@ -138,6 +140,7 @@ public static class ConfigureServices
     {
         services.Configure<AuthenticationConfiguration>(configuration.GetSection(AuthenticationConfiguration.SectionName));
         services.Configure<UserSettingsConfiguration>(configuration.GetSection(UserSettingsConfiguration.SectionName));
+        services.Configure<CaptchaConfiguration>(configuration.GetSection(CaptchaConfiguration.SectionName));
     }
 }
 

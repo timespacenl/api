@@ -17,6 +17,7 @@ public class SetPersonalInformationTests : IntegrationTest
         return await sender.Send(new CreateRegistrationFlow.Command
         {
             Email = email,
+            CaptchaToken = "irrelevant"
         });
     }
     

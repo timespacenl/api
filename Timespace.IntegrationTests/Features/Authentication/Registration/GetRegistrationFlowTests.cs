@@ -20,6 +20,7 @@ public class GetRegistrationFlowTests : IntegrationTest
         var flow = await sender.Send(new CreateRegistrationFlow.Command
         {
             Email = "test@example.com",
+            CaptchaToken = "irrelevant"
         });
 
         var flowRetrieval = await sender.Send(new GetRegistrationFlow.Query
@@ -52,6 +53,7 @@ public class GetRegistrationFlowTests : IntegrationTest
         var flow = await sender.Send(new CreateRegistrationFlow.Command
         {
             Email = "test@example.com",
+            CaptchaToken = "irrelevant"
         });
         
         GetService(out IClock clock);

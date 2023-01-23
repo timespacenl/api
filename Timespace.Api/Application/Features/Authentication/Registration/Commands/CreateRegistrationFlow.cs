@@ -17,6 +17,7 @@ public static class CreateRegistrationFlow {
     public record Command : IRequest<Response>
     {
         public string Email { get; init; } = null!;
+        public string CaptchaToken { get; init; } = null!;
     }
 
     public record Response : IRegistrationFlowResponse
@@ -79,6 +80,7 @@ public static class CreateRegistrationFlow {
         public CommandValidator()
         {
             RuleFor(x => x.Email).EmailAddress().NotEmpty();
+            RuleFor(x => x.CaptchaToken).NotEmpty();
         }
     }
 }
