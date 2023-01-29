@@ -55,6 +55,8 @@ app.UseProblemDetails();
 
 app.UseHttpsRedirection();
 
+app.UseCors();
+
 app.UseMiddleware<AuthenticationTokenExtractor>();
 
 app.UseAuthorization();

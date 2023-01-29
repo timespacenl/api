@@ -9,12 +9,14 @@ using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Sessions.Common.Entities;
+using Timespace.Api.Application.Features.Authentication.Verification;
 using Timespace.Api.Application.Features.Tenants.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Persistence;
 using Timespace.Api.Infrastructure.Services;
+using Constants = Timespace.Api.Infrastructure.Constants;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
@@ -76,81 +78,104 @@ public static class CompleteRegistrationFlow {
             if(request.Body.Password is null && !request.Body.MagicLink)
                 throw new MissingCredentialException();
 
-            var tenant = new Tenant()
-            {
-                CompanyName = flow.CompanyName!,
-                CompanyIndustry = flow.CompanyIndustry!,
-                CompanySize = flow.CompanySize!.Value,
-            };
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
-            _db.Tenants.Add(tenant);
-            await _db.SaveChangesAsync(cancellationToken);
-            
-            var identity = new Identity()
+            try
             {
-                FirstName = flow.FirstName!,
-                LastName = flow.LastName!,
-                PhoneNumber = flow.PhoneNumber,
-                TenantId = tenant.Id
-            };
-            
-            _db.Identities.Add(identity);
-            await _db.SaveChangesAsync(cancellationToken);
+                var tenant = new Tenant()
+                {
+                    CompanyName = flow.CompanyName!,
+                    CompanyIndustry = flow.CompanyIndustry!,
+                    CompanySize = flow.CompanySize!.Value,
+                };
 
-            var identifier = new IdentityIdentifier()
-            {
-                Identifier = flow.Email,
-                Verified = false,
-                AllowLogin = true,
-                IdentityId = identity.Id,
-                TenantId = tenant.Id,
-                Primary = true
-            };
-            
-            _db.IdentityIdentifiers.Add(identifier);
-            await _db.SaveChangesAsync(cancellationToken);
+                _db.Tenants.Add(tenant);
+                await _db.SaveChangesAsync(cancellationToken);
+                
+                var identity = new Identity()
+                {
+                    FirstName = flow.FirstName!,
+                    LastName = flow.LastName!,
+                    PhoneNumber = flow.PhoneNumber,
+                    TenantId = tenant.Id
+                };
+                
+                _db.Identities.Add(identity);
+                await _db.SaveChangesAsync(cancellationToken);
 
-            var credential = new IdentityCredential()
-            {
-                IdentityId = identity.Id,
-                TenantId = tenant.Id,
-                CredentialType = request.Body.MagicLink ? CredentialTypes.MagicLink : CredentialTypes.Password,
-                Configuration = request.Body.MagicLink ? "" : PasswordHasher.HashPasswordV3(request.Body.Password!)
-            };
-            
-            identity.Credentials.Add(credential);
-            await _db.SaveChangesAsync(cancellationToken);
-            
-            flow.NextStep = RegistrationFlowSteps.None;
-            flow.CredentialType = credential.CredentialType;
-            
-            await _db.SaveChangesAsync(cancellationToken);
+                var identifier = new IdentityIdentifier()
+                {
+                    Identifier = flow.Email,
+                    Verified = false,
+                    AllowLogin = true,
+                    IdentityId = identity.Id,
+                    TenantId = tenant.Id,
+                    Primary = true
+                };
+                
+                _db.IdentityIdentifiers.Add(identifier);
 
-            var session = new Session
-            {
-                IdentityId = identity.Id,
-                TenantId = tenant.Id,
-                SessionToken = RandomStringGenerator.CreateSecureRandomString(128),
-                ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromDays(_authConfiguration.SessionCookieExpirationDays))
-            };
+                var credential = new IdentityCredential()
+                {
+                    IdentityId = identity.Id,
+                    TenantId = tenant.Id,
+                    CredentialType = request.Body.MagicLink ? CredentialTypes.MagicLink : CredentialTypes.Password,
+                    Configuration = request.Body.MagicLink ? "" : PasswordHasher.HashPasswordV3(request.Body.Password!)
+                };
+                
+                identity.Credentials.Add(credential);
 
-            flow.NextStep = LoginFlowSteps.None;
-            
-            _db.Sessions.Add(session);
-            await _db.SaveChangesAsync(cancellationToken);
+                await _db.SaveChangesAsync(cancellationToken);
+                
+                var verification = new Verification.Verification
+                {
+                    VerificationTokenType = VerificationType.Email,
+                    VerificationToken = RandomStringGenerator.CreateUrlSafeRandomString(Constants.VerificationTokenSize),
+                    VerifiableIdentityIdentifierId = identifier.Id,
+                    ExpiresAt = _clock.GetCurrentInstant()
+                        .Plus(Duration.FromMinutes(_authConfiguration.VerificationTokenTimeoutMinutes))
+                };
 
-            _httpContextAccessor.HttpContext!.Response.Cookies.Append(_authConfiguration.SessionCookieName, session.SessionToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = null
-            });
+                _db.Verifications.Add(verification);
+                
+                flow.NextStep = RegistrationFlowSteps.None;
+                flow.CredentialType = credential.CredentialType;
+                
+                await _db.SaveChangesAsync(cancellationToken);
+                
+                var session = new Session
+                {
+                    IdentityId = identity.Id,
+                    TenantId = tenant.Id,
+                    SessionToken = RandomStringGenerator.CreateUrlSafeRandomString(128),
+                    ExpiresAt = _clock.GetCurrentInstant().Plus(Duration.FromDays(_authConfiguration.SessionCookieExpirationDays))
+                };
+
+                flow.NextStep = LoginFlowSteps.None;
+                
+                _db.Sessions.Add(session);
+                await _db.SaveChangesAsync(cancellationToken);
+                
+                await transaction.CommitAsync(cancellationToken);
+                
+                _httpContextAccessor.HttpContext!.Response.Cookies.Append(_authConfiguration.SessionCookieName, session.SessionToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = null
+                });
             
-            return new Response
+                return new Response
+                {
+                    SessionToken = session.SessionToken
+                };
+            }
+            catch (Exception e)
             {
-                SessionToken = session.SessionToken
-            };
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
     }
     

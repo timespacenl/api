@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,11 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230123171945_RemoveIdentityRelationShipFromVerification")]
+    partial class RemoveIdentityRelationShipFromVerification
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,6 +166,9 @@ namespace Timespace.Api.Migrations
 
                     b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VerifableIdentityIdentifierId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("VerifiableIdentityIdentifierId")
                         .HasColumnType("uuid");
@@ -329,9 +335,6 @@ namespace Timespace.Api.Migrations
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Identifier")
-                        .IsUnique();
 
                     b.HasIndex("IdentityId");
 

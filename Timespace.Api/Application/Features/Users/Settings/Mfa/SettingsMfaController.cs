@@ -28,4 +28,10 @@ public class UserSettingsMfaController : ControllerBase
     {
         return await _sender.Send(command);
     }
+    
+    [HttpPost("recovery-codes")]
+    public async Task<GenerateMfaRecoveryCodes.Response> GenerateRecoveryCodes()
+    {
+        return await _sender.Send(new GenerateMfaRecoveryCodes.Command());
+    }
 }

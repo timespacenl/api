@@ -14,7 +14,7 @@ public static class GetRegistrationFlow {
     [AllowUnauthenticated]
     public record Query : IRequest<Response>
     {
-        [FromRoute(Name = "flowId")] 
+        [FromQuery(Name = "flow")]
         public Guid FlowId { get; init; }
     }
 
@@ -58,7 +58,6 @@ public static class GetRegistrationFlow {
     {
         public QueryValidator()
         {
-            
         }
     }
 }

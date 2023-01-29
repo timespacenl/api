@@ -32,6 +32,7 @@ public static class ConfigureServices
         services.AddSingleton<IClock, DateTimeProvider>();
         services.AddScoped<IAuthenticationTokenProvider, AuthenticationTokenProvider>();
         services.AddScoped<IUsageContext, UsageContext>();
+        services.AddScoped<ICaptchaVerificationService, CaptchaVerificationService>();
         
         services.AddProblemDetails(ConfigureProblemDetails);
         services.AddDbContext<AppDbContext>(options =>
@@ -49,7 +50,6 @@ public static class ConfigureServices
         
         // Middleware
         services.AddTransient<AuthenticationTokenExtractor>();
-
     }
 
     private static void ConfigureProblemDetails(ProblemDetailsOptions options)
@@ -134,6 +134,18 @@ public static class ConfigureServices
         
         services.AddSwagger();
         services.AddHttpContextAccessor();
+
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(
+                policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173", "https://timespace.nl")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+        });
     }
     
     public static void AddConfiguration(this IServiceCollection services, ConfigurationManager configuration)

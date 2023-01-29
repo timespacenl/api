@@ -1,5 +1,4 @@
-﻿using System.Security.Authentication;
-using FluentAssertions;
+﻿using FluentAssertions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

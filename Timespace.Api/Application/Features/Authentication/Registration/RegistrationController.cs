@@ -19,17 +19,13 @@ public class RegistrationController : ControllerBase
 
     [HttpPost]
     [MapToApiVersion("1.0")]
-    [ProducesResponseType(typeof(CreateRegistrationFlow.Response), StatusCodes.Status200OK)]
-    [ProducesDefaultResponseType(typeof(ProblemDetails))]
     public async Task<CreateRegistrationFlow.Response> CreateRegistrationFlow(CreateRegistrationFlow.Command command)
     {
         return await _sender.Send(command);
     }
     
-    [HttpGet("{flowId:guid}")]
+    [HttpGet]
     [MapToApiVersion("1.0")]
-    [ProducesResponseType(typeof(GetRegistrationFlow.Response), StatusCodes.Status200OK)]
-    [ProducesDefaultResponseType(typeof(ProblemDetails))]
     public async Task<GetRegistrationFlow.Response> GetRegistrationFlow([FromQuery] GetRegistrationFlow.Query query)
     {
         return await _sender.Send(query);
@@ -37,8 +33,6 @@ public class RegistrationController : ControllerBase
     
     [HttpPost("{flowId}/personal_information")]
     [MapToApiVersion("1.0")]
-    [ProducesResponseType(typeof(SetPersonalInformation.Response), StatusCodes.Status200OK)]
-    [ProducesDefaultResponseType(typeof(ProblemDetails))]
     public async Task<SetPersonalInformation.Response> SetPersonalInformation([FromQuery] SetPersonalInformation.Command command)
     {
         return await _sender.Send(command);
@@ -46,8 +40,6 @@ public class RegistrationController : ControllerBase
     
     [HttpPost("{flowId}/company_information")]
     [MapToApiVersion("1.0")]
-    [ProducesResponseType(typeof(SetCompanyInformation.Response), StatusCodes.Status200OK)]
-    [ProducesDefaultResponseType(typeof(ProblemDetails))]
     public async Task<SetCompanyInformation.Response> SetCompanyInformation([FromQuery] SetCompanyInformation.Command command)
     {
         return await _sender.Send(command);
@@ -55,8 +47,6 @@ public class RegistrationController : ControllerBase
     
     [HttpPost("{flowId}/credentials")]
     [MapToApiVersion("1.0")]
-    [ProducesResponseType(typeof(CompleteRegistrationFlow.Response), StatusCodes.Status200OK)]
-    [ProducesDefaultResponseType(typeof(ProblemDetails))]
     public async Task<CompleteRegistrationFlow.Response> CompleteRegistrationFlow([FromQuery] CompleteRegistrationFlow.Command command)
     {
         return await _sender.Send(command);

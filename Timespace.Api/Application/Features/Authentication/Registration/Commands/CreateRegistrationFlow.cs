@@ -44,7 +44,7 @@ public static class CreateRegistrationFlow {
         {
             request = request with { Email = request.Email.ToLower() };
             
-            var existingCredential = await _db.IdentityIdentifiers
+            var existingIdentifier = await _db.IdentityIdentifiers
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Identifier == request.Email, cancellationToken: cancellationToken);
             
@@ -53,7 +53,7 @@ public static class CreateRegistrationFlow {
                 .Where(x => x.ExpiresAt > _clock.GetCurrentInstant())
                 .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken: cancellationToken);
             
-            if (existingCredential != null || existingFlow != null)
+            if (existingIdentifier != null || existingFlow != null)
                 throw new DuplicateIdentifierException();
             
             var flow = new RegistrationFlow()

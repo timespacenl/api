@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,11 @@ using Timespace.Api.Infrastructure.Persistence;
 namespace Timespace.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230123162800_AddVerificationTable")]
+    partial class AddVerificationTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,42 +150,6 @@ namespace Timespace.Api.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("Sessions");
-                });
-
-            modelBuilder.Entity("Timespace.Api.Application.Features.Authentication.Verification.Verification", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Instant>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Instant>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Instant>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("VerifiableIdentityIdentifierId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("VerificationToken")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("VerificationTokenType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VerifiableIdentityIdentifierId");
-
-                    b.HasIndex("VerificationToken")
-                        .IsUnique();
-
-                    b.ToTable("Verifications");
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Tenants.Common.Entities.Tenant", b =>
@@ -330,9 +297,6 @@ namespace Timespace.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Identifier")
-                        .IsUnique();
-
                     b.HasIndex("IdentityId");
 
                     b.HasIndex("TenantId");
@@ -442,17 +406,6 @@ namespace Timespace.Api.Migrations
                     b.Navigation("Identity");
 
                     b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("Timespace.Api.Application.Features.Authentication.Verification.Verification", b =>
-                {
-                    b.HasOne("Timespace.Api.Application.Features.Users.Common.Entities.IdentityIdentifier", "VerifiableIdentityIdentifier")
-                        .WithMany()
-                        .HasForeignKey("VerifiableIdentityIdentifierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("VerifiableIdentityIdentifier");
                 });
 
             modelBuilder.Entity("Timespace.Api.Application.Features.Users.Common.Entities.Credentials.IdentityCredential", b =>
