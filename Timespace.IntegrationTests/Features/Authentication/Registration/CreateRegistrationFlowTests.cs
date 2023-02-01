@@ -20,12 +20,14 @@ public class CreateRegistrationFlowTests : IntegrationTest
 
         var flow = await sender.Send(new CreateRegistrationFlow.Command
         {
-            Email = email
+            Email = email,
+            CaptchaToken = "irrelevant"
         });
 
         await FluentActions.Invoking(() => sender.Send(new CreateRegistrationFlow.Command
         {
-            Email = email
+            Email = email,
+            CaptchaToken = "irrelevant"
         })).Should().ThrowAsync<DuplicateIdentifierException>();
     }
     
@@ -38,7 +40,8 @@ public class CreateRegistrationFlowTests : IntegrationTest
 
         var flow = await sender.Send(new CreateRegistrationFlow.Command
         {
-            Email = email
+            Email = email,
+            CaptchaToken = "irrelevant"
         });
 
         GetService(out IClock clock);
@@ -61,7 +64,8 @@ public class CreateRegistrationFlowTests : IntegrationTest
 
         await FluentActions.Invoking(() => sender.Send(new CreateRegistrationFlow.Command
         {
-            Email = email
+            Email = email,
+            CaptchaToken = "irrelevant"
         })).Should().ThrowAsync<DuplicateIdentifierException>();
     }
 
@@ -72,7 +76,8 @@ public class CreateRegistrationFlowTests : IntegrationTest
         
         await FluentActions.Invoking(() => sender.Send(new CreateRegistrationFlow.Command
         {
-            Email = "invalid-email"
+            Email = "invalid-email",
+            CaptchaToken = "irrelevant"
         })).Should().ThrowAsync<ValidationException>();
     }
     
@@ -83,7 +88,8 @@ public class CreateRegistrationFlowTests : IntegrationTest
 
         var flow = await sender.Send(new CreateRegistrationFlow.Command
         {
-            Email = "test@example.com"
+            Email = "test@example.com",
+            CaptchaToken = "irrelevant"
         });
         
         flow.FlowId.Should().NotBeEmpty();

@@ -32,6 +32,7 @@ public static class ConfigureServices
         services.AddSingleton<IClock, DateTimeProvider>();
         services.AddScoped<IAuthenticationTokenProvider, AuthenticationTokenProvider>();
         services.AddScoped<IUsageContext, UsageContext>();
+        services.AddScoped<ICaptchaVerificationService, CaptchaVerificationService>();
         
         services.AddProblemDetails(ConfigureProblemDetails);
         services.AddDbContext<AppDbContext>(options =>
@@ -42,12 +43,13 @@ public static class ConfigureServices
         services.AddMediatR(typeof(IAssemblyMarker).Assembly);
         services.AddValidatorsFromAssembly(typeof(IAssemblyMarker).Assembly);
         services.RegisterBehaviours();
+
+        services.AddHttpClient();
         
         services.AddDistributedMemoryCache();
         
         // Middleware
         services.AddTransient<AuthenticationTokenExtractor>();
-
     }
 
     private static void ConfigureProblemDetails(ProblemDetailsOptions options)
@@ -132,12 +134,25 @@ public static class ConfigureServices
         
         services.AddSwagger();
         services.AddHttpContextAccessor();
+
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(
+                policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173", "https://timespace.nl")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+        });
     }
     
     public static void AddConfiguration(this IServiceCollection services, ConfigurationManager configuration)
     {
         services.Configure<AuthenticationConfiguration>(configuration.GetSection(AuthenticationConfiguration.SectionName));
         services.Configure<UserSettingsConfiguration>(configuration.GetSection(UserSettingsConfiguration.SectionName));
+        services.Configure<CaptchaConfiguration>(configuration.GetSection(CaptchaConfiguration.SectionName));
     }
 }
 

@@ -1,4 +1,6 @@
-﻿using Timespace.Api.Application.Features.Tenants.Common.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Timespace.Api.Application.Features.Tenants.Common.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Application.Features.Users.Common.Entities;
@@ -22,4 +24,11 @@ public class IdentityIdentifier : IEntity, ISoftDeletable, ITenantEntity
     public required string Identifier { get; set; }
     public Instant LastVerificationRequestSent { get; set; }
     public bool AllowLogin { get; set; }
+}
+
+public class IdentityIdentifierEntityTypeConfiguration : IEntityTypeConfiguration<IdentityIdentifier> {
+    public void Configure(EntityTypeBuilder<IdentityIdentifier> builder)
+    {
+        builder.HasIndex(x => x.Identifier).IsUnique();
+    }
 }

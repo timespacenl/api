@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Authentication.Registration.Common;
@@ -13,7 +14,7 @@ public static class GetRegistrationFlow {
     [AllowUnauthenticated]
     public record Query : IRequest<Response>
     {
-        [FromRoute(Name = "flowId")] 
+        [FromQuery(Name = "flow")]
         public Guid FlowId { get; init; }
     }
 
@@ -37,7 +38,7 @@ public static class GetRegistrationFlow {
     
         public Task<Response> Handle(Query request, CancellationToken cancellationToken)
         {
-            var flow = _db.RegistrationFlows.FirstOrDefault(x => x.Id == request.FlowId);
+            var flow = _db.RegistrationFlows.IgnoreQueryFilters().FirstOrDefault(x => x.Id == request.FlowId);
             if (flow == null)
                 throw new FlowNotFoundException();
 
@@ -57,7 +58,6 @@ public static class GetRegistrationFlow {
     {
         public QueryValidator()
         {
-            
         }
     }
 }

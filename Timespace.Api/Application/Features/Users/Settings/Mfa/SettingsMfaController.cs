@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Timespace.Api.Application.Features.Users.Settings.Mfa.Commands;
-using Timespace.Api.Infrastructure.Swagger;
 
 namespace Timespace.Api.Application.Features.Users.Settings.Mfa;
 
@@ -28,5 +27,11 @@ public class UserSettingsMfaController : ControllerBase
     public async Task<CompleteMfaSetupFlow.Response> CompleteMfa([FromQuery] CompleteMfaSetupFlow.Command command)
     {
         return await _sender.Send(command);
+    }
+    
+    [HttpPost("recovery-codes")]
+    public async Task<GenerateMfaRecoveryCodes.Response> GenerateRecoveryCodes()
+    {
+        return await _sender.Send(new GenerateMfaRecoveryCodes.Command());
     }
 }

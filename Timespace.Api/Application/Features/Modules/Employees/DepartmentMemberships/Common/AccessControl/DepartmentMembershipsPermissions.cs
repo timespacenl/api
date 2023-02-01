@@ -5,6 +5,7 @@ public partial class Permissions
 {
     public partial class Employees
     {
+        [PermissionGroup("department_memberships", PermissionScope.Tenant)]
         public class DepartmentMembershipsPermissions
         {
             public const string Read = "employees:departments:read";

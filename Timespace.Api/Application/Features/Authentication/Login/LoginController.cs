@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Timespace.Api.Application.Features.Authentication.Login.Commands;
+using Timespace.Api.Application.Features.Authentication.Login.Queries;
 
 namespace Timespace.Api.Application.Features.Authentication.Login;
 
@@ -19,11 +20,9 @@ public class LoginController : ControllerBase
     }
 
     [HttpGet("{flowId}")]
-    public async Task<IActionResult> Get(string flowId)
+    public async Task<GetLoginFlow.Response> Get([FromQuery] GetLoginFlow.Query query)
     {
-        var cookies = Request.Cookies;
-        // var result = await _sender.Send(new GetLoginFlowQuery(flowId));
-        return Ok();
+        return await _sender.Send(query);
     }
 
     [HttpPost]

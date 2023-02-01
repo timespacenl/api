@@ -9,4 +9,5 @@ public class AuthenticationConfiguration
     public int SessionCookieExpirationDays { get; set; }
     public string SessionCookieName { get; set; } = null!;
     public string ApiKeyHeaderName { get; set; } = null!;
+    public int VerificationTokenTimeoutMinutes { get; set; }
 }

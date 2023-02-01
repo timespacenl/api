@@ -6,5 +6,5 @@ public interface ILoginFlowResponse
     public string NextStep { get; set; }
     public Instant ExpiresAt { get; set; }
     public string? SessionToken { get; set; }
-    public List<string> NextStepAllowedMethods { get; set; }
+    public List<string> AllowedMethodsForNextStep { get; set; }
 }

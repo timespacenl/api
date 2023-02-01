@@ -27,7 +27,7 @@ public static class CreateLoginFlow {
         public Instant ExpiresAt { get; set; }
         public string NextStep { get; set; } = null!;
         public string? SessionToken { get; set; }
-        public List<string> NextStepAllowedMethods { get; set; } = new();
+        public List<string> AllowedMethodsForNextStep { get; set; } = new();
     }
     
     public class Handler : IRequestHandler<Command, Response>
@@ -75,7 +75,7 @@ public static class CreateLoginFlow {
                 FlowId = flow.Id,
                 ExpiresAt = flow.ExpiresAt,
                 NextStep = flow.NextStep,
-                NextStepAllowedMethods = flow.AllowedMethodsForNextStep,
+                AllowedMethodsForNextStep = flow.AllowedMethodsForNextStep,
                 SessionToken = null
             };
         }

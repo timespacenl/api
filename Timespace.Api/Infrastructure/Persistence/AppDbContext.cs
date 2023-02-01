@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
 using Timespace.Api.Application.Features.Authentication.Sessions.Common.Entities;
+using Timespace.Api.Application.Features.Authentication.Verification;
 using Timespace.Api.Application.Features.Tenants.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
@@ -34,6 +35,7 @@ public class AppDbContext : DbContext
     public DbSet<IdentityIdentifier> IdentityIdentifiers { get; init; } = null!;
     public DbSet<IdentityCredential> IdentityCredentials { get; init; } = null!;
     public DbSet<Session> Sessions { get; init; } = null!;
+    public DbSet<Verification> Verifications { get; init; } = null!;
 
     // Tenant
     public DbSet<Tenant> Tenants { get; init; } = null!;
