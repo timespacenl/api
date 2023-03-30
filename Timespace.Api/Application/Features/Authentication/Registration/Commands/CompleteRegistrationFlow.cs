@@ -20,6 +20,7 @@ using Constants = Timespace.Api.Infrastructure.Constants;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
+[GenerateTsTypes]
 public static class CompleteRegistrationFlow {
     
     [AllowUnauthenticated]

@@ -9,6 +9,7 @@ using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
+// [GenerateTsTypes]
 public static class SetPersonalInformation {
 
     [AllowUnauthenticated]
@@ -26,6 +27,12 @@ public static class SetPersonalInformation {
         public string FirstName { get; init; } = null!;
         public string LastName { get; init; } = null!;
         public string? PhoneNumber { get; init; }
+        public CommandBodyDeep Deep { get; init; } = null!;
+    }
+
+    public record CommandBodyDeep
+    {
+        public string SomeProperty { get; init; } = null!;
     }
 
     public class Response : IRegistrationFlowResponse

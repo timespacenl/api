@@ -9,6 +9,7 @@ using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
+[GenerateTsTypes]
 public static class SetCompanyInformation {
     
     [AllowUnauthenticated]
