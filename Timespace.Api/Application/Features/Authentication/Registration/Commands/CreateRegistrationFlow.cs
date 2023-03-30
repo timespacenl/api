@@ -11,13 +11,14 @@ using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Authentication.Registration.Commands;
 
+[GenerateTsTypes]
 public static class CreateRegistrationFlow {
     
     [AllowUnauthenticated]
     public record Command : IRequest<Response>
     {
         public string Email { get; init; } = null!;
-        public string CaptchaToken { get; init; } = null!;
+        public string? CaptchaToken { get; init; } = null!;
     }
 
     public record Response : IRegistrationFlowResponse
