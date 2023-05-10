@@ -7,6 +7,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.Operations;
 using Timespace.TypescriptGenerator;
+using Timespace.TypescriptGenerator.Builders;
+using Timespace.TypescriptGenerator.Extensions;
+using Timespace.TypescriptGenerator.Models;
+using Timespace.TypescriptGenerator.Walkers;
 
 MSBuildLocator.RegisterDefaults();
 
@@ -23,16 +27,32 @@ var syntaxNodes = allNodes.ToList();
 
 IEnumerable<ClassDeclarationSyntax> allClasses = syntaxNodes.GetClassDeclarationsByAttribute("GenerateTsTypes");
 
+List<ValidatorCollectionItem> validatorCollection = new();
+
 foreach (var schemaClass in allClasses)
 {
     GenerateRequestDto(schemaClass);
 }
 
+var builder = new ZodSchemaBuilder()
+    .CreateZfdSchema("GetAllUsersRequestDtoSchema")
+    .OpenZfdPropertyScope("username", "text")
+        .WithValidator("string")
+        .WithValidator("max", "20")
+    .CloseZfdPropertyScope()
+    .OpenZPropertyScope("body", "string")
+    .CloseZPropertyScope()
+    .OpenZPropertyScope("username", "string")
+    .CloseZPropertyScope()
+    .Build();
+
+Console.WriteLine(builder);
+
 void GenerateRequestDto(ClassDeclarationSyntax schemaClass)
 {
     var commandOrQuery = schemaClass.GetRecordDeclarationsByBaseList("IRequest<Response>").First();
     
-    Console.WriteLine(schemaClass.Identifier + "" + commandOrQuery.Identifier);
+    Console.WriteLine($"{schemaClass.Identifier}{commandOrQuery.Identifier}");
 
     var semanticModel = compilation.GetSemanticModel(commandOrQuery.SyntaxTree);
     
@@ -49,44 +69,42 @@ void GenerateRequestDto(ClassDeclarationSyntax schemaClass)
     
     foreach (var ctorChild in ctorExpressions)
     {
-        IOperation? operation = null;
-        
         InvocationExpressionSyntaxWalker walker = new();
         walker.Visit(ctorChild);
 
         foreach (var invocation in walker.Invocations.Reverse())
         {
-            var children = invocation.ChildNodes();
-
-            if (children.Any(x => x.GetText().ToString().Trim() == "RuleFor"))
+            var operation = semanticModel.GetOperation(invocation) as IInvocationOperation;
+            if (operation is null)
             {
-                operation = semanticModel.GetOperation(invocation) as IInvocationOperation;
+                throw new Exception($"Operation is null for {invocation.Expression.GetText().ToString().Trim()}");
+            }
+
+            if (operation.TargetMethod.MetadataName == "RuleFor")
+            {
+                Console.WriteLine(operation.TargetMethod.MetadataName);
+                
                 var operationWalker = new PropertyReferenceOperationWalker();
                 operationWalker.Visit(operation);
-        
-                var referencedProperty = operationWalker.PropertyReferences.First();
-        
-                Console.WriteLine($"- Validator for: {referencedProperty.Property.Name} ({referencedProperty.Property.ContainingType})");
-            }
-            
-            Console.WriteLine($"- - {invocation.Expression.GetText().ToString().Trim()}");
-            foreach (var child in children)
-            {
-                if (child is MemberAccessExpressionSyntax member)
+
+                var completeProp = operationWalker.PropertyReferences.Select(x => x.Property.Name).Reverse().Aggregate((x, y) => x + "." + y);
+                
+                validatorCollection.Add(new ValidatorCollectionItem
                 {
-                    Console.WriteLine($"- - - {member.Kind()}: {member.Name}");
-                }
-                else
-                {
-                    Console.WriteLine($"- - - {child.Kind()}: {child.GetText().ToString().Trim()}");
-                }
+                    PropertyPath = completeProp,
+                    Validators = walker.Invocations.Select(x => semanticModel.GetOperation(x) as IInvocationOperation)
+                        .Where(x => x?.TargetMethod.MetadataName != "RuleFor")
+                        .ToList()
+                });
             }
+
+            Console.WriteLine($"- - {invocation.Expression.GetText().ToString().Trim().Split('.').Last()}");
         }
 
         Console.WriteLine();
     }
 
-    
+    var a = 0;
     //TraverseDtoTree(schemaClass, commandOrQuery, semanticModel);
 }
 

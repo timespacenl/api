@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Timespace.Api;
+using Timespace.Api.Infrastructure;
 using Timespace.Api.Infrastructure.AccessControl;
+using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 using Timespace.Api.Infrastructure.Middleware;
 using Timespace.Api.Infrastructure.Persistence;
 
@@ -23,8 +25,14 @@ builder.Host
 builder.Services.AddAspnetServices();
 builder.Services.AddServices(builder.Configuration);
 builder.Services.AddPermissionTree();
+builder.Services.AddApiExplorerServices();
 
 var app = builder.Build();
+
+if (builder.Environment.IsDevelopment() && !builder.Configuration.GetValue<bool>("IntegrationTestingMode"))
+{
+    await app.RunExternalSourceGenerators();
+}
 
 using (var scope = app.Services.CreateScope())
 {
@@ -65,6 +73,9 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program
+namespace Timespace.Api
 {
+    public partial class Program
+    {
+    }
 }

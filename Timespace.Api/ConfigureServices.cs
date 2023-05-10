@@ -3,8 +3,10 @@ using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using MicroElements.Swashbuckle.NodaTime;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using NodaTime.Serialization.SystemTextJson;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -154,5 +156,13 @@ public static class ConfigureServices
         services.Configure<UserSettingsConfiguration>(configuration.GetSection(UserSettingsConfiguration.SectionName));
         services.Configure<CaptchaConfiguration>(configuration.GetSection(CaptchaConfiguration.SectionName));
     }
+    
+    public static void AddApiExplorerServices(this IServiceCollection services)
+    {
+        services.TryAddSingleton<IApiDescriptionGroupCollectionProvider, ApiDescriptionGroupCollectionProvider>();
+        services.TryAddEnumerable(
+            ServiceDescriptor.Transient<IApiDescriptionProvider, DefaultApiDescriptionProvider>());
+    }
+
 }
 

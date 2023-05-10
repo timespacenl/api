@@ -14,7 +14,7 @@ using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.IntegrationTests;
 
-public sealed class SharedFixture : WebApplicationFactory<Program>, IAsyncLifetime
+public sealed class SharedFixture : WebApplicationFactory<Api.Program>, IAsyncLifetime
 {
     private Respawner? _respawner;
 

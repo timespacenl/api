@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NodaTime;
 using NodaTime.Testing;
-using Timespace.Api.Application.Features.Authentication.Registration.Commands;
-using Timespace.Api.Application.Features.Authentication.Verification;
-using Timespace.Api.Application.Features.Authentication.Verification.Exceptions;
+using Timespace.Api.Application.Features.Users.Authentication.Registration.Commands;
+using Timespace.Api.Application.Features.Users.Authentication.Verification;
+using Timespace.Api.Application.Features.Users.Authentication.Verification.Exceptions;
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Persistence;
 

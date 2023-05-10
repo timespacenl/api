@@ -4,9 +4,9 @@ using MediatR;
 using Microsoft.Extensions.Options;
 using NodaTime;
 using NodaTime.Testing;
-using Timespace.Api.Application.Features.Authentication.Common.Exceptions;
-using Timespace.Api.Application.Features.Authentication.Login.Commands;
-using Timespace.Api.Application.Features.Authentication.Login.Queries;
+using Timespace.Api.Application.Features.Users.Authentication.Common.Exceptions;
+using Timespace.Api.Application.Features.Users.Authentication.Login.Commands;
+using Timespace.Api.Application.Features.Users.Authentication.Login.Queries;
 using Timespace.Api.Infrastructure.Configuration;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Login;

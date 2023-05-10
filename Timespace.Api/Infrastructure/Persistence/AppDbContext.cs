@@ -1,10 +1,10 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
-using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
-using Timespace.Api.Application.Features.Authentication.Sessions.Common.Entities;
-using Timespace.Api.Application.Features.Authentication.Verification;
 using Timespace.Api.Application.Features.Tenants.Common.Entities;
+using Timespace.Api.Application.Features.Users.Authentication.Login.Common.Entities;
+using Timespace.Api.Application.Features.Users.Authentication.Registration.Common.Entities;
+using Timespace.Api.Application.Features.Users.Authentication.Sessions.Common.Entities;
+using Timespace.Api.Application.Features.Users.Authentication.Verification;
 using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
 using Timespace.Api.Application.Features.Users.Settings.Mfa.Entities;
