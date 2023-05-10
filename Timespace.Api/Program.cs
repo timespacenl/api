@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Timespace.Api;
-using Timespace.Api.Infrastructure;
 using Timespace.Api.Infrastructure.AccessControl;
 using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 using Timespace.Api.Infrastructure.Middleware;

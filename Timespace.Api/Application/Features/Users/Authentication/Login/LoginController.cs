@@ -7,7 +7,7 @@ using Timespace.Api.Application.Features.Users.Authentication.Login.Queries;
 namespace Timespace.Api.Application.Features.Users.Authentication.Login;
 
 [ApiController]
-[ApiVersion("1.0")]
+[ApiVersion("2.0")]
 [Route("v{version:apiVersion}/auth/login")]
 public class LoginController : ControllerBase
 {
