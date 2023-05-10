@@ -3,9 +3,9 @@ using MediatR;
 using NodaTime;
 using NodaTime.Testing;
 using Timespace.Api.Application.Common.Exceptions;
-using Timespace.Api.Application.Features.Authentication.Registration.Commands;
-using Timespace.Api.Application.Features.Authentication.Registration.Common.Entities;
-using Timespace.Api.Application.Features.Authentication.Registration.Common.Exceptions;
+using Timespace.Api.Application.Features.Users.Authentication.Registration.Commands;
+using Timespace.Api.Application.Features.Users.Authentication.Registration.Common.Entities;
+using Timespace.Api.Application.Features.Users.Authentication.Registration.Common.Exceptions;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Registration;
 

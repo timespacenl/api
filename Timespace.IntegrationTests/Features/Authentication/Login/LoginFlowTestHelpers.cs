@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using NodaTime;
 using OtpNet;
-using Timespace.Api.Application.Features.Authentication.Registration.Commands;
+using Timespace.Api.Application.Features.Users.Authentication.Registration.Commands;
 using Timespace.Api.Application.Features.Users.Settings.Mfa.Commands;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Login;

@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Timespace.Api.Application.Features.Authentication.Registration.Commands;
+using Timespace.Api.Application.Features.Users.Authentication.Registration.Commands;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Registration;
 

@@ -3,9 +3,9 @@ using FluentAssertions.NodaTime;
 using MediatR;
 using Microsoft.Extensions.Options;
 using NodaTime;
-using Timespace.Api.Application.Features.Authentication.Login.Commands;
-using Timespace.Api.Application.Features.Authentication.Login.Common.Entities;
-using Timespace.Api.Application.Features.Authentication.Login.Exceptions;
+using Timespace.Api.Application.Features.Users.Authentication.Login.Commands;
+using Timespace.Api.Application.Features.Users.Authentication.Login.Common.Entities;
+using Timespace.Api.Application.Features.Users.Authentication.Login.Exceptions;
 using Timespace.Api.Infrastructure.Configuration;
 
 namespace Timespace.IntegrationTests.Features.Authentication.Login;
