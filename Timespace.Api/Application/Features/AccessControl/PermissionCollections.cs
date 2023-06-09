@@ -1,4 +1,4 @@
-﻿namespace Timespace.Api.Infrastructure.AccessControl;
+﻿namespace Timespace.Api.Application.Features.AccessControl;
 
 public class PermissionCollections
 {

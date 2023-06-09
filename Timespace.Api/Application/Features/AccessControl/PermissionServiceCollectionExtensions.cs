@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Timespace.Api.Infrastructure.AccessControl;
+namespace Timespace.Api.Application.Features.AccessControl;
 
 public static class PermissionServiceCollectionExtensions
 {
@@ -23,7 +23,7 @@ public static class PermissionServiceCollectionExtensions
     private static PermissionTree DiscoverPermissions(PermissionScope? scope = null)
     {
         var permissionTree = new PermissionTree();
-        var permissionRootTypes = typeof(Permissions).GetNestedTypes();
+        var permissionRootTypes = typeof(Application.Features.AccessControl.Permissions).GetNestedTypes();
 
         foreach (var rootType in permissionRootTypes)
         {

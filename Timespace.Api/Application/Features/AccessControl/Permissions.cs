@@ -1,26 +1,32 @@
-﻿// ReSharper disable once CheckNamespace
-namespace Timespace.Api.Infrastructure.AccessControl;
+﻿using Timespace.Api.Infrastructure.AccessControl;
 
-public partial class Permissions
+namespace Timespace.Api.Application.Features.AccessControl;
+
+public class Permissions
 {
-    public partial class Tenant
+    [PermissionScope(PermissionScope.Tenant)]
+    public class User
     {
-        [PermissionGroup("tenant_settings", PermissionScope.Tenant)]
+        [PermissionScope(PermissionScope.Tenant)]
         public class Settings
         {
-            public const string ReadAll = "tenant:settings:read_all";
-            public const string UpdateAll = "tenant:settings:update_all";
-
-            [PermissionGroup("tenant_settings_apikeys", PermissionScope.Tenant)]
-            public class ApiKeys
-            {
-                public const string Read = "tenant:settings:apikeys:read";
-                public const string Create = "tenant:settings:apikeys:create";
-                public const string Update = "tenant:settings:apikeys:update";
-                public const string Delete = "tenant:settings:apikeys:delete";
-            }
-            
-            [PermissionGroup("tenant_settings_roles", PermissionScope.Tenant)]
+            public const string Read = "tenant:read";
+            public const string Update = "tenant:update";
+            public const string Delete = "tenant:delete";
+        }
+    }
+    
+    [PermissionScope(PermissionScope.Tenant)]
+    public class Tenant
+    {
+        public const string Read = "tenant:read";
+        public const string Update = "tenant:update";
+        public const string Delete = "tenant:delete";
+        
+        [PermissionScope(PermissionScope.Tenant)]
+        public class Settings
+        {
+            [PermissionScope(PermissionScope.Tenant)]
             public class Roles
             {
                 public const string Read = "tenant:settings:roles:read";
@@ -29,7 +35,7 @@ public partial class Permissions
                 public const string Delete = "tenant:settings:roles:delete";            
             }
             
-            [PermissionGroup("tenant_settings_employees", PermissionScope.Tenant)]
+            [PermissionScope(PermissionScope.Tenant)]
             public class Employees
             {
                 public const string Read = "tenant:settings:employees:read";
@@ -38,11 +44,11 @@ public partial class Permissions
                 public const string Delete = "tenant:settings:employees:delete";
                 
                 // Data such as bsn, etc
-                public const string ReadExtended = "tenant:settings:employees:read_extended";
-                public const string UpdateExtended = "tenant:settings:employees:update_extended";
+                public const string ReadConfidential = "tenant:settings:employees:read_confidential";
+                public const string UpdateConfidential = "tenant:settings:employees:update_confidential";
             }
             
-            [PermissionGroup("tenant_settings_departments", PermissionScope.Tenant)]
+            [PermissionScope(PermissionScope.Tenant)]
             public class Departments
             {
                 public const string Read = "tenant:settings:departments:read";
@@ -50,8 +56,6 @@ public partial class Permissions
                 public const string Update = "tenant:settings:departments:update";
                 public const string Delete = "tenant:settings:departments:delete";            
             }
-
         }
     }
 }
-

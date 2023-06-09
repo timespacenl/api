@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.MSBuild;
+﻿using Basic.Reference.Assemblies;
+using Microsoft.CodeAnalysis.MSBuild;
 
 namespace Timespace.Api.Infrastructure.ExternalSourceGeneration;
 
@@ -12,15 +13,16 @@ public static class ExternalSourceGeneratorExtensions
             .Where(p => type.IsAssignableFrom(p) && p is { IsClass: true, IsAbstract: false })
             .ToList();
 
+        MSBuildWorkspace workspace = MSBuildWorkspace.Create();
+        workspace.LoadMetadataForReferencedProjects = true;
+        var project = await workspace.OpenProjectAsync(@"I:\Timespace Repos\Timespace\Timespace.Api\Timespace.Api.csproj");
+        var compilation = await project.GetCompilationAsync();
+
+        if (compilation is null)
+            throw new NullReferenceException("Compilation is null");
+        
         foreach (var externalGenerator in types)
         {
-            MSBuildWorkspace workspace = MSBuildWorkspace.Create();
-            var project = await workspace.OpenProjectAsync($@"{Environment.CurrentDirectory}\Timespace.Api.csproj");
-            var compilation = await project.GetCompilationAsync();
-
-            if (compilation is null)
-                throw new NullReferenceException("Compilation is null");
-            
             var externalSourceGenerator =
                 (IExternalSourceGenerator)ActivatorUtilities.CreateInstance(app.Services, externalGenerator, compilation);
             

@@ -1,4 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
+
+using Timespace.Api.Application.Features.AccessControl;
+
 namespace Timespace.Api.Infrastructure.AccessControl;
 
 public partial class Permissions

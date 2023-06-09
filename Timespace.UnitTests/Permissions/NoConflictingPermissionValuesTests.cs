@@ -9,7 +9,7 @@ public class NoConflictingPermissionValuesTests
     [Test]
     public void NoConflictingPermissionValues()
     {
-        var rootTypes = typeof(Api.Infrastructure.AccessControl.Permissions).GetNestedTypes();
+        var rootTypes = typeof(Api.Application.Features.AccessControl.Permissions).GetNestedTypes();
 
         foreach (var rootType in rootTypes)
         {

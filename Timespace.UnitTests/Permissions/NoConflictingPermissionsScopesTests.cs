@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using FluentAssertions;
+using Timespace.Api.Application.Features.AccessControl;
 using Timespace.Api.Infrastructure.AccessControl;
 
 namespace Timespace.UnitTests.Permissions;
@@ -11,7 +12,7 @@ public class NoConflictingPermissionsScopesTests
     [Test]
     public async Task NoConflictingPermissionScopes()
     {
-        var rootTypes = typeof(Api.Infrastructure.AccessControl.Permissions).GetNestedTypes();
+        var rootTypes = typeof(Api.Application.Features.AccessControl.Permissions).GetNestedTypes();
 
         foreach (var rootType in rootTypes)
         {

@@ -1,4 +1,4 @@
-﻿namespace Timespace.Api.Infrastructure.AccessControl;
+﻿namespace Timespace.Api.Application.Features.AccessControl;
 
 public class PermissionGroupAttribute : Attribute
 {
@@ -9,5 +9,15 @@ public class PermissionGroupAttribute : Attribute
     }
     
     public string GroupCode { get; set; }
+    public PermissionScope Scope { get; set; }
+}
+
+public class PermissionScopeAttribute : Attribute
+{
+    public PermissionScopeAttribute(PermissionScope scope)
+    {
+        Scope = scope;
+    }
+    
     public PermissionScope Scope { get; set; }
 }
