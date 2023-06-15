@@ -25,23 +25,21 @@ public class PermissionsMappingGenerator : IExternalSourceGenerator
     
     public void Execute()
     {
-        var allNodes = _compilation.SyntaxTrees.SelectMany(x => x.GetRoot().DescendantNodes()).ToList();
-        var permissionDeclaration = allNodes
-            .Where(d => d.IsKind(SyntaxKind.ClassDeclaration))
-            .OfType<ClassDeclarationSyntax>()
-            .FirstOrDefault(x => x.Identifier.ToString() == "Permissions");
-        
-        if(permissionDeclaration == null)
-            throw new Exception("Permissions class not found");
-        
-        var semanticModel = _compilation.GetSemanticModel(permissionDeclaration.SyntaxTree);
-        var symbol = semanticModel.GetDeclaredSymbol(permissionDeclaration);
-
-        ProcessNext(symbol!);
-        
-        _logger.LogDebug("Builder: \n{Builder}", _builder.Build());
-        
-        throw new NotImplementedException();
+        // var allNodes = _compilation.SyntaxTrees.SelectMany(x => x.GetRoot().DescendantNodes()).ToList();
+        // var permissionDeclaration = allNodes
+        //     .Where(d => d.IsKind(SyntaxKind.ClassDeclaration))
+        //     .OfType<ClassDeclarationSyntax>()
+        //     .FirstOrDefault(x => x.Identifier.ToString() == "Permissions");
+        //
+        // if(permissionDeclaration == null)
+        //     throw new Exception("Permissions class not found");
+        //
+        // var semanticModel = _compilation.GetSemanticModel(permissionDeclaration.SyntaxTree);
+        // var symbol = semanticModel.GetDeclaredSymbol(permissionDeclaration);
+        //
+        // ProcessNext(symbol!);
+        //
+        // _logger.LogDebug("Builder: \n{Builder}", _builder.Build());
     }
 
     public void ProcessNext(ITypeSymbol symbol)

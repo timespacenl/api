@@ -34,15 +34,15 @@ public class EmployeesController : ControllerBase
         return Ok();
     }
 
-    [HttpPost]
-    public async Task<IActionResult> InviteEmployeeAsync([FromBody] string request)
-    {
-        return Ok();
-    }
-
-    [HttpPut("{employeeId}")]
-    public async Task<IActionResult> UpdateEmployeeAsync([FromRoute] Guid employeeId, [FromBody] string request)
-    {
-        return Ok();
-    }
+    // [HttpPost]
+    // public async Task<IActionResult> InviteEmployeeAsync([FromBody] string request)
+    // {
+    //     return Ok();
+    // }
+    //
+    // [HttpPut("{employeeId}")]
+    // public async Task<IActionResult> UpdateEmployeeAsync([FromRoute] Guid employeeId, [FromBody] string request)
+    // {
+    //     return Ok();
+    // }
 }

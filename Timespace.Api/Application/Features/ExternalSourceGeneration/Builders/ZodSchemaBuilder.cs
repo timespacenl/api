@@ -10,7 +10,6 @@ public class ZodSchemaBuilder
     private int _indentLevel;
     private int _openZObjectScopes;
     private bool _openPropertyScope;
-    private int _openZfdPropertyScopes;
     private int _validatorAmount;
     
     public string Build()
@@ -35,22 +34,13 @@ public class ZodSchemaBuilder
         return _builder.ToString();
     }
 
-    public ZodSchemaBuilder CreateZodSchema(string name)
+    public ZodSchemaBuilder(string name)
     {
         _builder.AppendLine($"{_indent.Repeat(_indentLevel)}export const {name} = z.object({{");
         _indentLevel++;
         _openZObjectScopes++;
-        return this;
     }
-    
-    public ZodSchemaBuilder CreateZfdSchema(string name)
-    {
-        _builder.AppendLine($"{_indent.Repeat(_indentLevel)}export const {name} = z.object({{");
-        _indentLevel++;
-        _openZObjectScopes++;
-        return this;
-    }
-    
+
     public ZodSchemaBuilder OpenZObjectScope(string name)
     {
         if(_openPropertyScope)
@@ -70,8 +60,8 @@ public class ZodSchemaBuilder
         if(_openPropertyScope)
             throw new Exception("Cannot close a z.object scope while there are still open property scopes.");
         
-        _builder.AppendLine($"{_indent.Repeat(_indentLevel)}}}),");
         _indentLevel--;
+        _builder.AppendLine($"{_indent.Repeat(_indentLevel)}}}),");
         _openZObjectScopes--;
         return this;
     }
@@ -95,34 +85,11 @@ public class ZodSchemaBuilder
         _openPropertyScope = false;
         return this;
     }
-    
-    public ZodSchemaBuilder OpenZfdPropertyScope(string name, string type)
-    {
-        if(_openPropertyScope)
-            throw new Exception("Cannot open a zfd property scope while there are still open property scopes.");
-        
-        _builder.Append($"{_indent.Repeat(_indentLevel)}{name}: zfd.{type}(");
-        _openZfdPropertyScopes++;
-        return this;
-    }
-    
-    public ZodSchemaBuilder CloseZfdPropertyScope()
-    {
-        if(_openZfdPropertyScopes == 0)
-            throw new Exception("Cannot close a zfd property scope while there are no open zfd property scopes.");
-        
-        if(_openPropertyScope)
-            throw new Exception("Cannot close a zfd property scope while there are still open property scopes.");
-        
-        _builder.Append("),\n");
-        _openZfdPropertyScopes--;
-        return this;
-    }
-    
+
     public ZodSchemaBuilder WithValidator(string validator, string parameter = "")
     {
-        if(_openZfdPropertyScopes == 0 && _openPropertyScope == false)
-            throw new Exception("Cannot add a validator while there are no open zfd property scopes.");
+        if(_openPropertyScope == false)
+            throw new Exception("Cannot add a validator while there are no open zproperty scopes.");
 
         if (_validatorAmount == 0)
         {

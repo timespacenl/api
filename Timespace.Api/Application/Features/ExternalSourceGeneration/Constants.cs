@@ -21,21 +21,12 @@ public static class Constants
             {"Boolean", "boolean"},
             {"Instant", "date"},
         };
-    
-    public static readonly Dictionary<string, string> ZfdTypeMapping = new Dictionary<string, string>()
-        {
-            {"string", "text"},
-            {"Guid", "text"},
-            {"int", "numeric"},
-            {"double", "numeric"},
-            {"bool", "checkbox"},
-            {"Instant", "text"},
-        };
-    
+
     public static readonly Dictionary<string, ValidatorMapping> ZodFluentValidationValidatorMapping = new Dictionary<string, ValidatorMapping>()
         {
             {"NotEmpty", new ValidatorMapping("")},
             {"NotNull", new ValidatorMapping("")},
+            {"WithMessage", new ValidatorMapping("")},
             {"MaximumLength", new ValidatorMapping("max", true, 1)},
             {"MinimumLength", new ValidatorMapping("min", true, 1)},
             {"GreaterThanOrEqualTo", new ValidatorMapping("gte", true, 1)},

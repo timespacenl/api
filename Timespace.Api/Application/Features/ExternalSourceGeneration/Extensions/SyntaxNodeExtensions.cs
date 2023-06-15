@@ -58,6 +58,14 @@ public static class SyntaxNodeExtensions
                 .Where(x => x.BaseList!.Types.Any(y => y.ToString() == baseClass));
     }
     
+    private static IEnumerable<ClassDeclarationSyntax> FindClassDeclarationByTypeName(IEnumerable<SyntaxNode> nodes, string typeName)
+    {
+        return nodes
+            .Where(d => d.IsKind(SyntaxKind.ClassDeclaration))
+            .OfType<ClassDeclarationSyntax>()
+            .Where(x => x.GetType().FullName == typeName);
+    }
+    
     // Record declaration extension methods
     public static IEnumerable<RecordDeclarationSyntax> GetRecordDeclarationsByAttribute(this SyntaxNode node, string attributeName) => FindRecordDeclarationByAttribute(node.DescendantNodes(), attributeName);
     public static IEnumerable<RecordDeclarationSyntax> GetRecordDeclarationsByAttribute(this IEnumerable<SyntaxNode> nodes, string attributeName) => FindRecordDeclarationByAttribute(nodes, attributeName);
