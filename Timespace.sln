@@ -10,8 +10,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timespace.UnitTests", "Time
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timespace.IntegrationTests", "Timespace.IntegrationTests\Timespace.IntegrationTests.csproj", "{8327EC82-A951-4C12-A9AB-82CE39FB55E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timespace.TypescriptGenerator", "Timespace.TypescriptGenerator\Timespace.TypescriptGenerator.csproj", "{9E6BE548-F7B2-49FD-9ED7-7D29CE6566DF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,7 +19,6 @@ Global
 		{78AA330D-83F2-4FCB-9A0D-51376CC3B100} = {999CC7AC-5A43-4472-ACC4-5F1EC542FD1D}
 		{C624DB61-AF4C-44C5-B44F-F1A921DAB359} = {D5930570-9CDC-4D85-9FC7-1520512ADFB2}
 		{8327EC82-A951-4C12-A9AB-82CE39FB55E0} = {D5930570-9CDC-4D85-9FC7-1520512ADFB2}
-		{9E6BE548-F7B2-49FD-9ED7-7D29CE6566DF} = {999CC7AC-5A43-4472-ACC4-5F1EC542FD1D}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{78AA330D-83F2-4FCB-9A0D-51376CC3B100}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -36,9 +33,5 @@ Global
 		{8327EC82-A951-4C12-A9AB-82CE39FB55E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8327EC82-A951-4C12-A9AB-82CE39FB55E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8327EC82-A951-4C12-A9AB-82CE39FB55E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9E6BE548-F7B2-49FD-9ED7-7D29CE6566DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E6BE548-F7B2-49FD-9ED7-7D29CE6566DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E6BE548-F7B2-49FD-9ED7-7D29CE6566DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E6BE548-F7B2-49FD-9ED7-7D29CE6566DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

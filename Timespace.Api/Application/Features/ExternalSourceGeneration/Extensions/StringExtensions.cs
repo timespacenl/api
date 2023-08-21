@@ -29,4 +29,13 @@ public static class StringExtensions
         }
         return str.ToLowerInvariant();
     }
+    
+    public static string ToPascalCase(this string str)
+    {                    
+        if(!string.IsNullOrEmpty(str) && str.Length > 1)
+        {
+            return char.ToUpperInvariant(str[0]) + str.Substring(1);
+        }
+        return str.ToUpperInvariant();
+    }
 }

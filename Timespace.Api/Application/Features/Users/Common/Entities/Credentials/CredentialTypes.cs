@@ -13,3 +13,27 @@ public class CredentialTypes
     public static string[] AllFirstFactor { get; } = { Password, /*Google, Microsoft,*/ MagicLink };
     public static string[] AllSecondFactor { get; } = { Totp, LookupSecret };
 }
+
+public enum CredentialTypesEnum
+{
+    Password = 1,
+    Totp = 2,
+    LookupSecret = 3,
+    MagicLink = 4,
+    // Google = 5,
+    // Microsoft = 6
+}
+
+public enum FirstFactorCredentialTypes
+{
+    Password = CredentialTypesEnum.Password,
+    // Google = CredentialTypesEnum.Google,
+    // Microsoft = CredentialTypesEnum.Microsoft,
+    MagicLink = CredentialTypesEnum.MagicLink
+}
+
+public enum SecondFactorCredentialTypes
+{
+    Totp = CredentialTypesEnum.Totp,
+    LookupSecret = CredentialTypesEnum.LookupSecret
+}

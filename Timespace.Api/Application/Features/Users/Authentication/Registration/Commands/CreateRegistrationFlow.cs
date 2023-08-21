@@ -11,7 +11,6 @@ using Timespace.Api.Infrastructure.Persistence;
 
 namespace Timespace.Api.Application.Features.Users.Authentication.Registration.Commands;
 
-// [GenerateTsTypes]
 public static class CreateRegistrationFlow {
     
     [AllowUnauthenticated]

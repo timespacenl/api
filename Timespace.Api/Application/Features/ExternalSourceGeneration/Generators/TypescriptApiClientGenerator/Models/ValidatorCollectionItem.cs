@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.Operations;
 
-namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Models;
+namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Models;
 
 public class ValidatorCollectionItem
 {

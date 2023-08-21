@@ -3,7 +3,7 @@ using Timespace.Api.Application.Features.ExternalSourceGeneration.Extensions;
 
 namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 
-public class TypescriptObjectBuilder
+public class TypescriptTypeBuilder
 {
     private int _indentLevel = 0;
     private readonly StringBuilder _builder = new();
@@ -11,32 +11,18 @@ public class TypescriptObjectBuilder
     private readonly string _newLine = "\n";
     private readonly int _openScopes = 0;
     
-    public TypescriptObjectBuilder(string name)
+    public TypescriptTypeBuilder(string name)
     {
-        _builder.Append($"export const {name} = {{");
+        _builder.Append($"export interface {name} {{");
         _builder.Append(_newLine);
         _indentLevel++;
     }
     
-    public TypescriptObjectBuilder OpenScope(string name)
+    public TypescriptTypeBuilder AddProperty(string name, string type, bool nullable = false, bool isList = false)
     {
-        _builder.Append($"{_indent.Repeat(_indentLevel)}{name}: {{");
-        _builder.Append(_newLine);
-        _indentLevel++;
-        return this;
-    }
-    
-    public TypescriptObjectBuilder CloseScope()
-    {
-        _indentLevel--;
-        _builder.Append($"{_indent.Repeat(_indentLevel)}}},");
-        _builder.Append(_newLine);
-        return this;
-    }
-    
-    public TypescriptObjectBuilder AddProperty(string name, string value)
-    {
-        _builder.Append($"{_indent.Repeat(_indentLevel)}{name}: \"{value}\";");
+        var listExtension = isList ? "[]" : "";
+        var nullableExtension = nullable ? " | null" : "";
+        _builder.Append($"{_indent.Repeat(_indentLevel)}{name}: {type}{listExtension}{nullableExtension};");
         _builder.Append(_newLine);
         return this;
     }

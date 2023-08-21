@@ -22,11 +22,21 @@ public static class CompleteMfaSetupFlow {
     public record CommandBody
     {
         public string TotpCode { get; init; } = null!;
+        public List<CredentialTypesEnum> CredentialType { get; init; }
+        public FirstFactorCredentialTypes FirstFactorCredentialType { get; init; }
     }
     
     public record Response()
     {
         public bool Success { get; init; }
+        public List<Response2> Response2S { get; init; } = new();
+    }
+    
+    public record Response2()
+    {
+        public bool Success { get; init; }
+        public string Something { get; init; } = null!;
+        public int AnotherProperty { get; init; }
     }
     
     public class Handler : IRequestHandler<Command, Response>
@@ -43,7 +53,7 @@ public static class CompleteMfaSetupFlow {
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
             var flow = await _db.MfaSetupFlows.FirstOrDefaultAsync(x => x.Id == request.FlowId, cancellationToken);
-
+            
             if (flow == null)
                 throw new MfaSetupFlowNotFoundException();
             

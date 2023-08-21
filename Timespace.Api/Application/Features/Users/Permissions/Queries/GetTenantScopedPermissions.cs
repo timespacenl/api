@@ -10,6 +10,8 @@ public static class GetTenantScopedPermissions {
     {
         
     }
+    
+    
 
     public class Handler : IRequestHandler<Query, PermissionTree>
     {

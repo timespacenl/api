@@ -20,15 +20,15 @@ public class PermissionsController
         _permissionCollections = permissionCollections;
     }
 
-    [HttpGet("tenant")]
-    public async Task<PermissionTree> GetAvailableTenantScopedPermissions()
-    {
-        return await _sender.Send(new GetTenantScopedPermissions.Query());
-    }
-    
-    [HttpGet("department")]
-    public async Task<PermissionTree> GetAvailableDepartmentScopedPermissions()
-    {
-        return await _sender.Send(new GetDepartmentScopedPermissions.Query());
-    }
+    // [HttpGet("tenant")]
+    // public async Task<PermissionTree> GetAvailableTenantScopedPermissions()
+    // {
+    //     return await _sender.Send(new GetTenantScopedPermissions.Query());
+    // }
+    //
+    // [HttpGet("department")]
+    // public async Task<PermissionTree> GetAvailableDepartmentScopedPermissions()
+    // {
+    //     return await _sender.Send(new GetDepartmentScopedPermissions.Query());
+    // }
 }

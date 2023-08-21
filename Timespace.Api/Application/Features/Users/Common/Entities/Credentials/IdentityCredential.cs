@@ -28,3 +28,14 @@ public class IdentityCredentialTypeConfiguration : IEntityTypeConfiguration<Iden
         builder.HasIndex(x => new {x.IdentityId, x.CredentialType}).IsUnique();
     }
 }
+
+public interface ICredential
+{
+    public string CredentialType { get; }
+}
+
+public class PasswordCredential : ICredential
+{
+    public string CredentialType => "password";
+    public string Password { get; set; } = null!;
+}
