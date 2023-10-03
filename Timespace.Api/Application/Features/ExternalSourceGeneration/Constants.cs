@@ -37,25 +37,11 @@ public static class Constants
         };
 
     public static readonly string ApiClientHeaders = """
-import { PUBLIC_BASE_URL } from '$env/static/public';
+          import { genericPost, genericGet } from '../api-generics';
+          import type { FetchType } from '../api-generics';
+          
 
-type ApiResponse<T> = {
-  data: T | null;
-  error: ProblemDetails | null;
-}
-
-export type FetchType = typeof fetch;
-
-export interface ProblemDetails {
-    type: string;
-    title: string;
-    status: number;
-    detail: string | null;
-    instance: string;
-}
-
-
-""";
+          """;
 }
 
 public record ValidatorMapping(string? Mapping, bool HasParameters = false, int ParameterCount = 0);

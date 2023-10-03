@@ -1,5 +1,8 @@
+using System.Net.Http.Headers;
+using System.Text.Json;
 using Destructurama;
 using Hellang.Middleware.ProblemDetails;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis.MSBuild;
@@ -66,6 +69,8 @@ if (app.Environment.IsDevelopment())
 app.UseProblemDetails();
 
 app.UseHttpsRedirection();
+
+JsonElement a = new();
 
 app.UseCors();
 

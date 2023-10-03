@@ -22,17 +22,17 @@ public class EmployeesController : ControllerBase
         return await _sender.Send(query);
     }
 
-    [HttpGet("{employeeId}/extended")]
-    public async Task<IActionResult> GetEmployeeExtendedAsync([FromRoute] Guid employeeId)
-    {
-        return Ok();
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetEmployeesAsync()
-    {
-        return Ok();
-    }
+    // [HttpGet("{employeeId}/extended")]
+    // public async Task<IActionResult> GetEmployeeExtendedAsync([FromRoute] Guid employeeId)
+    // {
+    //     return Ok();
+    // }
+    //
+    // [HttpGet]
+    // public async Task<IActionResult> GetEmployeesAsync()
+    // {
+    //     return Ok();
+    // }
 
     // [HttpPost]
     // public async Task<IActionResult> InviteEmployeeAsync([FromBody] string request)

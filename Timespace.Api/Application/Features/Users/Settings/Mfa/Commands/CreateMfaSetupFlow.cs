@@ -1,6 +1,7 @@
 ﻿using System.Web;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OtpNet;
@@ -15,7 +16,7 @@ namespace Timespace.Api.Application.Features.Users.Settings.Mfa.Commands;
 
 public static class CreateMfaSetupFlow
 {
-    public record Command : IRequest<Response>;
+    public record Command() : IRequest<Response>;
     
     public record Response()
     {

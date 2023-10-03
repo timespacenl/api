@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Extensions;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Extensions;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Models;
+using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 
 namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator;
@@ -15,36 +17,42 @@ public partial class TypescriptApiClientGenerator : IExternalSourceGenerator
     private readonly ILogger<TypescriptApiClientGenerator> _logger;
     private readonly IApiDescriptionGroupCollectionProvider _apiExplorer;
     private readonly Compilation _compilation;
+    private readonly ExternalSourceGenerationSettings _options;
     
     private readonly StringBuilder _generation = new();
     private readonly StringBuilder _typeGeneration = new();
     private readonly StringBuilder _enumGeneration = new();
     private readonly List<string> _generatedEnums = new();
     
-    public TypescriptApiClientGenerator(ILogger<TypescriptApiClientGenerator> logger, IApiDescriptionGroupCollectionProvider apiExplorer, Compilation compilation)
+    public TypescriptApiClientGenerator(ILogger<TypescriptApiClientGenerator> logger, IApiDescriptionGroupCollectionProvider apiExplorer, Compilation compilation, IOptions<ExternalSourceGenerationSettings> options)
     {
         _logger = logger;
         _apiExplorer = apiExplorer;
         _compilation = compilation;
+        _options = options.Value;
     }
 
     public void Execute()
     {
-        var apiDescriptionGroups = _apiExplorer.ApiDescriptionGroups.Items;
-        foreach (var apiDescriptionGroup in apiDescriptionGroups)
-        {
-            var endpointDescriptions = GetEndpointInfoForApiDescriptionGroup(apiDescriptionGroup.Items, apiDescriptionGroup.GroupName);
-            
-            foreach (var endpointDescription in endpointDescriptions)
-            {
-                GenerateTypescriptCode(endpointDescription);
-            }
-        }
-
-        _generation.Append(Constants.ApiClientHeaders);
-        _generation.Append(_enumGeneration);
-        _generation.Append(_typeGeneration);
-        _logger.LogDebug("Generated typescript api client: \n{Generation}", _generation.ToString());
+        // var apiDescriptionGroups = _apiExplorer.ApiDescriptionGroups.Items;
+        // foreach (var apiDescriptionGroup in apiDescriptionGroups)
+        // {
+        //     var endpointDescriptions = GetEndpointInfoForApiDescriptionGroup(apiDescriptionGroup.Items, apiDescriptionGroup.GroupName);
+        //     
+        //     foreach (var endpointDescription in endpointDescriptions)
+        //     {
+        //         GenerateTypescriptCode(endpointDescription);
+        //     }
+        // }
+        //
+        // _generation.Append(Constants.ApiClientHeaders);
+        // _generation.Append(Constants.ApiClientGenericCallables);
+        // _generation.Append(_enumGeneration);
+        // _generation.Append(_typeGeneration);
+        //
+        // File.WriteAllText(_options.TypescriptGenerator.GenerationPath + '\\' + _options.TypescriptGenerator.GenerationFileName + ".ts", _generation.ToString());
+        //
+        // _logger.LogDebug("Generated typescript api client.");
     }
 
     private void GenerateTypescriptCode(EndpointInfo endpointInfo)
@@ -82,8 +90,8 @@ public partial class TypescriptApiClientGenerator : IExternalSourceGenerator
                 {
                     GenerateEnum(member.Type);
                     tsType.AddProperty(member.Name.ToCamelCase(), member.Type.Name, nullable, member.IsList);
-                } 
-                else 
+                }
+                else
                 {
                     tsType.AddProperty(member.Name.ToCamelCase(), member.Type.GetTsType(), nullable, member.IsList);
                 }
@@ -182,6 +190,8 @@ public partial class TypescriptApiClientGenerator : IExternalSourceGenerator
         
         var bodyType = endpointInfo.Parameters.FirstOrDefault(x => x.BindingInfo?.BindingSource == BindingSource.Body);
         var bodyFunctionCallString = bodyType != null ? $"request.{bodyType.ModelMetadata.PropertyName?.ToCamelCase()}" : "request";
+        if (!pathParams.Any() && !queryParams.Any())
+            bodyFunctionCallString = "request";
         
         var functionCall = method switch
         {

@@ -18,9 +18,9 @@ public class UserSettingsMfaController : ControllerBase
     }
 
     [HttpPost("setup")]
-    public async Task<CreateMfaSetupFlow.Response> SetupMfa()
+    public async Task<CreateMfaSetupFlow.Response> SetupMfa(CreateMfaSetupFlow.Command command)
     {
-        return await _sender.Send(new CreateMfaSetupFlow.Command());
+        return await _sender.Send(command);
     }
     
     [HttpPost("{flowId}/complete")]

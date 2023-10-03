@@ -4,6 +4,7 @@ using MediatR;
 using MicroElements.Swashbuckle.NodaTime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -155,6 +156,8 @@ public static class ConfigureServices
         services.Configure<AuthenticationConfiguration>(configuration.GetSection(AuthenticationConfiguration.SectionName));
         services.Configure<UserSettingsConfiguration>(configuration.GetSection(UserSettingsConfiguration.SectionName));
         services.Configure<CaptchaConfiguration>(configuration.GetSection(CaptchaConfiguration.SectionName));
+        services.Configure<ExternalSourceGenerationSettings>(
+            configuration.GetSection(ExternalSourceGenerationSettings.SectionName));
     }
     
     public static void AddApiExplorerServices(this IServiceCollection services)
