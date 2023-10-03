@@ -5,7 +5,7 @@ namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 
 public class TypescriptObjectBuilder
 {
-    private int _indentLevel = 0;
+    private int _indentLevel;
     private readonly StringBuilder _builder = new();
     private readonly string _indent = "    ";
     private readonly string _newLine = "\n";
@@ -36,7 +36,7 @@ public class TypescriptObjectBuilder
     
     public TypescriptObjectBuilder AddProperty(string name, string value)
     {
-        _builder.Append($"{_indent.Repeat(_indentLevel)}{name}: \"{value}\";");
+        _builder.Append($"{_indent.Repeat(_indentLevel)}{name}: \"{value}\",");
         _builder.Append(_newLine);
         return this;
     }

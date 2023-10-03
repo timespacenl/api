@@ -9,7 +9,7 @@ using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.New
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 
-namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.NewTypescriptApiClientGenerator;
+namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator;
 
 public class TypescriptApiClientGenerator : IExternalSourceGenerator
 {
@@ -103,8 +103,6 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
         GenerateCallingFunction(queryParams, pathParams, bodyParams, apiDescription, tsTypePrefix, blockBuilder);
         
         _typeGeneration.AppendLine(blockBuilder.ToString());
-        
-        _logger.LogDebug("Types: {Type} ", "\n" + blockBuilder);
     }
 
     private void GenerateFromApiParameterDescriptions(List<ApiParameterDescription> parameters, string typePrefix, StringBuilder blockBuilder)
