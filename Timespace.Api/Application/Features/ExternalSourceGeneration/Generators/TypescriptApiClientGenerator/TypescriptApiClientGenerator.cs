@@ -5,209 +5,240 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Extensions;
-using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Extensions;
-using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Models;
+using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.NewTypescriptApiClientGenerator.Extensions;
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 
-namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator;
+namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.NewTypescriptApiClientGenerator;
 
-public partial class TypescriptApiClientGenerator : IExternalSourceGenerator
+public class TypescriptApiClientGenerator : IExternalSourceGenerator
 {
     private readonly ILogger<TypescriptApiClientGenerator> _logger;
-    private readonly IApiDescriptionGroupCollectionProvider _apiExplorer;
     private readonly Compilation _compilation;
-    private readonly ExternalSourceGenerationSettings _options;
-    
+    private readonly IApiDescriptionGroupCollectionProvider _apiExplorer;
     private readonly StringBuilder _generation = new();
     private readonly StringBuilder _typeGeneration = new();
     private readonly StringBuilder _enumGeneration = new();
     private readonly List<string> _generatedEnums = new();
-    
-    public TypescriptApiClientGenerator(ILogger<TypescriptApiClientGenerator> logger, IApiDescriptionGroupCollectionProvider apiExplorer, Compilation compilation, IOptions<ExternalSourceGenerationSettings> options)
+    private readonly ExternalSourceGenerationSettings _options;
+
+    public TypescriptApiClientGenerator(Compilation compilation, IApiDescriptionGroupCollectionProvider apiExplorer, ILogger<TypescriptApiClientGenerator> logger, IOptions<ExternalSourceGenerationSettings> options)
     {
-        _logger = logger;
-        _apiExplorer = apiExplorer;
         _compilation = compilation;
+        _apiExplorer = apiExplorer;
+        _logger = logger;
         _options = options.Value;
     }
 
     public void Execute()
     {
-        // var apiDescriptionGroups = _apiExplorer.ApiDescriptionGroups.Items;
-        // foreach (var apiDescriptionGroup in apiDescriptionGroups)
-        // {
-        //     var endpointDescriptions = GetEndpointInfoForApiDescriptionGroup(apiDescriptionGroup.Items, apiDescriptionGroup.GroupName);
-        //     
-        //     foreach (var endpointDescription in endpointDescriptions)
-        //     {
-        //         GenerateTypescriptCode(endpointDescription);
-        //     }
-        // }
-        //
-        // _generation.Append(Constants.ApiClientHeaders);
-        // _generation.Append(Constants.ApiClientGenericCallables);
-        // _generation.Append(_enumGeneration);
-        // _generation.Append(_typeGeneration);
-        //
-        // File.WriteAllText(_options.TypescriptGenerator.GenerationPath + '\\' + _options.TypescriptGenerator.GenerationFileName + ".ts", _generation.ToString());
-        //
-        // _logger.LogDebug("Generated typescript api client.");
-    }
-
-    private void GenerateTypescriptCode(EndpointInfo endpointInfo)
-    {
-        var requestSchema = GenerateTypes(endpointInfo, endpointInfo.Request);
-        _typeGeneration.Append(requestSchema);
-        
-        var responseSchema = GenerateTypes(endpointInfo, endpointInfo.Response);
-        _typeGeneration.Append(responseSchema);
-        
-        var callingFunction = GenerateCallingFunction(endpointInfo);
-        _typeGeneration.AppendLine(callingFunction);
-        _typeGeneration.AppendLine();
-    }
-    
-    private string GenerateTypes(EndpointInfo endpointInfo, ObjectInfo objectInfo)
-    {
-        var blockBuilder = new StringBuilder();
-        
-        blockBuilder = GenerateTsTypeWithChildren(endpointInfo.HandlerClassSymbol.Name.ToPascalCase(), objectInfo, blockBuilder);
-        
-        return blockBuilder.ToString();
-    }
-    
-    private StringBuilder GenerateTsTypeWithChildren(string handlerClassPrefix, ObjectInfo objectInfo, StringBuilder blockBuilder)
-    {
-        var tsType = new TypescriptTypeBuilder(handlerClassPrefix + objectInfo.Name);
-
-        foreach (var member in objectInfo.Members)
+        var apiDescriptionGroups = _apiExplorer.ApiDescriptionGroups.Items;
+        foreach (var apiDescriptionGroup in apiDescriptionGroups)
         {
-            if (member.Children.Count == 0)
+            foreach (var apiDescription in apiDescriptionGroup.Items)
             {
-                var nullable = member.OriginalSymbol.NullableAnnotation == NullableAnnotation.Annotated;
-                if (member.Type.TypeKind == TypeKind.Enum)
+                GenerateCodeForApiDescription(apiDescription);
+            }
+        }
+
+        _generation.AppendLine(Constants.ApiClientHeaders);
+        _generation.AppendLine(_enumGeneration.ToString());
+        _generation.AppendLine(_typeGeneration.ToString());
+        
+        File.WriteAllText(_options.TypescriptGenerator.GenerationPath + '\\' + _options.TypescriptGenerator.GenerationFileName + ".ts", _generation.ToString());
+    }
+
+    private void GenerateCodeForApiDescription(ApiDescription apiDescription)
+    {
+        var returnType = apiDescription.SupportedResponseTypes.FirstOrDefault(x => x.StatusCode is >= 200 and < 300 );
+
+        if (returnType is null)
+        {
+            _logger.LogError("API endpoint with route url {RouteUrl} does not have a return type specified", apiDescription.RelativePath);
+            return;
+        }
+        
+        var handlerName = returnType.Type?.FullName?.Split('.').Last().Split('+').FirstOrDefault();
+        if (handlerName is null)
+        {
+            _logger.LogError("API endpoint with route url {RouteUrl} does not have a valid handler name", apiDescription.RelativePath);
+            return;
+        }
+
+        var tsTypePrefix = $"{handlerName}Request";
+        var tsType = new TypescriptTypeBuilder(tsTypePrefix);
+
+        var queryParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Query).ToList();
+        var pathParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Path).ToList();
+        var bodyParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Body).ToList();
+
+        var blockBuilder = new StringBuilder();
+
+        if (queryParams.Count > 0)
+        {
+            GenerateFromApiParameterDescriptions(queryParams, tsTypePrefix + "Query", blockBuilder);
+            tsType.AddProperty("query", tsTypePrefix + "Query");
+        }
+
+        if (pathParams.Count > 0)
+        {
+            GenerateFromApiParameterDescriptions(pathParams, tsTypePrefix + "Path", blockBuilder);
+            tsType.AddProperty("path", tsTypePrefix + "Path");
+        }
+
+        if (bodyParams.Count > 0)
+        {
+            GenerateFromApiParameterDescriptions(bodyParams, tsTypePrefix + "Body", blockBuilder);
+            tsType.AddProperty("body", tsTypePrefix + "Body");
+        }
+        
+        blockBuilder.AppendLine(tsType.Build());
+        blockBuilder.AppendLine();
+        
+        // Add the response type to the ts generation
+        var responseTsType = new TypescriptTypeBuilder(tsTypePrefix + "Response");
+        GenerateFromType(returnType.Type!, tsTypePrefix, blockBuilder, responseTsType);
+        
+        
+        GenerateCallingFunction(queryParams, pathParams, bodyParams, apiDescription, tsTypePrefix, blockBuilder);
+        
+        _typeGeneration.AppendLine(blockBuilder.ToString());
+        
+        _logger.LogDebug("Types: {Type} ", "\n" + blockBuilder);
+    }
+
+    private void GenerateFromApiParameterDescriptions(List<ApiParameterDescription> parameters, string typePrefix, StringBuilder blockBuilder)
+    {
+        var tsType = new TypescriptTypeBuilder(typePrefix);
+        
+        foreach (var parameter in parameters)
+        {
+            var paramType = parameter.Type.IsList() ? parameter.Type.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : parameter.Type;
+
+            if (parameter.Name.ToLower() is "body" or "command")
+            {
+                GenerateFromType(paramType, typePrefix, blockBuilder, tsType);
+                return;
+            } 
+            
+            if (Constants.TsTypeMapping.Keys.Contains(paramType.Name))
+            {
+                tsType.AddProperty(parameter.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullable(), parameter.Type.IsList());
+            }
+            else
+            {
+                if (paramType.IsEnum)
                 {
-                    GenerateEnum(member.Type);
-                    tsType.AddProperty(member.Name.ToCamelCase(), member.Type.Name, nullable, member.IsList);
+                    GenerateEnum(paramType);
+                    tsType.AddProperty(parameter.Name.ToCamelCase(), paramType.Name, paramType.IsNullable(), parameter.Type.IsList());
                 }
                 else
                 {
-                    tsType.AddProperty(member.Name.ToCamelCase(), member.Type.GetTsType(), nullable, member.IsList);
+                    GenerateFromType(paramType, typePrefix, blockBuilder);
+                    tsType.AddProperty(parameter.Name.ToCamelCase(), typePrefix + paramType.Name, paramType.IsNullable(), parameter.Type.IsList());
                 }
-            }
-            else
-            {
-                var newTypeName = GenerateTsTypeFromMemberinfo(handlerClassPrefix, member, blockBuilder);
-                tsType.AddProperty(member.Name.ToCamelCase(), newTypeName, member.IsList);
             }
         }
         
         blockBuilder.AppendLine(tsType.Build());
         blockBuilder.AppendLine();
-        return blockBuilder;
     }
-
-    private string GenerateTsTypeFromMemberinfo(string handlerClassPrefix, MemberInfo memberInfo, StringBuilder blockBuilder)
+    
+    private void GenerateFromType(Type type, string typePrefix, StringBuilder blockBuilder, TypescriptTypeBuilder? appendTo = null)
     {
-        var typeName = handlerClassPrefix + memberInfo.Type.Name;
-        var tsType = new TypescriptTypeBuilder(typeName);
-
-        foreach (var member in memberInfo.Children)
+        var tsType = appendTo ?? new TypescriptTypeBuilder(typePrefix + type.Name);
+        
+        foreach (var property in type.GetProperties())
         {
-            if (member.Children.Count == 0)
+            var paramType = property.PropertyType.IsList() ? property.PropertyType.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : property.PropertyType;
+            if (Constants.TsTypeMapping.Keys.Contains(paramType.Name))
             {
-                var nullable = member.OriginalSymbol.NullableAnnotation == NullableAnnotation.Annotated;
-                if (member.Type.TypeKind == TypeKind.Enum)
-                {
-                    GenerateEnum(member.Type);
-                    tsType.AddProperty(member.Name.ToCamelCase(), member.Type.Name, nullable, member.IsList);
-                } 
-                else 
-                {
-                    tsType.AddProperty(member.Name.ToCamelCase(), member.Type.GetTsType(), nullable, member.IsList);
-                }
+                tsType.AddProperty(property.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullable(), property.PropertyType.IsList());
             }
             else
             {
-                var newTypeName = GenerateTsTypeFromMemberinfo(handlerClassPrefix, member, blockBuilder);
-                tsType.AddProperty(member.Name.ToCamelCase(), newTypeName, member.IsList);
+                if (paramType.IsEnum)
+                {
+                    GenerateEnum(paramType);
+                    tsType.AddProperty(property.Name.ToCamelCase(), paramType.Name, paramType.IsNullable(), property.PropertyType.IsList());
+                }
+                else
+                {
+                    GenerateFromType(paramType, typePrefix, blockBuilder);
+                    tsType.AddProperty(property.Name.ToCamelCase(), typePrefix + paramType.Name, paramType.IsNullable(), property.PropertyType.IsList());
+                }
             }
         }
         
         blockBuilder.AppendLine(tsType.Build());
         blockBuilder.AppendLine();
-        return typeName;
     }
 
-    private void GenerateEnum(ITypeSymbol enumPropertyType)
+    private void GenerateEnum(Type enumType)
     {
-        if(_generatedEnums.Contains(enumPropertyType.Name))
+        if(_generatedEnums.Contains(enumType.Name))
             return;
         
-        var enumBuilder = new TypescriptEnumBuilder(enumPropertyType.Name);
-        
-        var members = enumPropertyType.GetMembers().OfType<IFieldSymbol>();
-        foreach (var member in members)
+        var enumBuilder = new TypescriptEnumBuilder(enumType.Name);
+
+        var names = Enum.GetNames(enumType).ToList();
+        var values = Enum.GetValues(enumType).Cast<int>().Select(x => x.ToString()).ToList();
+        foreach (var name in names)
         {
-            if (member.ConstantValue?.GetType() == typeof(int))
-            {
-                enumBuilder.AddNumberEnumProperty(member.Name, member.ConstantValue.ToString()!);
-            }
+            enumBuilder.AddNumberEnumProperty(name, values[names.IndexOf(name)]);
         }
         
-        _generatedEnums.Add(enumPropertyType.Name);
         _enumGeneration.AppendLine(enumBuilder.Build());
         _enumGeneration.AppendLine();
+        _generatedEnums.Add(enumType.Name);
     }
-
-    private string GenerateCallingFunction(EndpointInfo endpointInfo)
+    
+    private void GenerateCallingFunction(List<ApiParameterDescription> queryParams, List<ApiParameterDescription> pathParams, List<ApiParameterDescription> bodyParams, ApiDescription apiDescription, string tsTypePrefix, StringBuilder blockBuilder)
     {
-        var code = new StringBuilder();
-        var url = endpointInfo.Url;
-        var method = endpointInfo.HttpMethod;
+        var codeBuilder = new StringBuilder();
+        var method = apiDescription.HttpMethod;
 
-        var handlerClassPrefix = endpointInfo.HandlerClassSymbol.Name.ToPascalCase();
+        codeBuilder.Append(
+            $"export const {tsTypePrefix.Replace("Request", "").ToCamelCase()} = (fetch: FetchType, request: {tsTypePrefix}) => ");
         
-        code.Append($"export const {handlerClassPrefix.ToCamelCase()} = (fetch: FetchType, request: {handlerClassPrefix}{endpointInfo.Request.Name}) => ");
-
-        var pathParams = endpointInfo.Parameters.Where(x => x.BindingInfo?.BindingSource == BindingSource.Path);
-        var queryParams = endpointInfo.Parameters.Where(x => x.BindingInfo?.BindingSource == BindingSource.Query);
-        
-        var queryBuilder = new UrlQueryParamBuilder();
-        
-        foreach (var parameter in queryParams)
-        {
-            queryBuilder.Add(parameter.Name.ToCamelCase(), $"${{request.{parameter.ModelMetadata.PropertyName?.ToCamelCase()}}}");
-        }
-
-        foreach (var parameter in pathParams)
-        {
-            url = url.Replace($"{{{parameter.Name.ToCamelCase()}}}", $"${{request.{parameter.ModelMetadata.PropertyName?.ToCamelCase()}}}");
-        }
-        
-        url += queryBuilder.ToString();
-        
-        var bodyType = endpointInfo.Parameters.FirstOrDefault(x => x.BindingInfo?.BindingSource == BindingSource.Body);
-        var bodyFunctionCallString = bodyType != null ? $"request.{bodyType.ModelMetadata.PropertyName?.ToCamelCase()}" : "request";
-        if (!pathParams.Any() && !queryParams.Any())
-            bodyFunctionCallString = "request";
+        var bodyCallString = bodyParams.Count > 0 ? "request.body" : "{}";
         
         var functionCall = method switch
         {
             "GET" =>
-                $"genericGet<{handlerClassPrefix}{bodyType?.Type.Name ?? endpointInfo.Request.Name}, {handlerClassPrefix}{endpointInfo.Response.Name}>(fetch, `{url}`);",
+                $"genericGet<{tsTypePrefix}Response>(fetch, `{GenerateUrl(apiDescription.RelativePath!, queryParams, pathParams)}`);",
             "POST" =>
-                $"genericPost<{handlerClassPrefix}{bodyType?.Type.Name ?? endpointInfo.Request.Name}, {handlerClassPrefix}{endpointInfo.Response.Name}>(fetch, `{url}`, {bodyFunctionCallString});",
+                $"genericPost<{tsTypePrefix}Response>(fetch, `{GenerateUrl(apiDescription.RelativePath!, queryParams, pathParams)}`, {bodyCallString});",
             "PUT" =>
-                $"fetch<{handlerClassPrefix}{endpointInfo.Response.Name}>(`{url}`, {{ method: 'PUT', body: JSON.stringify(request) }});",
+                $"genericPost<{tsTypePrefix}Body, {tsTypePrefix}Response>(fetch, `{GenerateUrl(apiDescription.RelativePath!, queryParams, pathParams)}`);",
             "DELETE" =>
-                $"fetch<{handlerClassPrefix}{endpointInfo.Response.Name}>(`{url}`, {{ method: 'DELETE', body: JSON.stringify(request) }});",
+                $"genericPost<{tsTypePrefix}Body, {tsTypePrefix}Response>(fetch, `{GenerateUrl(apiDescription.RelativePath!, queryParams, pathParams)}`);",
             _ => throw new ArgumentOutOfRangeException()
         };
         
-        code.Append("\n\t" + functionCall);
+        codeBuilder.Append("\n\t" + functionCall);
+        
+        blockBuilder.AppendLine(codeBuilder.ToString());
+        blockBuilder.AppendLine();
+    }
 
-        return code.ToString();
+    private string GenerateUrl(string relativePath, List<ApiParameterDescription> queryParams,
+        List<ApiParameterDescription> pathParams)
+    {
+        var queryBuilder = new UrlQueryParamBuilder();
+    
+        foreach (var parameter in queryParams)
+        {
+            queryBuilder.Add(parameter.Name.ToCamelCase(), $"${{request.query.{parameter.Name.ToCamelCase()}}}");
+        }
+
+        foreach (var parameter in pathParams)
+        {
+            relativePath = relativePath.Replace($"{{{parameter.Name.ToCamelCase()}}}", $"${{request.path.{parameter.ModelMetadata.PropertyName?.ToCamelCase()}}}");
+        }
+        
+        relativePath += queryBuilder.ToString();
+        
+        return relativePath;
     }
 }
