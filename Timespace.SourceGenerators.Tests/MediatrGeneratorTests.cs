@@ -19,7 +19,7 @@ public static partial class WrapperClass
 
     public record Response();
 
-    public static async Task<Response> Handle(Command command, AppDbContext dbContext, IOptions<Thing> options, CancellationToken ct)
+    public static async Task<Response> Handle(Command command, CancellationToken ct)
     {
         return new Response();
     }

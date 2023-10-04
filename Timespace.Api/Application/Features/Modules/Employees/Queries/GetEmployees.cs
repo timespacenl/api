@@ -1,36 +1,20 @@
 ﻿using FluentValidation;
 using MediatR;
 using Timespace.Api.Infrastructure.Persistence;
+using Timespace.SourceGenerators;
 
 namespace Timespace.Api.Application.Features.Modules.Employees.Queries;
 
-public static class GetEmployees {
-    public record Query : IRequest<Response>
+[GenerateMediatr]
+public static partial class GetEmployees
+{
+    public partial record Query;
+
+    public record Response(string Test);
+    
+    private static async Task<Response> Handle(Query request, CancellationToken cancellationToken)
     {
-        
-    }
-    
-    public record Response()
-    {
-        
-    }
-    
-    public class Handler : IRequestHandler<Query, Response>
-    {
-        private readonly AppDbContext _db;
-    
-        public Handler(AppDbContext db)
-        {
-            _db = db;
-        }
-    
-        public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
-        {
-            return new Response
-            {
-            
-            };
-        }
+        return new Response("Test");
     }
     
     public class QueryValidator : AbstractValidator<Query>

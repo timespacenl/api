@@ -2,13 +2,14 @@
 
 namespace Timespace.SourceGenerators;
 
-public record struct MediatrGeneratable
+public readonly record struct MediatrGeneratable
 {
     public string WrapperClassName { get; init; }
     public string Fqns { get; init; }
     public string RequestTypeName { get; init; }
     public string ResponseTypeName { get; init; }
     public EquatableArray<(string TypeName, string ParameterName)> Dependencies { get; init; }
+    public bool HasDependencies => Dependencies.Count > 0;
     
     public MediatrGeneratable(string wrapperClassName, string fqns, List<(string, string)> handleMethodParameters, string requestTypeName, string responseTypeName)
     {

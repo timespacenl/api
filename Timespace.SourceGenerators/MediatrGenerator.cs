@@ -35,7 +35,8 @@ public class MediatrGenerator : IIncrementalGenerator
                 var handlerDependencies = string.Join("\n", generatable.Dependencies.Select(x => $"private readonly {x.TypeName} _{x.ParameterName};"));
                 var handlerDependenciesConstructorArguments = string.Join(",\n\t\t\t\t\t   ", generatable.Dependencies.Select(x => $"{x.TypeName} {x.ParameterName}"));
                 var handlerDependenciesConstructorAssignments = string.Join("\n", generatable.Dependencies.Select(x => $"_{x.ParameterName} = {x.ParameterName};"));
-                var handlerDependenciesStaticCallArguments = string.Join(", ", generatable.Dependencies.Select(x => $"_{x.ParameterName}"));
+                var handlerDependenciesStaticCallArguments = string.Join(", ", generatable.Dependencies.Select(x => $"_{x.ParameterName}")) +
+                                                             (generatable.Dependencies.Count > 0 ? "," : "");
                 
                 var source = ThisAssembly.Resources.MediatrGenerationTemplate.Text;
                 var template = Template.ParseLiquid(source);
@@ -45,10 +46,11 @@ public class MediatrGenerator : IIncrementalGenerator
                     generatable.WrapperClassName,
                     generatable.RequestTypeName,
                     generatable.ResponseTypeName,
+                    generatable.HasDependencies,
                     handlerDependencies,
                     handlerDependenciesConstructorArguments,
                     handlerDependenciesConstructorAssignments,
-                    handlerDependenciesStaticCallArguments
+                    handlerDependenciesStaticCallArguments,
                 };
                 
                 var result = template.Render(model);
