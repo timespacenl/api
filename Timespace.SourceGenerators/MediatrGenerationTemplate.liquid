@@ -6,7 +6,7 @@ public static partial class {{wrapper_class_name}} {
     public partial record {{request_type_name}} : IRequest<{{response_type_name}}>;
 
     public class Handler : IRequestHandler<{{request_type_name}}, {{response_type_name}}> {
-        {% if has_dependencies %}
+{% if has_dependencies %}
         {{handler_dependencies}}
             
         public Handler({{handler_dependencies_constructor_arguments}}
@@ -14,7 +14,7 @@ public static partial class {{wrapper_class_name}} {
             {{handler_dependencies_constructor_assignments}}
         }
             
-        {% endif %}
+{% endif %}
         public async Task<{{response_type_name}}> Handle({{request_type_name}} request, CancellationToken cancellationToken) {
             return await {{wrapper_class_name}}.Handle(request, {% if has_dependencies %}{{handler_dependencies_static_call_arguments}} cancellationToken{% else %}cancellationToken{% endif %});
         }
