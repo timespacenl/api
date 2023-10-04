@@ -1,4 +1,4 @@
-﻿using Timespace.Api.Infrastructure.AccessControl;
+﻿// ReSharper disable MemberHidesStaticFromOuterClass
 
 namespace Timespace.Api.Application.Features.AccessControl;
 

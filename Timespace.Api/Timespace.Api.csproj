@@ -69,4 +69,8 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Timespace.IntegrationTests" />
     </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="../Timespace.SourceGenerators/Timespace.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
 </Project>

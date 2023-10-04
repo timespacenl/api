@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <IsPackable>false</IsPackable>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <IsRoslynComponent>true</IsRoslynComponent>
+
+        <RootNamespace>Timespace.SourceGenerators</RootNamespace>
+        <PackageId>Timespace.SourceGenerators</PackageId>
+
+        <NoWarn>$(NoWarn);RS1035;CA1310</NoWarn>
+
+        <!-- Avoid figuring out an actual dependency on Scriban -->
+        <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+
+        <!-- Scriban fails a lot of things in latest-all... -->
+        <AnalysisLevel>latest-default</AnalysisLevel>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.7.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.7.0" />
+        <PackageReference Include="ThisAssembly.Resources" Version="1.4.1" PrivateAssets="all" />
+        <PackageReference Include="Scriban" Version="5.9.0" IncludeAssets="build" />
+        <PackageReference Include="PolySharp" Version="1.13.2" PrivateAssets="All" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="*.generator.cs" />
+        <EmbeddedResource Include="*.generator.cs" />
+
+        <None Remove="*.liquid" />
+        <EmbeddedResource Include="*.liquid" Kind="Text" />
+    </ItemGroup>
+
+</Project>

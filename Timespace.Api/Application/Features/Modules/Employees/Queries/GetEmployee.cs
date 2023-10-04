@@ -2,10 +2,26 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.Modules.Employees.Exceptions;
+using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Persistence;
+using Timespace.SourceGenerators;
 
 namespace Timespace.Api.Application.Features.Modules.Employees.Queries;
+
+[GenerateMediatr]
+public static partial class GetEmployee2
+{
+    public partial record Command(string E12);
+    
+    public record Response;
+    
+    private static async Task<Response> Handle(Command command, AppDbContext db, CancellationToken ct)
+    {
+        return new Response();
+    }
+}
 
 public static class GetEmployee {
     public record Query : IRequest<Response>
