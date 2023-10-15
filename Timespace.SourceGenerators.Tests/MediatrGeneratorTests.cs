@@ -9,26 +9,26 @@ namespace Timespace.SourceGenerators.Tests;
 
 public class MediatrGeneratorTests
 {
-    private const string Sample = @"
-namespace Timespace.Api.Application.Features.Modules.Test.Queries;
-
-[Timespace.SourceGenerators.GenerateMediatr]
-public static partial class WrapperClass
-{
-    public partial record Command();
-
-    public record Response();
-
-    public static async Task<Response> Handle(Command command, CancellationToken ct)
-    {
-        return new Response();
-    }
-}";
-
     [Fact]
-    public void GenerateReportMethod()
+    public void GenerateMediatr_HappyPath()
     {
-        Compilation inputCompilation = CreateCompilation(Sample);
+        const string sample = @"
+            namespace Timespace.Api.Application.Features.Modules.Test.Queries;
+
+            [Timespace.SourceGenerators.GenerateMediatr]
+            public static partial class WrapperClass
+            {
+                public partial record Command();
+
+                public record Response();
+
+                public static async Task<Response> Handle(Command command, CancellationToken ct)
+                {
+                    return new Response();
+                }
+            }";
+        
+        Compilation inputCompilation = CreateCompilation(sample);
         
         // Create an instance of the source generator.
         var generator = new MediatrGenerator();
@@ -42,7 +42,73 @@ public static partial class WrapperClass
 
         // Or we can look at the results directly:
         GeneratorDriverRunResult runResult = driver.GetRunResult();
-        var a = 0;
+        
+        Assert.True(runResult.GeneratedTrees.Length == 2);
+        Assert.Empty(diagnostics);
+    }
+    
+    [Fact]
+    public void GenerateMediatr_NoHandleMethod()
+    {
+        const string sample = @"
+            namespace Timespace.Api.Application.Features.Modules.Test.Queries;
+
+            [Timespace.SourceGenerators.GenerateMediatr]
+            public static partial class WrapperClass
+            {
+                public partial record Command();
+
+                public record Response();
+            }";
+        
+        Compilation inputCompilation = CreateCompilation(sample);
+        
+        // Create an instance of the source generator.
+        var generator = new MediatrGenerator();
+
+        // Source generators should be tested using 'GeneratorDriver'.
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+
+        // Run the generation pass
+        // (Note: the generator driver itself is immutable, and all calls return an updated version of the driver that you should use for subsequent calls)
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
+
+        // Or we can look at the results directly:
+        GeneratorDriverRunResult runResult = driver.GetRunResult();
+        
+        Assert.True(runResult.GeneratedTrees.Length == 1);
+        Assert.Empty(diagnostics);
+    }
+    
+    [Fact]
+    public void GenerateMediatr_NoCommand()
+    {
+        const string sample = @"
+            namespace Timespace.Api.Application.Features.Modules.Test.Queries;
+
+            [Timespace.SourceGenerators.GenerateMediatr]
+            public static partial class WrapperClass
+            {
+                public record Response();
+            }";
+        
+        Compilation inputCompilation = CreateCompilation(sample);
+        
+        // Create an instance of the source generator.
+        var generator = new MediatrGenerator();
+
+        // Source generators should be tested using 'GeneratorDriver'.
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+
+        // Run the generation pass
+        // (Note: the generator driver itself is immutable, and all calls return an updated version of the driver that you should use for subsequent calls)
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
+
+        // Or we can look at the results directly:
+        GeneratorDriverRunResult runResult = driver.GetRunResult();
+        
+        Assert.True(runResult.GeneratedTrees.Length == 1);
+        Assert.Empty(diagnostics);
     }
     
     private static Compilation CreateCompilation(string source)

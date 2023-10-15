@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Timespace.SourceGenerators;
+namespace Timespace.SourceGenerators.Helpers;
 
 /// <summary>
 /// Polyfill for .NET 6 HashCode  

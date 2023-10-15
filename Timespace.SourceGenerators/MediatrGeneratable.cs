@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Timespace.SourceGenerators.Helpers;
 
-namespace Timespace.SourceGenerators;
+namespace Timespace.SourceGenerators.MediatrSourceGenerator;
 
 public readonly record struct MediatrGeneratable
 {

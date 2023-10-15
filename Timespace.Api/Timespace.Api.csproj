@@ -72,5 +72,6 @@
     
     <ItemGroup>
         <ProjectReference Include="../Timespace.SourceGenerators/Timespace.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\Timespace.Analyzers\Timespace.Analyzers\Timespace.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 </Project>

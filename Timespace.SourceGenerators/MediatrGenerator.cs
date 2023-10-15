@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System.Linq;
 using Scriban;
+using Timespace.SourceGenerators.MediatrSourceGenerator;
 
 namespace Timespace.SourceGenerators;
 
@@ -35,8 +36,7 @@ public class MediatrGenerator : IIncrementalGenerator
                 var handlerDependencies = string.Join("\n", generatable.Dependencies.Select(x => $"private readonly {x.TypeName} _{x.ParameterName};"));
                 var handlerDependenciesConstructorArguments = string.Join(",\n\t\t\t\t\t   ", generatable.Dependencies.Select(x => $"{x.TypeName} {x.ParameterName}"));
                 var handlerDependenciesConstructorAssignments = string.Join("\n", generatable.Dependencies.Select(x => $"_{x.ParameterName} = {x.ParameterName};"));
-                var handlerDependenciesStaticCallArguments = string.Join(", ", generatable.Dependencies.Select(x => $"_{x.ParameterName}")) +
-                                                             (generatable.Dependencies.Count > 0 ? "," : "");
+                var handlerDependenciesStaticCallArguments = string.Join(", ", generatable.Dependencies.Select(x => $"_{x.ParameterName}"));
                 
                 var source = ThisAssembly.Resources.MediatrGenerationTemplate.Text;
                 var template = Template.ParseLiquid(source);
@@ -61,32 +61,36 @@ public class MediatrGenerator : IIncrementalGenerator
 
     private static MediatrGeneratable? GetTypeToGenerate(GeneratorAttributeSyntaxContext context, CancellationToken ct)
     {
-        var node = context.TargetNode as ClassDeclarationSyntax ?? throw new Exception("Node is not a class: " + context.TargetNode);
+        var node = (ClassDeclarationSyntax)context.TargetNode;
         
-        var classSymbol = context.SemanticModel.GetDeclaredSymbol(node) as INamedTypeSymbol ?? throw new Exception("Class symbol not found");
+        var classSymbol = (INamedTypeSymbol)context.SemanticModel.GetDeclaredSymbol(node)!;
         
-        var handleMethod = classSymbol.GetMembers("Handle").FirstOrDefault() as IMethodSymbol ?? throw new Exception("Handle method not found for class with name: " + classSymbol.Name);
+        var handleMethodMember = classSymbol.GetMembers("Handle").FirstOrDefault();
+        if(handleMethodMember is not IMethodSymbol handleMethodSymbol)
+            return null;
         
-        var dependencies = handleMethod.Parameters.Select(x =>
-        {
-            var type = x.Type as INamedTypeSymbol;
-            
-            if(type is null)
-                return (x.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), x.Name);
-            
-            var typename = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            
-            return (typename, x.Name);
-        }).ToList();
+        var dependencies = handleMethodSymbol.Parameters
+            .Select(x => (
+                x.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), 
+                x.Name)
+            )
+            .ToList();
         
+        // Remove the first and last parameters, which are the request and the cancellation token
         dependencies.RemoveAt(0);
         dependencies.RemoveAt(dependencies.Count - 1);
         
-        var requestTypeName = handleMethod.Parameters.FirstOrDefault()?.Type.Name;
-        var responseTypeName = (handleMethod.ReturnType as INamedTypeSymbol)!.IsGenericType ? (handleMethod.ReturnType as INamedTypeSymbol)?.TypeArguments.FirstOrDefault()?.Name : handleMethod.ReturnType.Name;
+        var requestTypeName = handleMethodSymbol.Parameters.FirstOrDefault()?.Type.Name;
         
-        if(requestTypeName is null || responseTypeName is null)
+        if(requestTypeName is null)
             return null;
+
+        string responseTypeName;
+        
+        if(handleMethodSymbol.ReturnType is INamedTypeSymbol returnTypeSymbol)
+            responseTypeName =  returnTypeSymbol.TypeArguments.FirstOrDefault()?.Name ?? handleMethodSymbol.ReturnType.Name;
+        else
+            responseTypeName = handleMethodSymbol.ReturnType.Name;
         
         return new MediatrGeneratable(classSymbol.Name, classSymbol.ContainingNamespace.ToString(), dependencies, requestTypeName, responseTypeName);
     }

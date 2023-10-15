@@ -14,6 +14,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timespace.SourceGenerators"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timespace.SourceGenerators.Tests", "Timespace.SourceGenerators.Tests\Timespace.SourceGenerators.Tests.csproj", "{F977EE1F-A96C-498E-82B6-1751F3F10BD4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timespace.Analyzers", "Timespace.Analyzers\Timespace.Analyzers\Timespace.Analyzers.csproj", "{90E16A87-CC0C-4D22-88A9-9DA296615392}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timespace.Analyzers.Tests", "Timespace.Analyzers\Timespace.Analyzers.Tests\Timespace.Analyzers.Tests.csproj", "{E2DA5F83-CDF5-4E0C-99F3-A154245549DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +29,8 @@ Global
 		{8327EC82-A951-4C12-A9AB-82CE39FB55E0} = {D5930570-9CDC-4D85-9FC7-1520512ADFB2}
 		{7A27ECDF-5D03-476E-AA3B-92E184306C6D} = {999CC7AC-5A43-4472-ACC4-5F1EC542FD1D}
 		{F977EE1F-A96C-498E-82B6-1751F3F10BD4} = {999CC7AC-5A43-4472-ACC4-5F1EC542FD1D}
+		{90E16A87-CC0C-4D22-88A9-9DA296615392} = {999CC7AC-5A43-4472-ACC4-5F1EC542FD1D}
+		{E2DA5F83-CDF5-4E0C-99F3-A154245549DA} = {999CC7AC-5A43-4472-ACC4-5F1EC542FD1D}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{78AA330D-83F2-4FCB-9A0D-51376CC3B100}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -47,5 +53,13 @@ Global
 		{F977EE1F-A96C-498E-82B6-1751F3F10BD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F977EE1F-A96C-498E-82B6-1751F3F10BD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F977EE1F-A96C-498E-82B6-1751F3F10BD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90E16A87-CC0C-4D22-88A9-9DA296615392}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90E16A87-CC0C-4D22-88A9-9DA296615392}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90E16A87-CC0C-4D22-88A9-9DA296615392}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90E16A87-CC0C-4D22-88A9-9DA296615392}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2DA5F83-CDF5-4E0C-99F3-A154245549DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2DA5F83-CDF5-4E0C-99F3-A154245549DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2DA5F83-CDF5-4E0C-99F3-A154245549DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2DA5F83-CDF5-4E0C-99F3-A154245549DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

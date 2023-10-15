@@ -1,4 +1,4 @@
-﻿namespace Timespace.SourceGenerators
+﻿namespace Timespace.SourceGenerators.MediatrSourceGenerator
 {
     public static class SourceGenerationHelper
     {
