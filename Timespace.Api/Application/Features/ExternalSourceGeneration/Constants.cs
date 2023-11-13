@@ -9,7 +9,7 @@ public static class Constants
             {"Int32", "number"},
             {"Double", "number"},
             {"Boolean", "boolean"},
-            {"Instant", "Date"},
+            {"Instant", "Dayjs"},
         };
 
     public static readonly Dictionary<string, string> ZodTypeMapping = new Dictionary<string, string>()
@@ -39,7 +39,7 @@ public static class Constants
     public static readonly string ApiClientHeaders = """
           import { genericPost, genericGet } from '../api-generics';
           import type { FetchType } from '../api-generics';
-          
+          import type { Dayjs } from 'dayjs';
 
           """;
 }

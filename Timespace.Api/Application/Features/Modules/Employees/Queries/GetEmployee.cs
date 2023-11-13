@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Timespace.Api.Application.Features.Modules.Employees.Common;
 using Timespace.Api.Application.Features.Modules.Employees.Exceptions;
 using Timespace.Api.Infrastructure.Persistence;
 using Timespace.SourceGenerators;
@@ -14,6 +14,8 @@ public static partial class GetEmployee {
     {
         [FromRoute(Name = "employeeId")]
         public Guid EmployeeId { get; init; }
+        [FromBody]
+        public SharedType SharedType { get; init; } = null!;
     }
     
     public record Response
@@ -22,6 +24,8 @@ public static partial class GetEmployee {
         public string FirstName { get; init; } = null!;
         public string LastName { get; init; } = null!;
         public string Email { get; init; } = null!;
+        public SharedType SharedType { get; init; } = null!;
+        public SharedType SharedType2 { get; init; } = null!;
     }
     
     private static async Task<Response> Handle(Query request, AppDbContext db, CancellationToken cancellationToken)
@@ -35,7 +39,7 @@ public static partial class GetEmployee {
 
         if (identifier == null)
             throw new EmployeeNotFoundException(); // Should never happen as the user is created with an email identifier
-            
+        
         return new Response
         {
             EmployeeId = employeeIdentity.Id,
@@ -45,9 +49,9 @@ public static partial class GetEmployee {
         };
     }
     
-    public class QueryValidator : AbstractValidator<Query>
+    public partial class Validator
     {
-        public QueryValidator()
+        public Validator()
         {
             RuleFor(x => x.EmployeeId).NotEmpty();
         }

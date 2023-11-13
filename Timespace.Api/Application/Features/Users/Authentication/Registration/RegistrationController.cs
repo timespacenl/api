@@ -19,7 +19,7 @@ public class RegistrationController : ControllerBase
 
     [HttpPost]
     [MapToApiVersion("1.0")]
-    public async Task<CreateRegistrationFlow.Response> CreateRegistrationFlow([FromQuery] CreateRegistrationFlow.Command command)
+    public async Task<CreateRegistrationFlow.Response> CreateRegistrationFlow(CreateRegistrationFlow.Command command)
     {
         return await _sender.Send(command);
     }

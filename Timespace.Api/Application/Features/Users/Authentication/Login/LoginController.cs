@@ -20,14 +20,12 @@ public class LoginController : ControllerBase
         _clock = clock;
     }
 
-    [GenerateTsClient]
     [HttpGet("{flowId}")]
     public async Task<GetLoginFlow.Response> Get([FromQuery] GetLoginFlow.Query query)
     {
         return await _sender.Send(query);
     }
 
-    [GenerateTsClient]
     [HttpPost]
     public async Task<CreateLoginFlow.Response> CreateLoginFlow(CreateLoginFlow.Command command)
     {
