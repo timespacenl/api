@@ -17,8 +17,7 @@ public class MediatrGenerator : IIncrementalGenerator
     {
         // Add the marker attribute to the compilation
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource(
-            "GenerateMediatrAttribute.g.cs", 
-            SourceText.From(SourceGenerationHelper.Attribute, Encoding.UTF8)));
+            "Attributes.generator.cs", ThisAssembly.Resources.Attributes.Text));
         
         var nodes = context.SyntaxProvider.ForAttributeWithMetadataName("Timespace.SourceGenerators.GenerateMediatrAttribute",
             static (node, _) => node is ClassDeclarationSyntax,

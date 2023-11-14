@@ -28,18 +28,17 @@
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.7.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.7.0" />
         <PackageReference Include="ThisAssembly.Resources" Version="1.4.1" PrivateAssets="all" />
         <PackageReference Include="Scriban" Version="5.9.0" IncludeAssets="build" />
         <PackageReference Include="PolySharp" Version="1.13.2" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="*.generator.cs" />
-        <EmbeddedResource Include="*.generator.cs" />
-
         <None Remove="*.liquid" />
         <EmbeddedResource Include="*.liquid" Kind="Text" />
+
+        <Compile Remove="Attributes.cs" />
+        <EmbeddedResource Include="Attributes.cs" />
     </ItemGroup>
 
 </Project>

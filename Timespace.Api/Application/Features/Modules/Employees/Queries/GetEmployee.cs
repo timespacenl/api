@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Timespace.Api.Application.Features.Modules.Employees.Common;
 using Timespace.Api.Application.Features.Modules.Employees.Exceptions;
 using Timespace.Api.Infrastructure.Persistence;
-using Timespace.SourceGenerators;
 
 namespace Timespace.Api.Application.Features.Modules.Employees.Queries;
 

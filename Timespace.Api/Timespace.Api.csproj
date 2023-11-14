@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -50,20 +50,20 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\Features\Modules\Common" />
-      <Folder Include="Application\Features\Modules\Customers" />
-      <Folder Include="Application\Features\Modules\Employees\Commands" />
-      <Folder Include="Application\Features\Modules\Projects" />
-      <Folder Include="Application\Features\Modules\Schedules" />
-      <Folder Include="Application\Features\Modules\Timesheet" />
-      <Folder Include="Application\Features\Tenants\Settings\Common\" />
-      <Folder Include="Application\Features\Users\Me" />
-      <Folder Include="Application\Features\Users\Settings\Common\" />
+      <Folder Include="Application/Features/Modules/Common" />
+      <Folder Include="Application/Features/Modules/Customers" />
+      <Folder Include="Application/Features/Modules/Employees/Commands" />
+      <Folder Include="Application/Features/Modules/Projects" />
+      <Folder Include="Application/Features/Modules/Schedules" />
+      <Folder Include="Application/Features/Modules/Timesheet" />
+      <Folder Include="Application/Features/Tenants/Settings/Common/" />
+      <Folder Include="Application/Features/Users/Me" />
+      <Folder Include="Application/Features/Users/Settings/Common/" />
       <Folder Include="Migrations" />
     </ItemGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="$(SolutionDir)\BannedSymbols.txt" />
+        <AdditionalFiles Include="$(SolutionDir)/BannedSymbols.txt" />
     </ItemGroup>
 
     <ItemGroup>
@@ -72,6 +72,6 @@
     
     <ItemGroup>
         <ProjectReference Include="../Timespace.SourceGenerators/Timespace.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\Timespace.Analyzers\Timespace.Analyzers\Timespace.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="../Timespace.Analyzers/Timespace.Analyzers/Timespace.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 </Project>
