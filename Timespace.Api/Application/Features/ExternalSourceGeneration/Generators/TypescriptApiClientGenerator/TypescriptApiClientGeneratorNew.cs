@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.CodeAnalysis;
@@ -6,6 +8,8 @@ using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Extensions;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.NewTypescriptApiClientGenerator.Extensions;
+using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.TsGenerators;
+using Timespace.Api.Application.Features.ExternalSourceGeneration.Types;
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 
@@ -21,7 +25,8 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
     private readonly StringBuilder _enumGeneration = new();
     private readonly List<string> _generatedEnums = new();
     private readonly ExternalSourceGenerationSettings _options;
-    private readonly Dictionary<Type, int> _typeCounter = new();
+    private readonly List<GeneratableEndpoint> _generatableEndpoints = new();
+    private HashSet<Type> _seenTypes = new();
 
     public TypescriptApiClientGeneratorNew(Compilation compilation, IApiDescriptionGroupCollectionProvider apiExplorer, ILogger<TypescriptApiClientGeneratorNew> logger, IOptions<ExternalSourceGenerationSettings> options)
     {
@@ -38,200 +43,223 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
         {
             foreach (var apiDescription in apiDescriptionGroup.Items)
             {
-                FindSharedTypes(apiDescription);
-                GenerateCodeForApiDescription(apiDescription);
+                var generatableEndpoint = TransformApiDescription(apiDescription);
+                
+                if (generatableEndpoint is null)
+                    continue;
+                
+                _generatableEndpoints.Add(generatableEndpoint);
+                // GenerateFromEndpoint(generatableEndpoint);
             }
         }
-
+        
+        var sharedTypes = GetSharedTypes(_generatableEndpoints);
+        GenerateSharedTypes(sharedTypes);
+        
         _generation.AppendLine(Constants.ApiClientHeaders);
         _generation.AppendLine(_enumGeneration.ToString());
         _generation.AppendLine(_typeGeneration.ToString());
         
-        var sharedTypes = _typeCounter.Where(x => x.Value > 1).Select(x => new {x.Key, x.Value}).ToList();
-        
         File.WriteAllText(_options.TypescriptGenerator.GenerationPath + '\\' + _options.TypescriptGenerator.GenerationFileName + ".ts", _generation.ToString());
     }
-
-    private void FindSharedTypes(ApiDescription apiDescription)
-    {
-        var returnType = apiDescription.SupportedResponseTypes.FirstOrDefault(x => x.StatusCode is >= 200 and < 300 );
-        
-        if (returnType is null)
-        {
-            _logger.LogError("API endpoint with route url {RouteUrl} does not have a return type specified", apiDescription.RelativePath);
-            return;
-        }
-        
-        if(_typeCounter.ContainsKey(returnType.Type))
-            _typeCounter[returnType.Type] += 1;
-        else
-            _typeCounter.Add(returnType.Type, 1);
-        
-        var queryParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Query).ToList();
-        var pathParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Path).ToList();
-        var bodyParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Body).ToList();
-        
-        FindSharedTypesFromApiParameterDescriptions(queryParams);
-        FindSharedTypesFromApiParameterDescriptions(pathParams);
-        FindSharedTypesFromApiParameterDescriptions(bodyParams);
-    }
-
-    private void FindSharedTypesFromApiParameterDescriptions(List<ApiParameterDescription> parameters)
-    {
-        foreach (var parameter in parameters)
-        {
-            var paramType = parameter.Type.IsList()
-                ? parameter.Type.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null")
-                : parameter.Type;
-
-            if (_typeCounter.ContainsKey(paramType))
-                _typeCounter[paramType] += 1;
-            else
-                _typeCounter.Add(paramType, 1);
-        }
-    }
     
-    private void GenerateCodeForApiDescription(ApiDescription apiDescription)
+    private GeneratableEndpoint? TransformApiDescription(ApiDescription apiDescription)
     {
         var returnType = apiDescription.SupportedResponseTypes.FirstOrDefault(x => x.StatusCode is >= 200 and < 300 );
-
         
-        if (returnType is null)
+        if (returnType?.Type is null)
         {
             _logger.LogError("API endpoint with route url {RouteUrl} does not have a return type specified", apiDescription.RelativePath);
-            return;
+            return null;
         }
-        
-        if(_typeCounter.ContainsKey(returnType.Type))
-            _typeCounter[returnType.Type] += 1;
-        else
-            _typeCounter.Add(returnType.Type, 1);
         
         var handlerName = returnType.Type?.FullName?.Split('.').Last().Split('+').FirstOrDefault();
         if (handlerName is null)
         {
             _logger.LogError("API endpoint with route url {RouteUrl} does not have a valid handler name", apiDescription.RelativePath);
-            return;
+            return null;
         }
 
         var tsTypePrefix = $"{handlerName}Request";
-        var tsType = new TypescriptTypeBuilder(tsTypePrefix);
+        GeneratableObject generatableObject = new()
+        {
+            Name = tsTypePrefix
+        };
 
         var queryParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Query).ToList();
         var pathParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Path).ToList();
         var bodyParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Body).ToList();
-
-        var blockBuilder = new StringBuilder();
+        
 
         if (queryParams.Count > 0)
         {
-            GenerateFromApiParameterDescriptions(queryParams, tsTypePrefix + "Query", blockBuilder);
-            tsType.AddProperty("query", tsTypePrefix + "Query");
+            var generatableMember = new GeneratableMember()
+            {
+                Name = "Query",
+            };
+            
+            generatableMember.Members.AddRange(GetGeneratableMembersFromApiParameterDescriptions(queryParams));
+            generatableObject.Members.Add(generatableMember);
         }
 
         if (pathParams.Count > 0)
         {
-            GenerateFromApiParameterDescriptions(pathParams, tsTypePrefix + "Path", blockBuilder);
-            tsType.AddProperty("path", tsTypePrefix + "Path");
+            var generatableMember = new GeneratableMember()
+            {
+                Name = "Path",
+            };
+            
+            generatableMember.Members.AddRange(GetGeneratableMembersFromApiParameterDescriptions(pathParams));
+            generatableObject.Members.Add(generatableMember);
         }
 
         if (bodyParams.Count > 0)
         {
-            GenerateFromApiParameterDescriptions(bodyParams, tsTypePrefix + "Body", blockBuilder);
-            tsType.AddProperty("body", tsTypePrefix + "Body");
+            var generatableMember = new GeneratableMember()
+            {
+                Name = "Body",
+            };
+            
+            generatableMember.Members.AddRange(GetGeneratableMembersFromApiParameterDescriptions(bodyParams));
+            generatableObject.Members.Add(generatableMember);
         }
         
-        blockBuilder.AppendLine(tsType.Build());
-        blockBuilder.AppendLine();
-        
         // Add the response type to the ts generation
-        var responseTsType = new TypescriptTypeBuilder(tsTypePrefix + "Response");
-        GenerateFromType(returnType.Type!, tsTypePrefix, blockBuilder, responseTsType);
+        var responseGeneratableObject = new GeneratableObject()
+        {
+            Name = tsTypePrefix + "Response"
+        };
         
+        responseGeneratableObject.Members.AddRange(returnType.Type!.GetGeneratableMembersFromType("response", true));
+
+        var options = new JsonSerializerOptions();
+        options.Converters.Add(new CustomJsonConverterForType());
+        options.WriteIndented = true;
         
-        GenerateCallingFunction(queryParams, pathParams, bodyParams, apiDescription, tsTypePrefix, blockBuilder);
+        _logger.LogDebug("Request: \n{Object} \nResponse: \n{Response}", JsonSerializer.Serialize(generatableObject, options), JsonSerializer.Serialize(responseGeneratableObject, options));
         
-        _typeGeneration.AppendLine(blockBuilder.ToString());
+        GeneratableEndpoint generatableEndpoint = new()
+        {
+            HandlerName = handlerName,
+            HttpMethod = apiDescription.HttpMethod!,
+            RouteUrl = apiDescription.RelativePath!,
+            Version = apiDescription.GetApiVersion()?.ToString() ?? "v1",
+            Request = generatableObject,
+            Response = responseGeneratableObject
+        };
+
+        return generatableEndpoint;
     }
 
-    private void GenerateFromApiParameterDescriptions(List<ApiParameterDescription> parameters, string typePrefix, StringBuilder blockBuilder)
+    private List<GeneratableMember> GetGeneratableMembersFromApiParameterDescriptions(List<ApiParameterDescription> parameters)
     {
-        var tsType = new TypescriptTypeBuilder(typePrefix);
+        var generatableMembers = new List<GeneratableMember>();
         
         foreach (var parameter in parameters)
         {
-            var paramType = parameter.Type.IsList() ? parameter.Type.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : parameter.Type;
-
-            if(_typeCounter.ContainsKey(paramType))
-                _typeCounter[paramType] += 1;
-            else
-                _typeCounter.Add(paramType, 1);
+            var parameterName = parameter.Name;
             
-            if (parameter.Name.ToLower() is "body" or "command")
-            {
-                GenerateFromType(paramType, typePrefix, blockBuilder, tsType);
-                return;
-            } 
-            
-            if (Constants.TsTypeMapping.Keys.Contains(paramType.Name))
-            {
-                tsType.AddProperty(parameter.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullable(), parameter.Type.IsList());
-            }
-            else
-            {
-                if (paramType.IsEnum)
-                {
-                    GenerateEnum(paramType);
-                    tsType.AddProperty(parameter.Name.ToCamelCase(), paramType.Name, paramType.IsNullable(), parameter.Type.IsList());
-                }
-                else
-                {
-                    GenerateFromType(paramType, typePrefix, blockBuilder);
-                    tsType.AddProperty(parameter.Name.ToCamelCase(), typePrefix + paramType.Name, paramType.IsNullable(), parameter.Type.IsList());
-                }
-            }
+            generatableMembers.AddRange(parameter.Type.GetGeneratableMembersFromType(parameterName, parameterName.ToLower() is "command" or "body", _seenTypes));
         }
         
-        blockBuilder.AppendLine(tsType.Build());
-        blockBuilder.AppendLine();
+        return generatableMembers;
+    }
+
+    private List<GeneratableObject> GetSharedTypes(List<GeneratableEndpoint> generatableEndpoints)
+    {
+        var returnList = new List<GeneratableObject>();
+        var counterDict = new Dictionary<Type, int>();
+
+        var generatableRequestObjects = generatableEndpoints.Select(x => x.Request).ToList();
+        var generatableResponseObjects = generatableEndpoints.Select(x => x.Response).ToList();
+        var generatableObjects = generatableRequestObjects.Concat(generatableResponseObjects).ToList();
+
+        var members = generatableObjects.SelectMany(x => x.Members).ToList();
+
+        foreach (var member in members)
+        {
+            CountTypesFromGeneratableMember(member);
+        }
+        
+        var sharedTypes = counterDict.Where(x => x.Value > 1).ToDictionary();
+        
+        foreach (var sharedType in sharedTypes.Keys)
+        {
+            var generatableMember = new GeneratableObject()
+            {
+                Name = sharedType.Name,
+                ObjectType = sharedType
+            };
+            
+            generatableMember.Members.AddRange(sharedType.GetGeneratableMembersFromSharedType(sharedType.Name, sharedTypes.Select(x => x.Key).ToList(), true));
+            
+            returnList.Add(generatableMember);
+        }
+        
+        return returnList;
+
+        void CountTypesFromGeneratableMember(GeneratableMember member)
+        {
+            if (member.MemberType is not null)
+            {
+                var memberType = member.MemberType.IsList() ? member.MemberType.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : member.MemberType;
+
+                if (!memberType.IsMappablePrimitive())
+                {
+                    if(counterDict.TryGetValue(memberType, out var count))
+                    {
+                        counterDict[memberType] = count + 1;
+                    }
+                    else
+                    {
+                        counterDict.Add(memberType, 1);
+                    }
+                }
+            }
+            
+            foreach (var generatableMember in member.Members)
+            {
+                CountTypesFromGeneratableMember(generatableMember);
+            }
+        }
     }
     
-    private void GenerateFromType(Type type, string typePrefix, StringBuilder blockBuilder, TypescriptTypeBuilder? appendTo = null)
+    private List<SharedType> GenerateSharedTypes(List<GeneratableObject> sharedTypes)
     {
-        var tsType = appendTo ?? new TypescriptTypeBuilder(typePrefix + type.Name);
+        var returnableSharedTypes = new List<SharedType>();
         
-        foreach (var property in type.GetProperties())
+        foreach (var sharedType in sharedTypes)
         {
-            var paramType = property.PropertyType.IsList() ? property.PropertyType.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : property.PropertyType;
-        
-            if(_typeCounter.ContainsKey(paramType))
-                _typeCounter[paramType] += 1;
-            else
-                _typeCounter.Add(paramType, 1);
+            ITypescriptSourceBuilder sourceBuilder = new TypescriptInterfaceSourceBuilder().Initialize(sharedType.Name);
+            var sharedTypeInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(sharedType, sourceBuilder, new());
+            var fileImportPath = $"./{sharedType.Name.ToCamelCase()}";
+            var fileName = sharedType.Name.ToCamelCase() + ".ts";
             
-            if (Constants.TsTypeMapping.Keys.Contains(paramType.Name))
-            {
-                tsType.AddProperty(property.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullable(), property.PropertyType.IsList());
-            }
-            else
-            {
-                if (paramType.IsEnum)
-                {
-                    GenerateEnum(paramType);
-                    tsType.AddProperty(property.Name.ToCamelCase(), paramType.Name, paramType.IsNullable(), property.PropertyType.IsList());
-                }
-                else
-                {
-                    GenerateFromType(paramType, typePrefix, blockBuilder);
-                    tsType.AddProperty(property.Name.ToCamelCase(), typePrefix + paramType.Name, paramType.IsNullable(), property.PropertyType.IsList());
-                }
-            }
+            
+            var a = 0;
         }
-        
-        blockBuilder.AppendLine(tsType.Build());
-        blockBuilder.AppendLine();
-    }
 
+        return returnableSharedTypes;
+    }
+    
+    private string GenerateFromEndpoint(GeneratableEndpoint endpoint)
+    {
+        var blockBuilder = new StringBuilder();
+
+        ITypescriptSourceBuilder requestBuilder = new TypescriptInterfaceSourceBuilder().Initialize(endpoint.Request.Name);
+        ITypescriptSourceBuilder responseBuilder = new TypescriptInterfaceSourceBuilder().Initialize(endpoint.Response.Name);
+        
+        var requestInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(endpoint.Request, requestBuilder, new());
+        var responseInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(endpoint.Response, responseBuilder, new());
+        
+        blockBuilder.AppendLine(requestInterfaces);
+        blockBuilder.AppendLine(responseInterfaces);
+        
+        _logger.LogDebug("Request: \n{Request} \nResponse: \n{Response}", requestInterfaces, responseInterfaces);
+        
+        return blockBuilder.ToString();
+    }
+    
     private void GenerateEnum(Type enumType)
     {
         if(_generatedEnums.Contains(enumType.Name))
@@ -298,5 +326,23 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
         relativePath += queryBuilder.ToString();
         
         return relativePath;
+    }
+}
+
+internal class CustomJsonConverterForType : JsonConverter<Type>
+{
+    public override Type Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        // Caution: Deserialization of type instances like this is not recommended and should be avoided
+        // since it can lead to potential security issues.
+
+        // string assemblyQualifiedName = reader.GetString();
+        // return Type.GetType(assemblyQualifiedName);
+        throw new NotSupportedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, Type value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.AssemblyQualifiedName);
     }
 }

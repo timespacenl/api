@@ -1,12 +1,22 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/SourceGeneratedFilesToSkip/=Timespace_002EApi_005CTimespace_002ESourceGenerators_002FTimespace_002ESourceGenerators_002EMediatrGenerator_002FAttributes_002Egenerator_002Ecs/@EntryIndexedValue">ExplicitlyExcluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/SourceGeneratedFilesToSkip/=Timespace_002EApi_005CTimespace_002ESourceGenerators_002FTimespace_002ESourceGenerators_002EMediatrGenerator_002FGetEmployees_002Eg_002Ecs/@EntryIndexedValue">ExplicitlyExcluded</s:String>
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Users\signa\.nuget\packages\thisassembly.resources\1.4.1\analyzers\dotnet\roslyn4.0\cs\ThisAssembly.Resource.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a702ebc4_002D08fd_002D4542_002Db025_002D55d268aa7423/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="GenerateReportMethod" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=226d3cfe_002Db52f_002D4cf9_002D8349_002D589c0f41c4d6/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::F977EE1F-A96C-498E-82B6-1751F3F10BD4::net7.0::Timespace.SourceGenerators.Tests.MediatrGeneratorTests&lt;/TestId&gt;
-    &lt;TestId&gt;xUnit::E2DA5F83-CDF5-4E0C-99F3-A154245549DA::net7.0::Timespace.Analyzers.Tests.SampleSyntaxAnalyzerTests.ClassWithoutHandleMethod_AlertDiagnostic&lt;/TestId&gt;
-    &lt;TestId&gt;xUnit::E2DA5F83-CDF5-4E0C-99F3-A154245549DA::net7.0::Timespace.Analyzers.Tests.SampleSyntaxAnalyzerTests.ClassWithHandleMethod_NoAlertDiagnostic&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::64A78046-E5F5-479D-8E67-E2163C660296::net8.0::Timespace.Api.UnitTests.UnitTest1.Test1&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a702ebc4_002D08fd_002D4542_002Db025_002D55d268aa7423/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GenerateReportMethod" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::64A78046-E5F5-479D-8E67-E2163C660296::net8.0::Timespace.Api.UnitTests.UnitTest1.Test1&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d8395e78_002D277d_002D43ac_002D985d_002Dddb0d3ffb148/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1 #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::64A78046-E5F5-479D-8E67-E2163C660296::net8.0::Timespace.Api.UnitTests.UnitTest1.Test1&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=src_002FTimespace_002EAnalyzers_002FResources/@EntryIndexedValue">True</s:Boolean>

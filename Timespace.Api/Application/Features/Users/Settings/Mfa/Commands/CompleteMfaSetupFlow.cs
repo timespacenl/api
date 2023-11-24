@@ -37,6 +37,14 @@ public static class CompleteMfaSetupFlow {
         public bool Success { get; init; }
         public string Something { get; init; } = null!;
         public int AnotherProperty { get; init; }
+        public Response3 DeeplyNested { get; init; } = null!;
+    }
+    
+    public record Response3()
+    {
+        public bool Success { get; init; }
+        public string Something { get; init; } = null!;
+        public int AnotherProperty { get; init; }
     }
     
     public class Handler : IRequestHandler<Command, Response>

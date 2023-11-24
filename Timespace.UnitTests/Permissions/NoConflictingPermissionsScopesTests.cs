@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using FluentAssertions;
 using Timespace.Api.Application.Features.AccessControl;
-using Timespace.Api.Infrastructure.AccessControl;
 
 namespace Timespace.UnitTests.Permissions;
 

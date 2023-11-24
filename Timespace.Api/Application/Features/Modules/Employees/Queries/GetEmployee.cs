@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Timespace.Api.Application.Features.Modules.Employees.Common;
 using Timespace.Api.Application.Features.Modules.Employees.Exceptions;
 using Timespace.Api.Infrastructure.Persistence;
+using Timespace.SourceGenerators;
 
 namespace Timespace.Api.Application.Features.Modules.Employees.Queries;
 
@@ -25,6 +26,8 @@ public static partial class GetEmployee {
         public string Email { get; init; } = null!;
         public SharedType SharedType { get; init; } = null!;
         public SharedType SharedType2 { get; init; } = null!;
+        public List<SharedType> SharedTypes { get; init; } = null!;
+        public NestedSharedType NestedSharedType { get; init; } = null!;
     }
     
     private static async Task<Response> Handle(Query request, AppDbContext db, CancellationToken cancellationToken)

@@ -1,11 +1,10 @@
-﻿using FluentValidation;
+﻿using Asp.Versioning;
+using FluentValidation;
 using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using MicroElements.Swashbuckle.NodaTime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -101,16 +100,22 @@ public static class ConfigureServices
 
     private static void AddSwagger(this IServiceCollection services)
     {
-        services.AddApiVersioning(o =>
+        var apiVersioningBuilder = services.AddApiVersioning(o =>
         {
             o.AssumeDefaultVersionWhenUnspecified = true;
             o.DefaultApiVersion = new ApiVersion(1, 0);
             o.ApiVersionReader = new UrlSegmentApiVersionReader();
         });
-        services.AddVersionedApiExplorer(setup =>
+        
+        apiVersioningBuilder.AddApiExplorer(options =>
         {
-            setup.GroupNameFormat = "'v'VVV";
-            setup.SubstituteApiVersionInUrl = true;
+            // add the versioned api explorer, which also adds IApiVersionDescriptionProvider service
+            // note: the specified format code will format the version as "'v'major[.minor][-status]"
+            options.GroupNameFormat = "'v'VVV";
+
+            // note: this option is only necessary when versioning by url segment. the SubstitutionFormat
+            // can also be used to control the format of the API version in route templates
+            options.SubstituteApiVersionInUrl = true;
         });
 
         services.AddSwaggerGen(opt =>

@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Users.Authentication.Login.Commands;
 using Timespace.Api.Application.Features.Users.Authentication.Login.Queries;
 

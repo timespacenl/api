@@ -32,20 +32,20 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
 
     public void Execute()
     {
-        var apiDescriptionGroups = _apiExplorer.ApiDescriptionGroups.Items;
-        foreach (var apiDescriptionGroup in apiDescriptionGroups)
-        {
-            foreach (var apiDescription in apiDescriptionGroup.Items)
-            {
-                GenerateCodeForApiDescription(apiDescription);
-            }
-        }
-
-        _generation.AppendLine(Constants.ApiClientHeaders);
-        _generation.AppendLine(_enumGeneration.ToString());
-        _generation.AppendLine(_typeGeneration.ToString());
-        
-        File.WriteAllText(_options.TypescriptGenerator.GenerationPath + '\\' + _options.TypescriptGenerator.GenerationFileName + ".ts", _generation.ToString());
+        // var apiDescriptionGroups = _apiExplorer.ApiDescriptionGroups.Items;
+        // foreach (var apiDescriptionGroup in apiDescriptionGroups)
+        // {
+        //     foreach (var apiDescription in apiDescriptionGroup.Items)
+        //     {
+        //         GenerateCodeForApiDescription(apiDescription);
+        //     }
+        // }
+        //
+        // _generation.AppendLine(Constants.ApiClientHeaders);
+        // _generation.AppendLine(_enumGeneration.ToString());
+        // _generation.AppendLine(_typeGeneration.ToString());
+        //
+        // File.WriteAllText(_options.TypescriptGenerator.GenerationPath + '\\' + _options.TypescriptGenerator.GenerationFileName + ".ts", _generation.ToString());
     }
 
     private void GenerateCodeForApiDescription(ApiDescription apiDescription)
@@ -119,7 +119,7 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
                 return;
             } 
             
-            if (Constants.TsTypeMapping.Keys.Contains(paramType.Name))
+            if (Constants.MappableTypesMapping.Keys.Contains(paramType.Name))
             {
                 tsType.AddProperty(parameter.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullable(), parameter.Type.IsList());
             }
@@ -148,8 +148,11 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
         
         foreach (var property in type.GetProperties())
         {
+            if(type.GetProperties().Select(x => x.MemberType).Any(x => property.MemberType == x))
+                continue;
+            
             var paramType = property.PropertyType.IsList() ? property.PropertyType.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : property.PropertyType;
-            if (Constants.TsTypeMapping.Keys.Contains(paramType.Name))
+            if (Constants.MappableTypesMapping.Keys.Contains(paramType.Name))
             {
                 tsType.AddProperty(property.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullable(), property.PropertyType.IsList());
             }

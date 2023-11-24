@@ -2,7 +2,7 @@
 
 public static class Constants
 {
-    public static readonly Dictionary<string, string> TsTypeMapping = new Dictionary<string, string>()
+    public static readonly Dictionary<string, string> MappableTypesMapping = new Dictionary<string, string>()
         {
             {"String", "string"},
             {"Guid", "string"},
