@@ -20,6 +20,7 @@ public class TypescriptInterfaceSourceBuilder : ITypescriptSourceBuilder
 
         return this;
     }
+    
     public ITypescriptSourceBuilder AddProperty(string name, string type, bool nullable = false, bool isList = false)
     {
         var listExtension = isList ? "[]" : "";

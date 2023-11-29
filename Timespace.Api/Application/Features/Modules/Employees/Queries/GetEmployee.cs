@@ -25,12 +25,12 @@ public static partial class GetEmployee {
         public string LastName { get; init; } = null!;
         public string Email { get; init; } = null!;
         public SharedType SharedType { get; init; } = null!;
-        public SharedType SharedType2 { get; init; } = null!;
-        public List<SharedType> SharedTypes { get; init; } = null!;
+        public SharedType? SharedType2 { get; init; } = null!;
+        public List<SharedType>? SharedTypes { get; init; } = null!;
         public NestedSharedType NestedSharedType { get; init; } = null!;
     }
     
-    private static async Task<Response> Handle(Query request, AppDbContext db, CancellationToken cancellationToken)
+    private static async Task<PaginatedResult<Response>> Handle(Query request, AppDbContext db, CancellationToken cancellationToken)
     {
         var employeeIdentity = await db.Identities.FirstOrDefaultAsync(x => x.Id == request.EmployeeId, cancellationToken: cancellationToken);
 
@@ -42,13 +42,15 @@ public static partial class GetEmployee {
         if (identifier == null)
             throw new EmployeeNotFoundException(); // Should never happen as the user is created with an email identifier
         
-        return new Response
+        var response = new Response
         {
             EmployeeId = employeeIdentity.Id,
             FirstName = employeeIdentity.FirstName,
             LastName = employeeIdentity.LastName,
             Email = identifier.Identifier
         };
+        
+        return new PaginatedResult<Response>([response], 1, 1, 1);
     }
     
     public partial class Validator

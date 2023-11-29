@@ -1,13 +1,15 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Extensions;
-using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.NewTypescriptApiClientGenerator.Extensions;
+using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Extensions;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.TsGenerators;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Types;
 using Timespace.Api.Infrastructure.Configuration;
@@ -53,8 +55,13 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
             }
         }
         
-        var sharedTypes = GetSharedTypes(_generatableEndpoints);
-        GenerateSharedTypes(sharedTypes);
+        var sharedTypeObjects = GetSharedTypes(_generatableEndpoints);
+        var sharedTypes = GenerateSharedTypes(sharedTypeObjects);
+
+        foreach (var endpoint in _generatableEndpoints)
+        {
+            GenerateFromEndpoint(endpoint, sharedTypes);
+        }
         
         _generation.AppendLine(Constants.ApiClientHeaders);
         _generation.AppendLine(_enumGeneration.ToString());
@@ -72,8 +79,18 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
             _logger.LogError("API endpoint with route url {RouteUrl} does not have a return type specified", apiDescription.RelativePath);
             return null;
         }
+
+        var handlerName = "";
+        if(returnType.Type.IsGenericType)
+        {
+            if (apiDescription.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
+                handlerName = controllerActionDescriptor.ActionName;
+        }
+        else
+        {
+            handlerName = returnType.Type?.FullName?.Split('.').Last().Split('+').FirstOrDefault();
+        }
         
-        var handlerName = returnType.Type?.FullName?.Split('.').Last().Split('+').FirstOrDefault();
         if (handlerName is null)
         {
             _logger.LogError("API endpoint with route url {RouteUrl} does not have a valid handler name", apiDescription.RelativePath);
@@ -89,13 +106,26 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
         var queryParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Query).ToList();
         var pathParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Path).ToList();
         var bodyParams = apiDescription.ParameterDescriptions.Where(x => x.BindingInfo?.BindingSource == BindingSource.Body).ToList();
-        
+        var formParams = apiDescription.ParameterDescriptions.Where(x => x.Source == BindingSource.Form).ToList();
 
+        if(bodyParams.Any() && formParams.Any())
+        {
+            _logger.LogError("API endpoint with route url {RouteUrl} has both body and form parameters", apiDescription.RelativePath);
+            return null;
+        }
+        
         if (queryParams.Count > 0)
         {
+            Type? memberType = null;
+            if(queryParams.Count == 1 && !queryParams.FirstOrDefault()!.Type.IsMappablePrimitive())
+            {
+                memberType = queryParams.FirstOrDefault()?.Type;
+            }
+            
             var generatableMember = new GeneratableMember()
             {
                 Name = "Query",
+                MemberType = memberType
             };
             
             generatableMember.Members.AddRange(GetGeneratableMembersFromApiParameterDescriptions(queryParams));
@@ -104,9 +134,15 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
 
         if (pathParams.Count > 0)
         {
+            Type? memberType = null;
+            if(pathParams.Count == 1 && !pathParams.FirstOrDefault()!.Type.IsMappablePrimitive())
+            {
+                memberType = pathParams.FirstOrDefault()?.Type;
+            }
             var generatableMember = new GeneratableMember()
             {
                 Name = "Path",
+                MemberType = memberType
             };
             
             generatableMember.Members.AddRange(GetGeneratableMembersFromApiParameterDescriptions(pathParams));
@@ -115,19 +151,58 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
 
         if (bodyParams.Count > 0)
         {
+            Type? memberType = null;
+            if(bodyParams.Count == 1 && !bodyParams.FirstOrDefault()!.Type.IsMappablePrimitive())
+            {
+                memberType = bodyParams.FirstOrDefault()?.Type;
+            }
+            
             var generatableMember = new GeneratableMember()
             {
                 Name = "Body",
+                MemberType = memberType
             };
             
             generatableMember.Members.AddRange(GetGeneratableMembersFromApiParameterDescriptions(bodyParams));
             generatableObject.Members.Add(generatableMember);
         }
         
+        if (formParams.Count > 0)
+        {
+            Type? memberType = null;
+            var rootValues = formParams.Where(x => x.Name.Count(c => c == '.') == 1 || !x.Name.Contains('.')).ToList();
+            var rootItem = rootValues.FirstOrDefault();
+
+            if (rootItem is not null)
+            {
+                var rootType = rootItem.ModelMetadata.ContainerType;
+                memberType = rootType;
+            }
+            
+            if(rootValues.Count == 1 && !rootValues.FirstOrDefault()!.Type.IsMappablePrimitive())
+            {
+                memberType = bodyParams.FirstOrDefault()?.Type;
+            }
+            
+            var generatableMember = new GeneratableMember()
+            {
+                Name = "Body",
+                MemberType = memberType
+            };
+
+            if (memberType is not null)
+                generatableMember.Members.AddRange(memberType.GetGeneratableMembersFromType("body", true, _seenTypes));
+            else
+                generatableMember.Members.AddRange(GetGeneratableMembersFromApiParameterDescriptions(rootValues, true));
+            
+            generatableObject.Members.Add(generatableMember);
+        }
+        
         // Add the response type to the ts generation
         var responseGeneratableObject = new GeneratableObject()
         {
-            Name = tsTypePrefix + "Response"
+            Name = handlerName + "Response",
+            ObjectType = returnType.Type
         };
         
         responseGeneratableObject.Members.AddRange(returnType.Type!.GetGeneratableMembersFromType("response", true));
@@ -145,19 +220,20 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
             RouteUrl = apiDescription.RelativePath!,
             Version = apiDescription.GetApiVersion()?.ToString() ?? "v1",
             Request = generatableObject,
-            Response = responseGeneratableObject
+            Response = responseGeneratableObject,
+            OriginalApiDescription = apiDescription
         };
 
         return generatableEndpoint;
     }
 
-    private List<GeneratableMember> GetGeneratableMembersFromApiParameterDescriptions(List<ApiParameterDescription> parameters)
+    private List<GeneratableMember> GetGeneratableMembersFromApiParameterDescriptions(List<ApiParameterDescription> parameters, bool formData = false)
     {
         var generatableMembers = new List<GeneratableMember>();
         
         foreach (var parameter in parameters)
         {
-            var parameterName = parameter.Name;
+            var parameterName = formData ? parameter.Name.Split('.').Last() : parameter.Name;
             
             generatableMembers.AddRange(parameter.Type.GetGeneratableMembersFromType(parameterName, parameterName.ToLower() is "command" or "body", _seenTypes));
         }
@@ -174,6 +250,26 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
         var generatableResponseObjects = generatableEndpoints.Select(x => x.Response).ToList();
         var generatableObjects = generatableRequestObjects.Concat(generatableResponseObjects).ToList();
 
+        foreach (var generatableObject in generatableObjects)
+        {
+            if(generatableObject.ObjectType is null)
+                continue;
+            
+            var memberType = generatableObject.ObjectType.IsEnumerableT() ? generatableObject.ObjectType.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : generatableObject.ObjectType;
+
+            if (!memberType.IsMappablePrimitive())
+            {
+                if(counterDict.TryGetValue(memberType, out var count))
+                {
+                    counterDict[memberType] = count + 1;
+                }
+                else
+                {
+                    counterDict.Add(memberType, 1);
+                }
+            }
+        }
+        
         var members = generatableObjects.SelectMany(x => x.Members).ToList();
 
         foreach (var member in members)
@@ -181,7 +277,7 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
             CountTypesFromGeneratableMember(member);
         }
         
-        var sharedTypes = counterDict.Where(x => x.Value > 1).ToDictionary();
+        var sharedTypes = counterDict.Where(x => x.Value > 1 || x.Key.IsEnum).ToDictionary();
         
         foreach (var sharedType in sharedTypes.Keys)
         {
@@ -202,10 +298,11 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
         {
             if (member.MemberType is not null)
             {
-                var memberType = member.MemberType.IsList() ? member.MemberType.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : member.MemberType;
+                var memberType = member.MemberType;
 
                 if (!memberType.IsMappablePrimitive())
                 {
+                    
                     if(counterDict.TryGetValue(memberType, out var count))
                     {
                         counterDict[memberType] = count + 1;
@@ -224,38 +321,75 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
         }
     }
     
-    private List<SharedType> GenerateSharedTypes(List<GeneratableObject> sharedTypes)
+    private List<SharedType> GenerateSharedTypes(List<GeneratableObject> sharedTypesObjects)
     {
         var returnableSharedTypes = new List<SharedType>();
-        
-        foreach (var sharedType in sharedTypes)
+        var localSharedTypes = new List<SharedType>();
+
+        foreach (var sharedType in sharedTypesObjects)
         {
-            ITypescriptSourceBuilder sourceBuilder = new TypescriptInterfaceSourceBuilder().Initialize(sharedType.Name);
-            var sharedTypeInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(sharedType, sourceBuilder, new());
-            var fileImportPath = $"./{sharedType.Name.ToCamelCase()}";
-            var fileName = sharedType.Name.ToCamelCase() + ".ts";
+            var typeName = sharedType.Name;
+            if(sharedType.ObjectType is not null && sharedType.ObjectType.IsGenericType)
+            {
+                typeName = (sharedType.Name.Split('`').FirstOrDefault() ?? "") + "Of" + sharedType.ObjectType.GenericTypeArguments.FirstOrDefault()?.Name;
+            }
             
+            var fileImportPath = $"./{typeName.ToCamelCase()}";
+            var fileImport = $"import {{ to{typeName}, from{typeName}, type {typeName} }} from '{fileImportPath}';";
+            if(sharedType.ObjectType is not null && sharedType.ObjectType.IsEnum)
+            {
+                fileImport = $"import {{ {typeName} }} from '{fileImportPath}';";
+            }
             
-            var a = 0;
+            var sharedTypeObject = new SharedType(sharedType.ObjectType, sharedType.Name, $"to{typeName}", $"from{typeName}", fileImportPath, fileImport);
+            localSharedTypes.Add(sharedTypeObject);
+        }
+        
+        foreach (var sharedType in sharedTypesObjects)
+        {
+            var typeName = sharedType.Name;
+            if(sharedType.ObjectType is not null && sharedType.ObjectType.IsGenericType)
+            {
+                typeName = (sharedType.Name.Split('`').FirstOrDefault() ?? "") + "Of" + sharedType.ObjectType.GenericTypeArguments.FirstOrDefault()?.Name ?? "";
+            }
+            
+            ITypescriptSourceBuilder sourceBuilder = new TypescriptInterfaceSourceBuilder().Initialize(typeName);
+            var importables = new HashSet<Type>();
+            var sharedTypeInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(sharedType, sourceBuilder, localSharedTypes, importables);
+            var importString = GetImportsFromTypeList(importables, localSharedTypes);
+            
+            var fileImportPath = $"./{typeName.ToCamelCase()}";
+            var fileImport = $"import {{ to{typeName}, from{typeName}, type {typeName} }} from '{fileImportPath}';";
+            if(sharedType.ObjectType is not null && sharedType.ObjectType.IsEnum)
+            {
+                fileImport = $"import {{ {typeName} }} from '{fileImportPath}';";
+            }
+            
+            var sharedTypeObject = new SharedType(sharedType.ObjectType, sharedType.Name, $"to{typeName}", $"from{typeName}", fileImportPath, fileImport);
+            returnableSharedTypes.Add(sharedTypeObject);
         }
 
         return returnableSharedTypes;
     }
     
-    private string GenerateFromEndpoint(GeneratableEndpoint endpoint)
+    private string GenerateFromEndpoint(GeneratableEndpoint endpoint, List<SharedType> sharedTypes)
     {
         var blockBuilder = new StringBuilder();
 
         ITypescriptSourceBuilder requestBuilder = new TypescriptInterfaceSourceBuilder().Initialize(endpoint.Request.Name);
         ITypescriptSourceBuilder responseBuilder = new TypescriptInterfaceSourceBuilder().Initialize(endpoint.Response.Name);
         
-        var requestInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(endpoint.Request, requestBuilder, new());
-        var responseInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(endpoint.Response, responseBuilder, new());
+        var importables = new HashSet<Type>();
+        var requestInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(endpoint.Request, requestBuilder, sharedTypes, importables);
+        var responseInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(endpoint.Response, responseBuilder, sharedTypes, importables);
         
+        var imports = GetImportsFromTypeList(importables, sharedTypes);
+
+        if(importables.Count > 0) blockBuilder.AppendLine(imports);
         blockBuilder.AppendLine(requestInterfaces);
         blockBuilder.AppendLine(responseInterfaces);
         
-        _logger.LogDebug("Request: \n{Request} \nResponse: \n{Response}", requestInterfaces, responseInterfaces);
+        _logger.LogDebug("File contents: \n{File}", blockBuilder.ToString());
         
         return blockBuilder.ToString();
     }
@@ -278,36 +412,22 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
         _enumGeneration.AppendLine();
         _generatedEnums.Add(enumType.Name);
     }
-    
-    private void GenerateCallingFunction(List<ApiParameterDescription> queryParams, List<ApiParameterDescription> pathParams, List<ApiParameterDescription> bodyParams, ApiDescription apiDescription, string tsTypePrefix, StringBuilder blockBuilder)
+
+    private string GetImportsFromTypeList(HashSet<Type> types, List<SharedType> sharedTypes)
     {
-        var codeBuilder = new StringBuilder();
-        var method = apiDescription.HttpMethod;
-
-        codeBuilder.Append(
-            $"export const {tsTypePrefix.Replace("Request", "").ToCamelCase()} = (fetch: FetchType, request: {tsTypePrefix}) => ");
-        
-        var bodyCallString = bodyParams.Count > 0 ? "request.body" : "{}";
-        
-        var functionCall = method switch
+        var importBuilder = new StringBuilder();
+        foreach (var type in types)
         {
-            "GET" =>
-                $"genericGet<{tsTypePrefix}Response>(fetch, `{GenerateUrl(apiDescription.RelativePath!, queryParams, pathParams)}`);",
-            "POST" =>
-                $"genericPost<{tsTypePrefix}Response>(fetch, `{GenerateUrl(apiDescription.RelativePath!, queryParams, pathParams)}`, {bodyCallString});",
-            "PUT" =>
-                $"genericPost<{tsTypePrefix}Body, {tsTypePrefix}Response>(fetch, `{GenerateUrl(apiDescription.RelativePath!, queryParams, pathParams)}`);",
-            "DELETE" =>
-                $"genericPost<{tsTypePrefix}Body, {tsTypePrefix}Response>(fetch, `{GenerateUrl(apiDescription.RelativePath!, queryParams, pathParams)}`);",
-            _ => throw new ArgumentOutOfRangeException()
-        };
-        
-        codeBuilder.Append("\n\t" + functionCall);
-        
-        blockBuilder.AppendLine(codeBuilder.ToString());
-        blockBuilder.AppendLine();
-    }
+            var sharedType = sharedTypes.FirstOrDefault(x => x.OriginalType == type);
+            
+            if(sharedType is null) continue;
+            
+            importBuilder.AppendLine(sharedType.ImportString);
+        }
 
+        return importBuilder.ToString();
+    }
+    
     private string GenerateUrl(string relativePath, List<ApiParameterDescription> queryParams,
         List<ApiParameterDescription> pathParams)
     {

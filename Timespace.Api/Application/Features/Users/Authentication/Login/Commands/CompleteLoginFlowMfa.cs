@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OtpNet;
 using Timespace.Api.Application.Common.Attributes;
+using Timespace.Api.Application.Common.Types;
 using Timespace.Api.Application.Features.Users.Authentication.Common.Exceptions;
 using Timespace.Api.Application.Features.Users.Authentication.Login.Common;
 using Timespace.Api.Application.Features.Users.Authentication.Login.Common.Entities;
@@ -25,11 +26,21 @@ public static class CompleteLoginFlowMfa {
         [FromRoute(Name = "flowId")]
         public Guid FlowId { get; init; }
         
-        [FromBody]
+        [FromForm]
         public CommandBody Body { get; init; } = null!;
     }
     
     public record CommandBody
+    {
+        public string CredentialType { get; init; } = null!;
+        public string CredentialValue { get; init; } = null!;
+        public IFormFile? File { get; init; }
+        public List<IFormFile>? Files { get; init; }
+        public List<NestedFormData> NestedFormDataList { get; init; } = new();
+        public NestedFormData? NestedFormData { get; init; }
+    }
+    
+    public record NestedFormData
     {
         public string CredentialType { get; init; } = null!;
         public string CredentialValue { get; init; } = null!;

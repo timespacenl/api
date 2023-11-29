@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Extensions;
-using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.NewTypescriptApiClientGenerator.Extensions;
+using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Extensions;
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 
@@ -111,7 +111,7 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
         
         foreach (var parameter in parameters)
         {
-            var paramType = parameter.Type.IsList() ? parameter.Type.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : parameter.Type;
+            var paramType = parameter.Type.IsEnumerableT() ? parameter.Type.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : parameter.Type;
 
             if (parameter.Name.ToLower() is "body" or "command")
             {
@@ -121,19 +121,19 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
             
             if (Constants.MappableTypesMapping.Keys.Contains(paramType.Name))
             {
-                tsType.AddProperty(parameter.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullable(), parameter.Type.IsList());
+                tsType.AddProperty(parameter.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullableValueType(), parameter.Type.IsEnumerableT());
             }
             else
             {
                 if (paramType.IsEnum)
                 {
                     GenerateEnum(paramType);
-                    tsType.AddProperty(parameter.Name.ToCamelCase(), paramType.Name, paramType.IsNullable(), parameter.Type.IsList());
+                    tsType.AddProperty(parameter.Name.ToCamelCase(), paramType.Name, paramType.IsNullableValueType(), parameter.Type.IsEnumerableT());
                 }
                 else
                 {
                     GenerateFromType(paramType, typePrefix, blockBuilder);
-                    tsType.AddProperty(parameter.Name.ToCamelCase(), typePrefix + paramType.Name, paramType.IsNullable(), parameter.Type.IsList());
+                    tsType.AddProperty(parameter.Name.ToCamelCase(), typePrefix + paramType.Name, paramType.IsNullableValueType(), parameter.Type.IsEnumerableT());
                 }
             }
         }
@@ -151,22 +151,22 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
             if(type.GetProperties().Select(x => x.MemberType).Any(x => property.MemberType == x))
                 continue;
             
-            var paramType = property.PropertyType.IsList() ? property.PropertyType.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : property.PropertyType;
+            var paramType = property.PropertyType.IsEnumerableT() ? property.PropertyType.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : property.PropertyType;
             if (Constants.MappableTypesMapping.Keys.Contains(paramType.Name))
             {
-                tsType.AddProperty(property.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullable(), property.PropertyType.IsList());
+                tsType.AddProperty(property.Name.ToCamelCase(), paramType.GetTsType(), paramType.IsNullableValueType(), property.PropertyType.IsEnumerableT());
             }
             else
             {
                 if (paramType.IsEnum)
                 {
                     GenerateEnum(paramType);
-                    tsType.AddProperty(property.Name.ToCamelCase(), paramType.Name, paramType.IsNullable(), property.PropertyType.IsList());
+                    tsType.AddProperty(property.Name.ToCamelCase(), paramType.Name, paramType.IsNullableValueType(), property.PropertyType.IsEnumerableT());
                 }
                 else
                 {
                     GenerateFromType(paramType, typePrefix, blockBuilder);
-                    tsType.AddProperty(property.Name.ToCamelCase(), typePrefix + paramType.Name, paramType.IsNullable(), property.PropertyType.IsList());
+                    tsType.AddProperty(property.Name.ToCamelCase(), typePrefix + paramType.Name, paramType.IsNullableValueType(), property.PropertyType.IsEnumerableT());
                 }
             }
         }

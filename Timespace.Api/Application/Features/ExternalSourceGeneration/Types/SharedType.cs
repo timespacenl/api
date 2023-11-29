@@ -1,10 +1,10 @@
 namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Types;
 
 public record SharedType(
-    Type SharedTypeType,
-    string TypeName,
+    Type? OriginalType,
     string InterfaceName,
     string ToMappingFunction,
     string FromMappingFunction,
-    string ImportPath
+    string ImportPath,
+    string ImportString
     );

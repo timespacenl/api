@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Timespace.Api.Application.Features.Modules.Employees.Common;
 using Timespace.Api.Application.Features.Modules.Employees.Queries;
 
 namespace Timespace.Api.Application.Features.Modules.Employees;
@@ -18,11 +19,29 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet("{employeeId}")]
-    public async Task<GetEmployee.Response> GetEmployeeAsync([FromQuery] GetEmployee.Query query)
+    public async Task<PaginatedResult<UserDto>> GetEmployeeAsync([FromQuery] GetEmployee.Query query)
     {
-        return await _sender.Send(query);
+        return null;
     }
+    
+    [HttpGet("{employeeId}/2")]
+    public async Task<PaginatedResult<UserDto>> GetEmployee2Async([FromBody] UserDto body)
+    {
+        return null;
+    }
+    
+    // [HttpGet("{employeeId}/3")]
+    // public async Task<PaginatedResult<UserDto>> GetEmployee3Async([FromBody] UserDto body)
+    // {
+    //     return null;
+    // }
 
+    public record UserDto
+    {
+        public string Name { get; init; } = null!;
+        public string Email { get; init; } = null!;
+    }
+    
     // [HttpGet("{employeeId}/extended")]
     // public async Task<IActionResult> GetEmployeeExtendedAsync([FromRoute] Guid employeeId)
     // {

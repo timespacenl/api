@@ -13,6 +13,8 @@ public class MediatrGeneratorTests
         const string sample = @"
             namespace Timespace.Api.Application.Features.Modules.Test.Queries;
 
+            public record PaginatedResult<T>(List<T> Items, int TotalCount, int Page, int PageSize);
+
             [Timespace.SourceGenerators.GenerateMediatr]
             public static partial class WrapperClass
             {
@@ -20,7 +22,7 @@ public class MediatrGeneratorTests
 
                 public record Response();
 
-                public static async Task<Response> Handle(Command command, CancellationToken ct)
+                public static async Task<PaginatedResult<Response>> Handle(Command command, CancellationToken ct)
                 {
                     return new Response();
                 }

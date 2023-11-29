@@ -43,6 +43,7 @@ public class MediatrGenerator : IIncrementalGenerator
                     generatable.Fqns,
                     generatable.WrapperClassName,
                     generatable.RequestTypeName,
+                    generatable.RequestTypeNameShort,
                     generatable.ResponseTypeName,
                     generatable.HasDependencies,
                     handlerDependencies,
@@ -78,19 +79,23 @@ public class MediatrGenerator : IIncrementalGenerator
         dependencies.RemoveAt(0);
         dependencies.RemoveAt(dependencies.Count - 1);
         
-        var requestTypeName = handleMethodSymbol.Parameters.FirstOrDefault()?.Type.Name;
+        var requestTypeName = handleMethodSymbol.Parameters.FirstOrDefault()?.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var requestTypeNameShort = handleMethodSymbol.Parameters.FirstOrDefault()?.Type.Name;
         
-        if(requestTypeName is null)
+        if(requestTypeName is null || requestTypeNameShort is null)
             return null;
 
         string responseTypeName;
-        
-        if(handleMethodSymbol.ReturnType is INamedTypeSymbol returnTypeSymbol)
-            responseTypeName =  returnTypeSymbol.TypeArguments.FirstOrDefault()?.Name ?? handleMethodSymbol.ReturnType.Name;
+
+        if (handleMethodSymbol.ReturnType is INamedTypeSymbol returnTypeSymbol)
+        {
+            var responseType = returnTypeSymbol.TypeArguments.FirstOrDefault() ?? handleMethodSymbol.ReturnType;
+            responseTypeName = responseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        }
         else
             responseTypeName = handleMethodSymbol.ReturnType.Name;
         
-        return new MediatrGeneratable(classSymbol.Name, classSymbol.ContainingNamespace.ToString(), dependencies, requestTypeName, responseTypeName);
+        return new MediatrGeneratable(classSymbol.Name, classSymbol.ContainingNamespace.ToString(), dependencies, requestTypeName, responseTypeName, requestTypeNameShort);
     }
     
 }
