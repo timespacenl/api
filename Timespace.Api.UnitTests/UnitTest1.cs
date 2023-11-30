@@ -24,7 +24,7 @@ public class UnitTest1
         
         ITypescriptSourceBuilder responseBuilder = new TypescriptInterfaceSourceBuilder().Initialize(obj.Name);
         
-        var responseInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(obj, responseBuilder, new());
+        var responseInterfaces = ApiClientSourceBuilder<>.GenerateFromGeneratableObject(obj, responseBuilder, new());
         
         Assert.True(true);
     }

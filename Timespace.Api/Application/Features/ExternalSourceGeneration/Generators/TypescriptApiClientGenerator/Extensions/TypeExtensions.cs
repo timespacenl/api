@@ -15,6 +15,11 @@ public static class TypeExtensions
         return type.IsGenericType && type.GetInterface(nameof(IEnumerable)) != null;
     }
     
+    public static bool IsNodaTimeType(this Type type)
+    {
+        return type == typeof(Instant) || type == typeof(LocalDate) || type == typeof(LocalDateTime);
+    }
+    
     public static string GetTsType(this Type type)
     {
         if(Constants.MappableTypesMapping.TryGetValue(type.Name, out var tsType))

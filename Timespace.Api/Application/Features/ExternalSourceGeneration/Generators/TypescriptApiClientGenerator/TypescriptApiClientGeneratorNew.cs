@@ -354,8 +354,8 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
             }
             
             ITypescriptSourceBuilder sourceBuilder = new TypescriptInterfaceSourceBuilder().Initialize(typeName);
-            var importables = new HashSet<Type>();
-            var sharedTypeInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(sharedType, sourceBuilder, localSharedTypes, importables);
+            var importables = new HashSet<TypescriptImportable>();
+            var sharedTypeInterfaces = ApiClientSourceBuilder<TypescriptInterfaceSourceBuilder>.GenerateFromGeneratableObject(sharedType, sourceBuilder, localSharedTypes, importables);
             var importString = GetImportsFromTypeList(importables, localSharedTypes);
             
             var fileImportPath = $"./{typeName.ToCamelCase()}";
@@ -376,18 +376,30 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
     {
         var blockBuilder = new StringBuilder();
 
-        ITypescriptSourceBuilder requestBuilder = new TypescriptInterfaceSourceBuilder().Initialize(endpoint.Request.Name);
-        ITypescriptSourceBuilder responseBuilder = new TypescriptInterfaceSourceBuilder().Initialize(endpoint.Response.Name);
+        ITypescriptSourceBuilder requestInterfacesBuilder = new TypescriptInterfaceSourceBuilder().Initialize(endpoint.Request.Name);
+        ITypescriptSourceBuilder responseInterfacesBuilder = new TypescriptInterfaceSourceBuilder().Initialize(endpoint.Response.Name);
+        ITypescriptSourceBuilder requestToMappingBuilder = new TypescriptToMappingBuilder().Initialize(endpoint.Request.Name);
+        ITypescriptSourceBuilder responseToMappingBuilder = new TypescriptToMappingBuilder().Initialize(endpoint.Response.Name);
+        ITypescriptSourceBuilder requestFromMappingBuilder = new TypescriptFromMappingBuilder().Initialize(endpoint.Request.Name);
+        ITypescriptSourceBuilder responseFromMappingBuilder = new TypescriptFromMappingBuilder().Initialize(endpoint.Response.Name);
         
-        var importables = new HashSet<Type>();
-        var requestInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(endpoint.Request, requestBuilder, sharedTypes, importables);
-        var responseInterfaces = InterfaceGenerator.GenerateFromGeneratableObject(endpoint.Response, responseBuilder, sharedTypes, importables);
+        var importables = new HashSet<TypescriptImportable>();
+        var requestInterfaces = ApiClientSourceBuilder<TypescriptInterfaceSourceBuilder>.GenerateFromGeneratableObject(endpoint.Request, requestInterfacesBuilder, sharedTypes, importables);
+        var responseInterfaces = ApiClientSourceBuilder<TypescriptInterfaceSourceBuilder>.GenerateFromGeneratableObject(endpoint.Response, responseInterfacesBuilder, sharedTypes, importables);
+        var requestToMapping = ApiClientSourceBuilder<TypescriptToMappingBuilder>.GenerateFromGeneratableObject(endpoint.Request, requestToMappingBuilder, sharedTypes, importables);
+        var responseToMapping = ApiClientSourceBuilder<TypescriptToMappingBuilder>.GenerateFromGeneratableObject(endpoint.Response, responseToMappingBuilder, sharedTypes, importables);
+        var requestFromMapping = ApiClientSourceBuilder<TypescriptFromMappingBuilder>.GenerateFromGeneratableObject(endpoint.Request, requestFromMappingBuilder, sharedTypes, importables);
+        var responseFromMapping = ApiClientSourceBuilder<TypescriptFromMappingBuilder>.GenerateFromGeneratableObject(endpoint.Response, responseFromMappingBuilder, sharedTypes, importables);
         
         var imports = GetImportsFromTypeList(importables, sharedTypes);
 
-        if(importables.Count > 0) blockBuilder.AppendLine(imports);
-        blockBuilder.AppendLine(requestInterfaces);
-        blockBuilder.AppendLine(responseInterfaces);
+        if(importables.Count > 0) blockBuilder.Append(imports);
+        blockBuilder.Append(requestInterfaces);
+        blockBuilder.Append(responseInterfaces);
+        blockBuilder.Append(requestToMapping);
+        blockBuilder.Append(responseToMapping);
+        blockBuilder.Append(requestFromMapping);
+        blockBuilder.Append(responseFromMapping);
         
         _logger.LogDebug("File contents: \n{File}", blockBuilder.ToString());
         
@@ -413,16 +425,22 @@ public class TypescriptApiClientGeneratorNew : IExternalSourceGenerator
         _generatedEnums.Add(enumType.Name);
     }
 
-    private string GetImportsFromTypeList(HashSet<Type> types, List<SharedType> sharedTypes)
+    private string GetImportsFromTypeList(HashSet<TypescriptImportable> types, List<SharedType> sharedTypes)
     {
         var importBuilder = new StringBuilder();
         foreach (var type in types)
         {
-            var sharedType = sharedTypes.FirstOrDefault(x => x.OriginalType == type);
-            
-            if(sharedType is null) continue;
-            
-            importBuilder.AppendLine(sharedType.ImportString);
+            if (type.ImportType == ImportType.TYPE)
+            {
+                var sharedType = sharedTypes.FirstOrDefault(x => x.OriginalType == type.ImportableType);
+                
+                if(sharedType is null) continue;
+                
+                importBuilder.AppendLine(sharedType.ImportString);
+            } else if (type.ImportType == ImportType.DAYJS)
+            {
+                importBuilder.AppendLine("import dayjs from 'dayjs';");
+            }
         }
 
         return importBuilder.ToString();

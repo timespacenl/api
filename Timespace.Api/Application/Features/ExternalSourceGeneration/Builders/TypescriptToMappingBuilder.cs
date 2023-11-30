@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Extensions;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Extensions;
@@ -5,18 +6,17 @@ using Timespace.Api.Application.Features.ExternalSourceGeneration.Types;
 
 namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 
-public class TypescriptInterfaceSourceBuilder : ITypescriptSourceBuilder
+public class TypescriptToMappingBuilder : ITypescriptSourceBuilder
 {
     private int _indentLevel;
     private readonly StringBuilder _builder = new();
     private readonly string _indent = "    ";
     private readonly string _newLine = "\n";
     private readonly int _openScopes = 0;
-
-
+    
     public ITypescriptSourceBuilder Initialize(string name)
     {
-        _builder.Append($"export interface {name} {{");
+        _builder.Append($"export const to{name} = (data: any): {name} => {{");
         _builder.Append(_newLine);
         _indentLevel++;
 
@@ -24,16 +24,23 @@ public class TypescriptInterfaceSourceBuilder : ITypescriptSourceBuilder
     }
     public ITypescriptSourceBuilder AddProperty(GeneratableMember member, string? typeNameOverride = null)
     {
-        var listExtension = member.IsList ? "[]" : "";
-        var nullableExtension = member.IsNullable ? " | null" : "";
+        string propertyAccessor;
         
-        var typeName = typeNameOverride;
         if (member.MemberType is not null && typeNameOverride is null)
         {
-            typeName = Constants.MappableTypesMapping.TryGetValue(member.MemberType.Name, out var tsType) ? tsType : "unknown";
+            if(member.MemberType == typeof(Instant) || member.MemberType == typeof(LocalDate) || member.MemberType == typeof(LocalDateTime))
+                propertyAccessor = $"dayjs(data.{member.Name.ToCamelCase()})";
+            else
+                propertyAccessor = $"data.{member.Name.ToCamelCase()}";
+        }
+        else
+        {
+            propertyAccessor = member.IsList ? 
+                $"data.{member.Name.ToCamelCase()}?.map((c) => to{typeNameOverride}(c))" : 
+                $"to{typeNameOverride}(data.{member.Name.ToCamelCase()})";
         }
         
-        _builder.Append($"{_indent.Repeat(_indentLevel)}{member.Name.ToCamelCase()}: {typeName}{listExtension}{nullableExtension};");
+        _builder.Append($"{_indent.Repeat(_indentLevel)}{member.Name.ToCamelCase()}: {propertyAccessor},");
         _builder.Append(_newLine);
         return this;
     }
@@ -48,7 +55,7 @@ public class TypescriptInterfaceSourceBuilder : ITypescriptSourceBuilder
         }
         
         _indentLevel--;
-        _builder.Append($"{_indent.Repeat(_indentLevel)}}};");
+        _builder.Append($"{_indent.Repeat(_indentLevel)}}});");
         
         return _builder.ToString();
     }
