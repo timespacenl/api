@@ -12,8 +12,7 @@ public class ExternalSourceGenerationSettings
 
 public class TypescriptGeneratorSettings
 {
-    public string GenerationPath { get; set; } = null!;
-    public string GenerationFileName { get; set; } = null!;
+    public string GenerationRoot { get; set; } = null!;
 }
 
 public class PermissionsGenerator

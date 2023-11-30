@@ -16,7 +16,7 @@ public class TypescriptFromMappingBuilder : ITypescriptSourceBuilder
     
     public ITypescriptSourceBuilder Initialize(string name)
     {
-        _builder.Append($"export const from{name} = (data: {name}) => {{");
+        _builder.Append($"export const from{name} = (data: {name}) => ({{");
         _builder.Append(_newLine);
         _indentLevel++;
 
@@ -29,7 +29,7 @@ public class TypescriptFromMappingBuilder : ITypescriptSourceBuilder
         if (member.MemberType is not null && typeNameOverride is null)
         {
             if(member.MemberType == typeof(Instant))
-                propertyAccessor = $"dayjs(data.{member.Name.ToCamelCase()}).utc().toISOString()";
+                propertyAccessor = $"dayjs(data.{member.Name.ToCamelCase()}).toISOString()";
             else if(member.MemberType == typeof(LocalDate))
                 propertyAccessor = $"dayjs(data.{member.Name.ToCamelCase()}).format('YYYY-MM-DD')";
             else
@@ -38,7 +38,7 @@ public class TypescriptFromMappingBuilder : ITypescriptSourceBuilder
         else
         {
             propertyAccessor = member.IsList ? 
-                $"data.{member.Name.ToCamelCase()}{(member.IsNullable ? '?' : "")}.map((c) => from{typeNameOverride}(c))" : 
+                $"data.{member.Name.ToCamelCase()}{(member.IsNullable ? '?' : "")}.map((c: {typeNameOverride}) => from{typeNameOverride}(c))" : 
                 $"from{typeNameOverride}(data.{member.Name.ToCamelCase()})";
         }
         

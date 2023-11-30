@@ -16,7 +16,7 @@ public class TypescriptToMappingBuilder : ITypescriptSourceBuilder
     
     public ITypescriptSourceBuilder Initialize(string name)
     {
-        _builder.Append($"export const to{name} = (data: any): {name} => {{");
+        _builder.Append($"export const to{name} = (data: any): {name} => ({{");
         _builder.Append(_newLine);
         _indentLevel++;
 
@@ -36,7 +36,7 @@ public class TypescriptToMappingBuilder : ITypescriptSourceBuilder
         else
         {
             propertyAccessor = member.IsList ? 
-                $"data.{member.Name.ToCamelCase()}?.map((c) => to{typeNameOverride}(c))" : 
+                $"data.{member.Name.ToCamelCase()}?.map((c: any) => to{typeNameOverride}(c))" : 
                 $"to{typeNameOverride}(data.{member.Name.ToCamelCase()})";
         }
         
