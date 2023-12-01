@@ -60,6 +60,7 @@
       <Folder Include="Application/Features/Tenants/Settings/Common/" />
       <Folder Include="Application/Features/Users/Me" />
       <Folder Include="Application/Features/Users/Settings/Common/" />
+      <Folder Include="Application\Features\ExternalSourceGeneration\Generators\TypescriptApiClientGenerator\TsGenerators\" />
       <Folder Include="Migrations" />
     </ItemGroup>
 

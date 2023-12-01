@@ -14,12 +14,12 @@ public class TypescriptFromMappingBuilder : ITypescriptSourceBuilder
     private readonly string _newLine = "\n";
     private readonly int _openScopes = 0;
     
-    public ITypescriptSourceBuilder Initialize(string name)
+    public ITypescriptSourceBuilder Initialize(string name, bool canBeNull = false)
     {
-        _builder.Append($"export const from{name} = (data: {name}) => ({{");
+        _builder.Append($"export const from{name} = (data: {name}{(canBeNull ? " | null" : "")}) => {(canBeNull ? "data == null ? null : " : "")}({{");
         _builder.Append(_newLine);
         _indentLevel++;
-
+        
         return this;
     }
     public ITypescriptSourceBuilder AddProperty(GeneratableMember member, string? typeNameOverride = null)
@@ -38,7 +38,7 @@ public class TypescriptFromMappingBuilder : ITypescriptSourceBuilder
         else
         {
             propertyAccessor = member.IsList ? 
-                $"data.{member.Name.ToCamelCase()}{(member.IsNullable ? '?' : "")}.map((c: {typeNameOverride}) => from{typeNameOverride}(c))" : 
+                $"data.{member.Name.ToCamelCase()}{(member.IsNullable ? "?" : "")}.map((c: {typeNameOverride}) => from{typeNameOverride}(c))" : 
                 $"from{typeNameOverride}(data.{member.Name.ToCamelCase()})";
         }
         

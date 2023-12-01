@@ -20,7 +20,7 @@ public class LoginController : ControllerBase
         _clock = clock;
     }
 
-    [HttpGet("{flowId}")]
+    [HttpGet("{flowId:guid}")]
     public async Task<GetLoginFlow.Response> Get([FromQuery] GetLoginFlow.Query query)
     {
         return await _sender.Send(query);

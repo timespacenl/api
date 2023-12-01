@@ -51,8 +51,12 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
             }
         }
         
+        Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/routes", true);
+        Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/enums", true);
+        Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/shared", true);
         var sharedTypeObjects = GetSharedTypes(_generatableEndpoints);
         var sharedTypes = GenerateSharedTypes(sharedTypeObjects);
+        
         
         foreach (var endpoint in _generatableEndpoints)
         {
@@ -350,9 +354,9 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
             else
             {
                 var fileContentBuilder = new StringBuilder();
-                ITypescriptSourceBuilder interfaceSourceBuilder = new TypescriptInterfaceSourceBuilder().Initialize(typeName);
-                ITypescriptSourceBuilder toMappingSourceBuilder = new TypescriptToMappingBuilder().Initialize(typeName);
-                ITypescriptSourceBuilder fromMappingSourceBuilder = new TypescriptFromMappingBuilder().Initialize(typeName);
+                ITypescriptSourceBuilder interfaceSourceBuilder = new TypescriptInterfaceSourceBuilder().Initialize(typeName, true);
+                ITypescriptSourceBuilder toMappingSourceBuilder = new TypescriptToMappingBuilder().Initialize(typeName, true);
+                ITypescriptSourceBuilder fromMappingSourceBuilder = new TypescriptFromMappingBuilder().Initialize(typeName, true);
                 var importables = new HashSet<TypescriptImportable>();
                 var localSharedTypesWithoutCurrent = localSharedTypes.Where(x => x.OriginalType != sharedType.ObjectType).ToList();
                 var sharedTypeInterfaces = ApiClientSourceBuilder<TypescriptInterfaceSourceBuilder>.GenerateFromGeneratableObject(sharedType, interfaceSourceBuilder, localSharedTypesWithoutCurrent, importables);
@@ -385,7 +389,7 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
     
     private string GenerateFromEndpoint(GeneratableEndpoint endpoint, List<SharedType> sharedTypes)
     {
-        var dirPath = _options.TypescriptGenerator.GenerationRoot + $"/routes/{endpoint.RouteUrl}";
+        var dirPath = _options.TypescriptGenerator.GenerationRoot + $"/routes/{endpoint.RouteUrl.Replace('{', '(').Replace('}', ')').Replace(':', '_')}";
         Directory.CreateDirectory(dirPath);
         
         var blockBuilder = new StringBuilder();

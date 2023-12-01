@@ -14,7 +14,7 @@ public class TypescriptInterfaceSourceBuilder : ITypescriptSourceBuilder
     private readonly int _openScopes = 0;
 
 
-    public ITypescriptSourceBuilder Initialize(string name)
+    public ITypescriptSourceBuilder Initialize(string name, bool canBeNull = false)
     {
         _builder.Append($"export interface {name} {{");
         _builder.Append(_newLine);
