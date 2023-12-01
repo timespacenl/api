@@ -50,9 +50,13 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
             }
         }
         
-        Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/routes", true);
-        Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/enums", true);
-        Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/shared", true);
+        if(Directory.Exists(_options.TypescriptGenerator.GenerationRoot + "/routes"))
+            Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/routes", true);
+        if(Directory.Exists(_options.TypescriptGenerator.GenerationRoot + "/enums"))
+            Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/enums", true);
+        if(Directory.Exists(_options.TypescriptGenerator.GenerationRoot + "/shared"))
+            Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/shared", true);
+        
         var sharedTypeObjects = GetSharedTypes(_generatableEndpoints);
         var sharedTypes = GenerateSharedTypes(sharedTypeObjects);
         
@@ -357,10 +361,11 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
                 ITypescriptSourceBuilder toMappingSourceBuilder = new TypescriptToMappingBuilder().Initialize(typeName, true);
                 ITypescriptSourceBuilder fromMappingSourceBuilder = new TypescriptFromMappingBuilder().Initialize(typeName, true);
                 var importables = new HashSet<TypescriptImportable>();
-                var localSharedTypesWithoutCurrent = localSharedTypes.Where(x => x.OriginalType != sharedType.ObjectType).ToList();
-                var sharedTypeInterfaces = ApiClientSourceBuilder<TypescriptInterfaceSourceBuilder>.GenerateFromGeneratableObject(sharedType, interfaceSourceBuilder, localSharedTypesWithoutCurrent, importables);
-                var sharedTypeToMapping = ApiClientSourceBuilder<TypescriptToMappingBuilder>.GenerateFromGeneratableObject(sharedType, toMappingSourceBuilder, localSharedTypesWithoutCurrent, importables);
-                var sharedTypeFromMapping = ApiClientSourceBuilder<TypescriptFromMappingBuilder>.GenerateFromGeneratableObject(sharedType, fromMappingSourceBuilder, localSharedTypesWithoutCurrent, importables);
+                var sharedTypeInterfaces = ApiClientSourceBuilder<TypescriptInterfaceSourceBuilder>.GenerateFromGeneratableObject(sharedType, interfaceSourceBuilder, localSharedTypes, importables, true);
+                var sharedTypeToMapping = ApiClientSourceBuilder<TypescriptToMappingBuilder>.GenerateFromGeneratableObject(sharedType, toMappingSourceBuilder, localSharedTypes, importables, true);
+                var sharedTypeFromMapping = ApiClientSourceBuilder<TypescriptFromMappingBuilder>.GenerateFromGeneratableObject(sharedType, fromMappingSourceBuilder, localSharedTypes, importables, true);
+                
+                importables.RemoveWhere(x => x.ImportableType == sharedType.ObjectType);
                 var importString = GetImportsFromTypeList(importables, localSharedTypes);
                 
                 fileContentBuilder.Append(importString);

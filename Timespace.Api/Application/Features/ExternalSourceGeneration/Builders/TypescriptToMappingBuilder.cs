@@ -16,7 +16,7 @@ public class TypescriptToMappingBuilder : ITypescriptSourceBuilder
     
     public ITypescriptSourceBuilder Initialize(string name, bool canBeNull = false)
     {
-        _builder.Append($"export const to{name} = (data: any): {name}{(canBeNull ? " | null" : "")} => {(canBeNull ? "data == null ? null : " : "")}({{");
+        _builder.Append($"export const to{name} = (data: any): {name} => ({{");
         _builder.Append(_newLine);
         _indentLevel++;
         
@@ -25,11 +25,12 @@ public class TypescriptToMappingBuilder : ITypescriptSourceBuilder
     public ITypescriptSourceBuilder AddProperty(GeneratableMember member, string? typeNameOverride = null)
     {
         string propertyAccessor;
+        string nullablePrefix = member.IsNullable ? $"data.{member.Name.ToCamelCase()} ? undefined : " : "";
         
         if (member.MemberType is not null && typeNameOverride is null)
         {
             if(member.MemberType == typeof(Instant) || member.MemberType == typeof(LocalDate) || member.MemberType == typeof(LocalDateTime))
-                propertyAccessor = $"dayjs(data.{member.Name.ToCamelCase()})";
+                propertyAccessor = $"{nullablePrefix}dayjs(data.{member.Name.ToCamelCase()})";
             else
                 propertyAccessor = $"data.{member.Name.ToCamelCase()}";
         }
@@ -37,7 +38,7 @@ public class TypescriptToMappingBuilder : ITypescriptSourceBuilder
         {
             propertyAccessor = member.IsList ? 
                 $"data.{member.Name.ToCamelCase()}{(member.IsNullable ? "?" : "")}.map((c: any) => to{typeNameOverride}(c))" : 
-                $"to{typeNameOverride}(data.{member.Name.ToCamelCase()})";
+                $"{nullablePrefix}to{typeNameOverride}(data.{member.Name.ToCamelCase()})";
         }
         
         _builder.Append($"{_indent.Repeat(_indentLevel)}{member.Name.ToCamelCase()}: {propertyAccessor},");

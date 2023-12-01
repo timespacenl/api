@@ -1,6 +1,6 @@
 ﻿namespace Timespace.Api.Application.Features.Modules.Employees.Common;
 
-public record SharedType(string Prop1, string Prop2, List<SharedType>? SharedType2, NestedSharedType NestedSharedType);
+public record SharedType(string Prop1, string Prop2, List<SharedType>? SharedType2, NestedSharedType NestedSharedType, Instant? Test, LocalDate Test2);
 
 public record NestedSharedType(string Prop1, string Prop2);
 

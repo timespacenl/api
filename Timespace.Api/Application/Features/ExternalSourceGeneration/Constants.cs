@@ -10,6 +10,7 @@ public static class Constants
             {"Double", "number"},
             {"Boolean", "boolean"},
             {"Instant", "Dayjs"},
+            {"LocalDate", "Dayjs"},
             {"IFormFile", "File"}
         };
 

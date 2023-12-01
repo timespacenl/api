@@ -5,13 +5,13 @@ namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators
 
 public static class TypeMemberExtensions
 {
-    public static bool IsNullableReferenceType(this PropertyInfo property) =>
+    public static bool IsNullable(this PropertyInfo property) =>
     IsNullableHelper(property.PropertyType, property.DeclaringType, property.CustomAttributes);
 
-    public static bool IsNullableReferenceType(this FieldInfo field) =>
+    public static bool IsNullable(this FieldInfo field) =>
         IsNullableHelper(field.FieldType, field.DeclaringType, field.CustomAttributes);
 
-    public static bool IsNullableReferenceType(this ParameterInfo parameter) =>
+    public static bool IsNullable(this ParameterInfo parameter) =>
         IsNullableHelper(parameter.ParameterType, parameter.Member, parameter.CustomAttributes);
 
     private static bool IsNullableHelper(Type memberType, MemberInfo? declaringType, IEnumerable<CustomAttributeData> customAttributes)

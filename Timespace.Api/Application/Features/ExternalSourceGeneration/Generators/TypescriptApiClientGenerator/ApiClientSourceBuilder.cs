@@ -7,14 +7,14 @@ namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators
 
 public static class ApiClientSourceBuilder<TGenerator> where TGenerator : ITypescriptSourceBuilder, new()
 {
-    public static string GenerateFromGeneratableObject(GeneratableObject generatableObject, ITypescriptSourceBuilder sourceBuilder, List<SharedType> sharedTypes, HashSet<TypescriptImportable> importableTypes)
+    public static string GenerateFromGeneratableObject(GeneratableObject generatableObject, ITypescriptSourceBuilder sourceBuilder, List<SharedType> sharedTypes, HashSet<TypescriptImportable> importableTypes, bool isGeneratingSharedType = false)
     {
         var blockBuilder = new StringBuilder();
 
         if(generatableObject.ObjectType is not null && generatableObject.ObjectType.IsNodaTimeType())
             importableTypes.Add(new(ImportType.DAYJS, null));
         
-        if (generatableObject.ObjectType is not null && sharedTypes.IsSharedType(generatableObject.ObjectType))
+        if (generatableObject.ObjectType is not null && sharedTypes.IsSharedType(generatableObject.ObjectType) && !isGeneratingSharedType)
         {
             importableTypes.Add(new(ImportType.TYPE, generatableObject.ObjectType));
         }

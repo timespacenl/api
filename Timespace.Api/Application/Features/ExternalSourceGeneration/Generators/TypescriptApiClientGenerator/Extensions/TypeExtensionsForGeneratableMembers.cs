@@ -11,7 +11,8 @@ public static class TypeExtensionsForGeneratableMembers
 
         var generatableMembers = new List<GeneratableMember>();
         var paramType = type.IsEnumerableT() ? type.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : type;
-            
+        paramType = type.IsNullableValueType() ? type.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("Nullable argument is null") : paramType;    
+        
         var generatableMember = new GeneratableMember()
         {
             Name = propertyName,
@@ -30,7 +31,7 @@ public static class TypeExtensionsForGeneratableMembers
             foreach (var property in paramType.GetProperties())
             {
                 seenTypes.Add(paramType);   
-                generatableMember.Members.AddRange(property.PropertyType.GetGeneratableMembersFromType(property.Name, property.Name.ToLower() is "command" or "body", seenTypes, property.IsNullableReferenceType(), property.PropertyType.IsEnumerableT()));
+                generatableMember.Members.AddRange(property.PropertyType.GetGeneratableMembersFromType(property.Name, property.Name.ToLower() is "command" or "body", seenTypes, property.IsNullable() || property.PropertyType.IsNullableValueType(), property.PropertyType.IsEnumerableT()));
             }
             
             generatableMembers.Add(generatableMember);
@@ -51,7 +52,8 @@ public static class TypeExtensionsForGeneratableMembers
 
         var generatableMembers = new List<GeneratableMember>();
         var paramType = type.IsEnumerableT() ? type.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("List argument is null") : type;
-            
+        paramType = type.IsNullableValueType() ? type.GenericTypeArguments.FirstOrDefault() ?? throw new Exception("Nullable argument is null") : paramType;    
+        
         var generatableMember = new GeneratableMember()
         {
             Name = propertyName,
@@ -70,7 +72,7 @@ public static class TypeExtensionsForGeneratableMembers
             foreach (var property in paramType.GetProperties())
             {
                 seenTypes.Add(paramType);
-                generatableMember.Members.AddRange(property.PropertyType.GetGeneratableMembersFromSharedType(property.Name, sharedTypes, property.Name.ToLower() is "command" or "body", root: false, seenTypes: seenTypes, property.IsNullableReferenceType(), property.PropertyType.IsEnumerableT()));
+                generatableMember.Members.AddRange(property.PropertyType.GetGeneratableMembersFromSharedType(property.Name, sharedTypes, property.Name.ToLower() is "command" or "body", root: false, seenTypes: seenTypes, property.IsNullable(), property.PropertyType.IsEnumerableT()));
             }
             
             generatableMembers.Add(generatableMember);

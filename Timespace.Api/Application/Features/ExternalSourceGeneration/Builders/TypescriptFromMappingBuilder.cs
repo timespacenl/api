@@ -16,7 +16,7 @@ public class TypescriptFromMappingBuilder : ITypescriptSourceBuilder
     
     public ITypescriptSourceBuilder Initialize(string name, bool canBeNull = false)
     {
-        _builder.Append($"export const from{name} = (data: {name}{(canBeNull ? " | null" : "")}) => {(canBeNull ? "data == null ? null : " : "")}({{");
+        _builder.Append($"export const from{name} = (data: {name}): any => ({{");
         _builder.Append(_newLine);
         _indentLevel++;
         
@@ -25,13 +25,15 @@ public class TypescriptFromMappingBuilder : ITypescriptSourceBuilder
     public ITypescriptSourceBuilder AddProperty(GeneratableMember member, string? typeNameOverride = null)
     {
         string propertyAccessor;
+        string nullableTernary = member.IsNullable ? $"data.{member.Name.ToCamelCase()} ? undefined : " : "";
+        string nullableExtension = member.IsNullable ? "?" : "";
         
         if (member.MemberType is not null && typeNameOverride is null)
         {
             if(member.MemberType == typeof(Instant))
-                propertyAccessor = $"dayjs(data.{member.Name.ToCamelCase()}).toISOString()";
+                propertyAccessor = $"data.{member.Name.ToCamelCase()}{nullableExtension}.toISOString()";
             else if(member.MemberType == typeof(LocalDate))
-                propertyAccessor = $"dayjs(data.{member.Name.ToCamelCase()}).format('YYYY-MM-DD')";
+                propertyAccessor = $"data.{member.Name.ToCamelCase()}{nullableExtension}.format('YYYY-MM-DD')";
             else
                 propertyAccessor = $"data.{member.Name.ToCamelCase()}";
         }
@@ -39,7 +41,7 @@ public class TypescriptFromMappingBuilder : ITypescriptSourceBuilder
         {
             propertyAccessor = member.IsList ? 
                 $"data.{member.Name.ToCamelCase()}{(member.IsNullable ? "?" : "")}.map((c: {typeNameOverride}) => from{typeNameOverride}(c))" : 
-                $"from{typeNameOverride}(data.{member.Name.ToCamelCase()})";
+                $"{nullableTernary}from{typeNameOverride}(data.{member.Name.ToCamelCase()})";
         }
         
         _builder.Append($"{_indent.Repeat(_indentLevel)}{member.Name.ToCamelCase()}: {propertyAccessor},");
