@@ -5,7 +5,7 @@ namespace Timespace.Api.Application.Features.Tenants.Settings.Departments.Common
 
 public class Department : IEntity, ITenantEntity, ISoftDeletable
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public Instant CreatedAt { get; set; }
     public Instant UpdatedAt { get; set; }
     public Tenant Tenant { get; set; } = null!;

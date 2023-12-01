@@ -3,7 +3,7 @@ using Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Extensions;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Types;
 
-namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.TsGenerators;
+namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator;
 
 public static class ApiClientSourceBuilder<TGenerator> where TGenerator : ITypescriptSourceBuilder, new()
 {

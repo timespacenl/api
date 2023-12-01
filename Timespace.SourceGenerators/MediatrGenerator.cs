@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Scriban;
-using Timespace.SourceGenerators.MediatrSourceGenerator;
 
 namespace Timespace.SourceGenerators;
 

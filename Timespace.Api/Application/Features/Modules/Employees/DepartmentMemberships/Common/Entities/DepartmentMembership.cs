@@ -8,7 +8,7 @@ namespace Timespace.Api.Application.Features.Modules.Employees.DepartmentMembers
 
 public class DepartmentMembership : IEntity, ITenantEntity, ISoftDeletable
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public Instant CreatedAt { get; set; }
     public Instant UpdatedAt { get; set; }
     public Tenant Tenant { get; set; } = null!;
@@ -18,7 +18,7 @@ public class DepartmentMembership : IEntity, ITenantEntity, ISoftDeletable
     public Department Department { get; set; } = null!;
     public Guid DepartmentId { get; set; }
     
-    public Identity Identity { get; set; } = null!;
+    public ApplicationIdentity Identity { get; set; } = null!;
     public Guid IdentityId { get; set; }
     
     public List<DepartmentRole> Roles { get; set; } = null!;

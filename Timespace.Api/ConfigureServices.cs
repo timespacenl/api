@@ -3,14 +3,19 @@ using FluentValidation;
 using Hellang.Middleware.ProblemDetails;
 using MediatR;
 using MicroElements.Swashbuckle.NodaTime;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using NodaTime.Serialization.SystemTextJson;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Timespace.Api.Application.Common.Behaviours;
+using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Infrastructure;
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Errors;
@@ -35,6 +40,8 @@ public static class ConfigureServices
         services.AddScoped<IAuthenticationTokenProvider, AuthenticationTokenProvider>();
         services.AddScoped<IUsageContext, UsageContext>();
         services.AddScoped<ICaptchaVerificationService, CaptchaVerificationService>();
+
+        services.ConfigureIdentity();
         
         services.AddProblemDetails(ConfigureProblemDetails);
         services.AddDbContext<AppDbContext>(options =>
@@ -42,7 +49,7 @@ public static class ConfigureServices
                 opt => opt.UseNodaTime())
         );
 
-        services.AddMediatR(typeof(IAssemblyMarker).Assembly);
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<IAssemblyMarker>());
         services.AddValidatorsFromAssembly(typeof(IAssemblyMarker).Assembly);
         services.RegisterBehaviours();
 
@@ -54,6 +61,52 @@ public static class ConfigureServices
         services.AddTransient<AuthenticationTokenExtractor>();
     }
 
+    private static void ConfigureIdentity(this IServiceCollection services)
+    {
+        // Services used by identity
+        services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+            })
+            .AddCookie(IdentityConstants.ApplicationScheme, o =>
+            {
+                o.Cookie.Name = "timespace.session";
+                o.Cookie.HttpOnly = true;
+                o.Cookie.SameSite = SameSiteMode.Strict;
+                o.Cookie.Expiration = TimeSpan.FromDays(7);
+                o.Events = new CookieAuthenticationEvents
+                {
+                    OnValidatePrincipal = SecurityStampValidator.ValidatePrincipalAsync
+                };
+            })
+            .AddCookie(IdentityConstants.ExternalScheme, o =>
+            {
+                o.Cookie.Name = IdentityConstants.ExternalScheme;
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+            })
+            .AddCookie(IdentityConstants.TwoFactorRememberMeScheme, o =>
+            {
+                o.Cookie.Name = IdentityConstants.TwoFactorRememberMeScheme;
+                o.Events = new CookieAuthenticationEvents
+                {
+                    OnValidatePrincipal = SecurityStampValidator.ValidateAsync<ITwoFactorSecurityStampValidator>
+                };
+            })
+            .AddCookie(IdentityConstants.TwoFactorUserIdScheme, o =>
+            {
+                o.Cookie.Name = IdentityConstants.TwoFactorUserIdScheme;
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+            });
+        
+        services.AddIdentityCore<ApplicationUser>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<AppDbContext>();
+    }
+    
     private static void ConfigureProblemDetails(ProblemDetailsOptions options)
     {
         options.IncludeExceptionDetails = (_, _) => false;

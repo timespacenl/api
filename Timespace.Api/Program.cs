@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Asp.Versioning.ApiExplorer;
 using Destructurama;
 using Hellang.Middleware.ProblemDetails;
@@ -8,6 +7,7 @@ using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Timespace.Api;
 using Timespace.Api.Application.Features.AccessControl;
+using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 using Timespace.Api.Infrastructure.Middleware;
 using Timespace.Api.Infrastructure.Persistence;
@@ -65,9 +65,6 @@ if (app.Environment.IsDevelopment())
 app.UseProblemDetails();
 
 app.UseHttpsRedirection();
-
-JsonElement a = new();
-
 app.UseCors();
 
 app.UseMiddleware<AuthenticationTokenExtractor>();
@@ -75,6 +72,7 @@ app.UseMiddleware<AuthenticationTokenExtractor>();
 app.UseAuthorization();
 
 app.MapControllers();
+// app.MapIdentityApi<ApplicationUser>();
 
 app.Run();
 

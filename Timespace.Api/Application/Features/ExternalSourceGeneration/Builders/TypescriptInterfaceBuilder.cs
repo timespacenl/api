@@ -25,7 +25,7 @@ public class TypescriptInterfaceSourceBuilder : ITypescriptSourceBuilder
     public ITypescriptSourceBuilder AddProperty(GeneratableMember member, string? typeNameOverride = null)
     {
         var listExtension = member.IsList ? "[]" : "";
-        var nullableExtension = member.IsNullable ? " | null" : "";
+        var nullableExtension = member.IsNullable ? "?" : "";
         
         var typeName = typeNameOverride;
         if (member.MemberType is not null && typeNameOverride is null)
@@ -33,7 +33,7 @@ public class TypescriptInterfaceSourceBuilder : ITypescriptSourceBuilder
             typeName = Constants.MappableTypesMapping.TryGetValue(member.MemberType.Name, out var tsType) ? tsType : "unknown";
         }
         
-        _builder.Append($"{_indent.Repeat(_indentLevel)}{member.Name.ToCamelCase()}: {typeName}{listExtension}{nullableExtension};");
+        _builder.Append($"{_indent.Repeat(_indentLevel)}{member.Name.ToCamelCase()}{nullableExtension}: {typeName}{listExtension};");
         _builder.Append(_newLine);
         return this;
     }

@@ -9,7 +9,6 @@ using Microsoft.Extensions.Options;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Extensions;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Extensions;
-using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.TsGenerators;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Types;
 using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.ExternalSourceGeneration;
@@ -414,10 +413,10 @@ public class TypescriptApiClientGenerator : IExternalSourceGenerator
         if(importables.Count > 0) blockBuilder.Append(imports);
         blockBuilder.Append(requestInterfaces);
         blockBuilder.Append(responseInterfaces);
-        blockBuilder.Append(requestToMapping);
+        // blockBuilder.Append(requestToMapping);
         blockBuilder.Append(responseToMapping);
         blockBuilder.Append(requestFromMapping);
-        blockBuilder.Append(responseFromMapping);
+        // blockBuilder.Append(responseFromMapping);
         
         File.WriteAllText(dirPath + $"/{endpoint.HandlerName.ToCamelCase()}.ts", blockBuilder.ToString());
         

@@ -5,7 +5,7 @@ namespace Timespace.Api.Application.Features.Tenants.Settings.Roles.Common.Entit
 
 public class TenantRole : IEntity, ITenantEntity, ISoftDeletable
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public Instant CreatedAt { get; set; }
     public Instant UpdatedAt { get; set; }
     public Tenant Tenant { get; set; } = null!;

@@ -41,7 +41,7 @@ public class PermissionsMappingGenerator : IExternalSourceGenerator
         
         ProcessNext(symbol!);
         
-        File.WriteAllText(_options.PermissionsGenerator.GenerationPath + '\\' + _options.PermissionsGenerator.GenerationFileName + ".ts", _builder.Build());
+        File.WriteAllText(_options.PermissionsGenerator.GenerationPath + '/' + _options.PermissionsGenerator.GenerationFileName + ".ts", _builder.Build());
     }
 
     public void ProcessNext(ITypeSymbol symbol)

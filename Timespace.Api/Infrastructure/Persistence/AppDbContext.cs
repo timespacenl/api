@@ -1,23 +1,21 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Timespace.Api.Application.Features.Tenants.Common.Entities;
-using Timespace.Api.Application.Features.Users.Authentication.Login.Common.Entities;
-using Timespace.Api.Application.Features.Users.Authentication.Registration.Common.Entities;
-using Timespace.Api.Application.Features.Users.Authentication.Sessions.Common.Entities;
-using Timespace.Api.Application.Features.Users.Authentication.Verification;
 using Timespace.Api.Application.Features.Users.Common.Entities;
-using Timespace.Api.Application.Features.Users.Common.Entities.Credentials;
-using Timespace.Api.Application.Features.Users.Settings.Mfa.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
 using Timespace.Api.Infrastructure.Services;
 
 namespace Timespace.Api.Infrastructure.Persistence;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
-    // private readonly ISessionInfoProvider _sessionInfoProvider;
     private readonly IClock _clock;
     private readonly IUsageContext _usageContext;
+    
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
     
     public AppDbContext(DbContextOptions<AppDbContext> options, IClock clock, IUsageContext usageContext) : base(options)
     {
@@ -25,27 +23,15 @@ public class AppDbContext : DbContext
         _usageContext = usageContext;
     }
 
-    // Selfservice flows
-    public DbSet<RegistrationFlow> RegistrationFlows { get; init; } = null!;
-    public DbSet<LoginFlow> LoginFlows { get; init; } = null!;
-    public DbSet<MfaSetupFlow> MfaSetupFlows { get; init; } = null!;
-
-    // Identity
-    public DbSet<Identity> Identities { get; init; } = null!;
-    public DbSet<IdentityIdentifier> IdentityIdentifiers { get; init; } = null!;
-    public DbSet<IdentityCredential> IdentityCredentials { get; init; } = null!;
-    public DbSet<Session> Sessions { get; init; } = null!;
-    public DbSet<Verification> Verifications { get; init; } = null!;
-
     // Tenant
-    public DbSet<Tenant> Tenants { get; init; } = null!;
+    // public DbSet<Tenant> Tenants { get; init; } = null!;
 
     public override int SaveChanges()
     {
         throw new NotSupportedException();
     }
 
-    public async override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker
             .Entries()
@@ -53,11 +39,11 @@ public class AppDbContext : DbContext
 
         foreach (var entityEntry in entries)
         {
-            ((IEntity)entityEntry.Entity).UpdatedAt = _clock.GetCurrentInstant();
+            ((ITimestamped)entityEntry.Entity).UpdatedAt = _clock.GetCurrentInstant();
 
             if (entityEntry.State == EntityState.Added)
             {
-                ((IEntity)entityEntry.Entity).CreatedAt = _clock.GetCurrentInstant();
+                ((ITimestamped)entityEntry.Entity).CreatedAt = _clock.GetCurrentInstant();
             }
         }
 

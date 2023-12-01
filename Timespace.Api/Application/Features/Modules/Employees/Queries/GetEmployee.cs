@@ -32,25 +32,25 @@ public static partial class GetEmployee {
     
     private static async Task<PaginatedResult<Response>> Handle(Query request, AppDbContext db, CancellationToken cancellationToken)
     {
-        var employeeIdentity = await db.Identities.FirstOrDefaultAsync(x => x.Id == request.EmployeeId, cancellationToken: cancellationToken);
-
-        if (employeeIdentity == null)
-            throw new EmployeeNotFoundException();
-            
-        var identifier = await db.IdentityIdentifiers.FirstOrDefaultAsync(x => x.IdentityId == employeeIdentity.Id && x.Primary == true, cancellationToken: cancellationToken);
-
-        if (identifier == null)
-            throw new EmployeeNotFoundException(); // Should never happen as the user is created with an email identifier
+        // var employeeIdentity = await db.Identities.FirstOrDefaultAsync(x => x.Id == request.EmployeeId, cancellationToken: cancellationToken);
+        //
+        // if (employeeIdentity == null)
+        //     throw new EmployeeNotFoundException();
+        //     
+        // var identifier = await db.IdentityIdentifiers.FirstOrDefaultAsync(x => x.IdentityId == employeeIdentity.Id && x.Primary == true, cancellationToken: cancellationToken);
+        //
+        // if (identifier == null)
+        //     throw new EmployeeNotFoundException(); // Should never happen as the user is created with an email identifier
+        //
+        // var response = new Response
+        // {
+        //     EmployeeId = employeeIdentity.Id,
+        //     FirstName = employeeIdentity.FirstName,
+        //     LastName = employeeIdentity.LastName,
+        //     Email = identifier.Identifier
+        // };
         
-        var response = new Response
-        {
-            EmployeeId = employeeIdentity.Id,
-            FirstName = employeeIdentity.FirstName,
-            LastName = employeeIdentity.LastName,
-            Email = identifier.Identifier
-        };
-        
-        return new PaginatedResult<Response>([response], 1, 1, 1);
+        return new PaginatedResult<Response>([], 1, 1, 1);
     }
     
     public partial class Validator
