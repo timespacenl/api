@@ -1,6 +1,5 @@
 ﻿// using System.Text;
 // using System.Text.Json;
-// using System.Text.Json.Serialization;
 // using Microsoft.AspNetCore.Mvc.ApiExplorer;
 // using Microsoft.AspNetCore.Mvc.Controllers;
 // using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -13,10 +12,11 @@
 //
 // namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator;
 //
-// public class TypescriptApiClientGenerator : IExternalSourceGenerator
+// public class TypescriptApiClientGeneratorRoslyn : IExternalSourceGenerator
 // {
-//     private readonly ILogger<TypescriptApiClientGenerator> _logger;
+//     private readonly ILogger<TypescriptApiClientGeneratorRoslyn> _logger;
 //     private readonly IApiDescriptionGroupCollectionProvider _apiExplorer;
+//     private readonly Compilation _compilation;
 //     private readonly StringBuilder _generation = new();
 //     private readonly StringBuilder _typeGeneration = new();
 //     private readonly StringBuilder _enumGeneration = new();
@@ -25,8 +25,9 @@
 //     private readonly List<GeneratableEndpoint> _generatableEndpoints = new();
 //     private readonly HashSet<Type> _seenTypes = new();
 //
-//     public TypescriptApiClientGenerator(Compilation compilation, IApiDescriptionGroupCollectionProvider apiExplorer, ILogger<TypescriptApiClientGenerator> logger, IOptions<ExternalSourceGenerationSettings> options)
+//     public TypescriptApiClientGeneratorRoslyn(Compilation compilation, IApiDescriptionGroupCollectionProvider apiExplorer, ILogger<TypescriptApiClientGeneratorRoslyn> logger, IOptions<ExternalSourceGenerationSettings> options)
 //     {
+//         _compilation = compilation;
 //         _apiExplorer = apiExplorer;
 //         _logger = logger;
 //         _options = options.Value;
@@ -34,20 +35,20 @@
 //
 //     public void Execute()
 //     {
-//         // var apiDescriptionGroups = _apiExplorer.ApiDescriptionGroups.Items;
-//         // foreach (var apiDescriptionGroup in apiDescriptionGroups)
-//         // {
-//         //     foreach (var apiDescription in apiDescriptionGroup.Items)
-//         //     {
-//         //         var generatableEndpoint = TransformApiDescription(apiDescription);
-//         //         
-//         //         if (generatableEndpoint is null)
-//         //             continue;
-//         //         
-//         //         _generatableEndpoints.Add(generatableEndpoint);
-//         //     }
-//         // }
-//         //
+//         var apiDescriptionGroups = _apiExplorer.ApiDescriptionGroups.Items;
+//         foreach (var apiDescriptionGroup in apiDescriptionGroups)
+//         {
+//             foreach (var apiDescription in apiDescriptionGroup.Items)
+//             {
+//                 var generatableEndpoint = TransformApiDescription(apiDescription);
+//                 
+//                 if (generatableEndpoint is null)
+//                     continue;
+//                 
+//                 _generatableEndpoints.Add(generatableEndpoint);
+//             }
+//         }
+//         
 //         // if(Directory.Exists(_options.TypescriptGenerator.GenerationRoot + "/routes"))
 //         //     Directory.Delete(_options.TypescriptGenerator.GenerationRoot + "/routes", true);
 //         // if(Directory.Exists(_options.TypescriptGenerator.GenerationRoot + "/enums"))
@@ -57,7 +58,6 @@
 //         //
 //         // var sharedTypeObjects = GetSharedTypes(_generatableEndpoints);
 //         // var sharedTypes = GenerateSharedTypes(sharedTypeObjects);
-//         //
 //         //
 //         // foreach (var endpoint in _generatableEndpoints)
 //         // {
@@ -74,17 +74,45 @@
 //             _logger.LogError("API endpoint with route url {RouteUrl} does not have a return type specified", apiDescription.RelativePath);
 //             return null;
 //         }
-//
-//         string? handlerName = null;
-//         if (apiDescription.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
-//             handlerName = controllerActionDescriptor.ActionName;
 //         
-//         if (handlerName is null)
+//         if (apiDescription.ActionDescriptor is not ControllerActionDescriptor controllerActionDescriptor)
+//             return null;
+//         
+//         string handlerName = controllerActionDescriptor.ActionName;
+//
+//         var allNodes = _compilation.SyntaxTrees.SelectMany(x => x.GetRoot().DescendantNodes()).ToList();
+//
+//         var declaringType = _compilation.GetTypeByMetadataName(controllerActionDescriptor.ControllerTypeInfo.FullName!);
+//
+//         if (declaringType is null)
 //         {
-//             _logger.LogError("API endpoint with route url {RouteUrl} does not have a valid handler name", apiDescription.RelativePath);
+//             _logger.LogError("API endpoint with route url {RouteUrl} does not have a parent controller type that could be found", apiDescription.RelativePath);
 //             return null;
 //         }
+//         
+//         var actionSym = declaringType.GetMembers().OfType<IMethodSymbol>().FirstOrDefault(x => x.Name == controllerActionDescriptor.MethodInfo.Name);
+//         var actionParams = actionSym.Parameters.Select(x =>
+//         {
+//             return new
+//             {
+//                 name = x.Name,
+//                 attrs = x.GetAttributes()
+//             };
+//         });
+//         
+//         var action = allNodes
+//             .Where(d => d.IsKind(SyntaxKind.MethodDeclaration))
+//             .OfType<MethodDeclarationSyntax>()
+//             .FirstOrDefault(x => x.Identifier.ToString() == controllerActionDescriptor.MethodInfo.Name);
 //
+//         if (action is null)
+//         {
+//             _logger.LogError("API endpoint with route url {RouteUrl} does not have a method declaration that could be found", apiDescription.RelativePath);
+//             return null;
+//         }
+//         
+//         var actionSymbol = _compilation.GetSemanticModel(action.SyntaxTree).GetDeclaredSymbol(action);
+//         
 //         var tsTypePrefix = $"{handlerName}Request";
 //         GeneratableObject generatableObject = new()
 //         {
@@ -479,23 +507,5 @@
 //         relativePath += queryBuilder.ToString();
 //         
 //         return relativePath;
-//     }
-// }
-//
-// internal class CustomJsonConverterForType : JsonConverter<Type>
-// {
-//     public override Type Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-//     {
-//         // Caution: Deserialization of type instances like this is not recommended and should be avoided
-//         // since it can lead to potential security issues.
-//
-//         // string assemblyQualifiedName = reader.GetString();
-//         // return Type.GetType(assemblyQualifiedName);
-//         throw new NotSupportedException();
-//     }
-//
-//     public override void Write(Utf8JsonWriter writer, Type value, JsonSerializerOptions options)
-//     {
-//         writer.WriteStringValue(value.AssemblyQualifiedName);
 //     }
 // }

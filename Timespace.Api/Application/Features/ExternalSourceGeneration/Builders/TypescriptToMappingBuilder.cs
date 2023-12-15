@@ -1,7 +1,5 @@
-using System.Reflection;
 using System.Text;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Extensions;
-using Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Extensions;
 using Timespace.Api.Application.Features.ExternalSourceGeneration.Types;
 
 namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Builders;

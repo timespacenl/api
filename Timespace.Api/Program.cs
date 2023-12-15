@@ -1,18 +1,14 @@
 using Asp.Versioning.ApiExplorer;
 using Destructurama;
 using Hellang.Middleware.ProblemDetails;
-using Microsoft.Build.Locator;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Timespace.Api;
 using Timespace.Api.Application.Features.AccessControl;
-using Timespace.Api.Application.Features.Users.Common.Entities;
-using Timespace.Api.Infrastructure.ExternalSourceGeneration;
+using Timespace.Api.Application.Features.StartupJobs;
 using Timespace.Api.Infrastructure.Middleware;
 using Timespace.Api.Infrastructure.Persistence;
-
-MSBuildLocator.RegisterDefaults();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +30,8 @@ var app = builder.Build();
 
 if (builder.Environment.IsDevelopment() && !builder.Configuration.GetValue<bool>("IntegrationTestingMode"))
 {
+    app.Services.GetRequiredService<ApiDetailsExtractor>().Execute();
 }
-await app.RunExternalSourceGenerators();
 
 using (var scope = app.Services.CreateScope())
 {

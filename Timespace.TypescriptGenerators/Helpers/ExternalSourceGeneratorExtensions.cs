@@ -1,12 +1,14 @@
 ﻿using Microsoft.CodeAnalysis.MSBuild;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Timespace.Api.Infrastructure.Configuration;
+using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 
-namespace Timespace.Api.Infrastructure.ExternalSourceGeneration;
+namespace Timespace.TypescriptGenerators.Helpers;
 
 public static class ExternalSourceGeneratorExtensions
 {
-    public static async Task RunExternalSourceGenerators(this WebApplication app)
+    public static async Task RunSourceGenerators(this IHost host)
     {
         var type = typeof(IExternalSourceGenerator);
         var types = AppDomain.CurrentDomain.GetAssemblies()
@@ -16,7 +18,7 @@ public static class ExternalSourceGeneratorExtensions
 
         MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
-        var options = app.Services.GetRequiredService<IOptions<ExternalSourceGenerationSettings>>();
+        var options = host.Services.GetRequiredService<IOptions<ExternalSourceGenerationSettings>>();
         
         workspace.LoadMetadataForReferencedProjects = true;
         var project = await workspace.OpenProjectAsync(options.Value.ApiProjectPath);
@@ -28,7 +30,7 @@ public static class ExternalSourceGeneratorExtensions
         foreach (var externalGenerator in types)
         {
             var externalSourceGenerator =
-                (IExternalSourceGenerator)ActivatorUtilities.CreateInstance(app.Services, externalGenerator, compilation);
+                (IExternalSourceGenerator)ActivatorUtilities.CreateInstance(host.Services, externalGenerator, compilation);
             
             externalSourceGenerator.Execute();
         }

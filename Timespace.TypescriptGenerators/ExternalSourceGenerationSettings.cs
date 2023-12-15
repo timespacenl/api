@@ -1,4 +1,4 @@
-﻿namespace Timespace.Api.Infrastructure.Configuration;
+﻿namespace Timespace.TypescriptGenerators;
 
 public class ExternalSourceGenerationSettings
 {

@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Timespace.Api.Application.Features.Modules.Employees.Common;
-using Timespace.Api.Application.Features.Modules.Employees.Queries;
 
 namespace Timespace.Api.Application.Features.Modules.Employees;
 
@@ -19,13 +18,13 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet("{employeeId}")]
-    public async Task<PaginatedResult<UserDto>> GetEmployeeAsync([FromQuery] GetEmployee.Query query)
+    public async Task<PaginatedResult<UserDto>?> GetEmployeeAsync(int employeeId, [FromBody] SharedType query)
     {
         return null;
     }
     
     [HttpGet("{employeeId}/2")]
-    public async Task<PaginatedResult<UserDto>> GetEmployee2Async([FromBody] UserDto body)
+    public async Task<PaginatedResult<UserDto>> GetEmployee2Async(int employeeId, [FromBody] UserDto body)
     {
         return null;
     }

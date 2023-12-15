@@ -25,9 +25,6 @@
         <PackageReference Include="MicroElements.Swashbuckle.NodaTime" Version="4.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Build.Locator" Version="1.6.10" />
-        <PackageReference Include="Microsoft.CodeAnalysis" Version="4.8.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.8.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -64,6 +61,7 @@
       <Folder Include="Application\Features\ExternalSourceGeneration\Generators\TypescriptApiClientGenerator\TsGenerators\" />
       <Folder Include="Application\Features\Users\Authentication\Sessions\" />
       <Folder Include="Application\Features\Users\Authentication\Verification\" />
+      <Folder Include="Infrastructure\ExternalSourceGeneration\" />
       <Folder Include="Migrations" />
     </ItemGroup>
 
@@ -78,5 +76,6 @@
     <ItemGroup>
         <ProjectReference Include="../Timespace.SourceGenerators/Timespace.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="../Timespace.Analyzers/Timespace.Analyzers/Timespace.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\TimeSpace.Shared\TimeSpace.Shared.csproj" />
     </ItemGroup>
 </Project>

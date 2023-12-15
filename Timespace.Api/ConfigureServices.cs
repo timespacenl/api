@@ -1,20 +1,18 @@
 ﻿using Asp.Versioning;
 using FluentValidation;
 using Hellang.Middleware.ProblemDetails;
-using MediatR;
 using MicroElements.Swashbuckle.NodaTime;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using NodaTime.Serialization.SystemTextJson;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Timespace.Api.Application.Common.Behaviours;
+using Timespace.Api.Application.Features.StartupJobs;
 using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Infrastructure;
 using Timespace.Api.Infrastructure.Configuration;
@@ -40,6 +38,7 @@ public static class ConfigureServices
         services.AddScoped<IAuthenticationTokenProvider, AuthenticationTokenProvider>();
         services.AddScoped<IUsageContext, UsageContext>();
         services.AddScoped<ICaptchaVerificationService, CaptchaVerificationService>();
+        services.AddSingleton<ApiDetailsExtractor>();
 
         services.ConfigureIdentity();
         
@@ -214,8 +213,6 @@ public static class ConfigureServices
         services.Configure<AuthenticationConfiguration>(configuration.GetSection(AuthenticationConfiguration.SectionName));
         services.Configure<UserSettingsConfiguration>(configuration.GetSection(UserSettingsConfiguration.SectionName));
         services.Configure<CaptchaConfiguration>(configuration.GetSection(CaptchaConfiguration.SectionName));
-        services.Configure<ExternalSourceGenerationSettings>(
-            configuration.GetSection(ExternalSourceGenerationSettings.SectionName));
     }
     
     public static void AddApiExplorerServices(this IServiceCollection services)

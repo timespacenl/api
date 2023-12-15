@@ -18,7 +18,7 @@ public class DepartmentMembership : IEntity, ITenantEntity, ISoftDeletable
     public Department Department { get; set; } = null!;
     public Guid DepartmentId { get; set; }
     
-    public ApplicationIdentity Identity { get; set; } = null!;
+    public ApplicationUser Identity { get; set; } = null!;
     public Guid IdentityId { get; set; }
     
     public List<DepartmentRole> Roles { get; set; } = null!;

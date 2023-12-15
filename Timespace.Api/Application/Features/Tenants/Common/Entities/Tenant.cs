@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Timespace.Api.Application.Features.Users.Common.Entities;
+﻿using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
 
 namespace Timespace.Api.Application.Features.Tenants.Common.Entities;
