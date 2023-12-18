@@ -40,15 +40,17 @@ public class ApiDetailsExtractor(IApiDescriptionGroupCollectionProvider apiExplo
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (apiDescription.ParameterDescriptions.Any(x => x.Type == null))
             throw new Exception($"Couldn't find type for parameter in route with url {apiDescription.RelativePath}");
+
+        var paramsTest = apiDescription.ParameterDescriptions.Where(x => x.Source == BindingSource.Path || x.Source == BindingSource.Query).ToList();
         
         var endpointDescription = new EndpointDescription()
         {
             RelativePath = apiDescription.RelativePath!,
             Version = groupName,
-            ActionName = controllerActionDescriptor.ActionName,
+            ActionName = controllerActionDescriptor.MethodInfo.Name,
             HttpMethod = apiDescription.HttpMethod,
-            ControllerTypeName = controllerActionDescriptor.ControllerTypeInfo.AssemblyQualifiedName!,
-            Parameters = apiDescription.ParameterDescriptions.Select(TransformApiParameter).ToList()
+            ControllerTypeName = controllerActionDescriptor.ControllerTypeInfo.FullName!,
+            //Parameters = paramsTest.Select(TransformApiParameter).ToList()
         };
         
         return endpointDescription;
@@ -56,11 +58,9 @@ public class ApiDetailsExtractor(IApiDescriptionGroupCollectionProvider apiExplo
     
     private ParameterDescription TransformApiParameter(ApiParameterDescription apiParameterDescription)
     {
-        return new ParameterDescription()
+        return new ParameterDescription
         {
-            Name = apiParameterDescription.Name,
-            Type = apiParameterDescription.Type.AssemblyQualifiedName,
-            DeclaringType = apiParameterDescription.Type.DeclaringType?.AssemblyQualifiedName,
+            Name = apiParameterDescription.ModelMetadata.PropertyName ?? apiParameterDescription.ModelMetadata.ParameterName ?? apiParameterDescription.Name,
             Source = GetSource(apiParameterDescription.Source)
         };
     }

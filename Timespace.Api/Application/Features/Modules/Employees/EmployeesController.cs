@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Timespace.Api.Application.Features.Modules.Employees.Common;
+using Timespace.Api.Application.Features.Modules.Employees.Queries;
 
 namespace Timespace.Api.Application.Features.Modules.Employees;
 
@@ -17,14 +18,44 @@ public class EmployeesController : ControllerBase
         _sender = sender;
     }
 
-    [HttpGet("{employeeId}")]
-    public async Task<PaginatedResult<UserDto>?> GetEmployeeAsync(int employeeId, [FromBody] SharedType query)
+    [HttpGet("{employeeId:int}")]
+    public async Task<PaginatedResult<UserDto>?> GetEmployeeAsync(int employeeId, [FromBody] SharedType query, string test)
     {
         return null;
     }
     
-    [HttpGet("{employeeId}/2")]
+    [HttpGet("{employeeId:int}/2")]
     public async Task<PaginatedResult<UserDto>> GetEmployee2Async(int employeeId, [FromBody] UserDto body)
+    {
+        return null;
+    }
+    
+    [HttpGet("{employeeId:int}/3")]
+    public async Task<PaginatedResult<UserDto>> GetEmployee3Async(int employeeId, [FromBody] PaginatedResult<UserDto> body)
+    {
+        return null;
+    }
+    
+    [HttpGet("")]
+    public async Task<PaginatedResult<UserDto>> GetEmployee4Async([FromQuery] CreateEmployee.Command command, [FromBody] CreateEmployee.CommandBody body)
+    {
+        return null;
+    }
+    
+    [HttpGet("get")]
+    public async Task<PaginatedResult<UserDto>> GetEmployee5Async([FromQuery] CreateEmployee.Command command, [FromForm] CreateEmployee.CommandBody body, [FromForm] string Test)
+    {
+        return null;
+    }
+    
+    [HttpGet("get2")]
+    public async Task<PaginatedResult<UserDto>> GetEmployee6Async([FromQuery] CreateEmployee.Command2 command)
+    {
+        return null;
+    }
+    
+    [HttpGet("get3")]
+    public async Task<PaginatedResult<UserDto>> GetEmployee7Async([FromQuery] CreateEmployee.Command3 command, SharedType sharedType)
     {
         return null;
     }

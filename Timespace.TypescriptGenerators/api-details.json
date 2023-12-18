@@ -3,42 +3,56 @@
     "RelativePath": "v1/employees/{employeeId}",
     "HttpMethod": "GET",
     "Version": "v1",
-    "ActionName": "GetEmployee",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController, Timespace.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "Parameters": [
-      {
-        "Name": "employeeId",
-        "Type": "System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e",
-        "DeclaringType": null,
-        "Source": 1
-      },
-      {
-        "Name": "query",
-        "Type": "Timespace.Api.Application.Features.Modules.Employees.Common.SharedType, Timespace.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-        "DeclaringType": null,
-        "Source": 2
-      }
-    ]
+    "ActionName": "GetEmployeeAsync",
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
+    "Parameters": []
   },
   {
     "RelativePath": "v1/employees/{employeeId}/2",
     "HttpMethod": "GET",
     "Version": "v1",
-    "ActionName": "GetEmployee2",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController, Timespace.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "Parameters": [
-      {
-        "Name": "employeeId",
-        "Type": "System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e",
-        "DeclaringType": null,
-        "Source": 1
-      },
-      {
-        "Name": "body",
-        "Type": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController\u002BUserDto, Timespace.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-        "DeclaringType": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController, Timespace.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-        "Source": 2
-      }
-    ]
+    "ActionName": "GetEmployee2Async",
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
+    "Parameters": []
+  },
+  {
+    "RelativePath": "v1/employees/{employeeId}/3",
+    "HttpMethod": "GET",
+    "Version": "v1",
+    "ActionName": "GetEmployee3Async",
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
+    "Parameters": []
+  },
+  {
+    "RelativePath": "v1/employees",
+    "HttpMethod": "GET",
+    "Version": "v1",
+    "ActionName": "GetEmployee4Async",
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
+    "Parameters": []
+  },
+  {
+    "RelativePath": "v1/employees/get",
+    "HttpMethod": "GET",
+    "Version": "v1",
+    "ActionName": "GetEmployee5Async",
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
+    "Parameters": []
+  },
+  {
+    "RelativePath": "v1/employees/get2",
+    "HttpMethod": "GET",
+    "Version": "v1",
+    "ActionName": "GetEmployee6Async",
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
+    "Parameters": []
+  },
+  {
+    "RelativePath": "v1/employees/get3",
+    "HttpMethod": "GET",
+    "Version": "v1",
+    "ActionName": "GetEmployee7Async",
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
+    "Parameters": []
   }
 ]

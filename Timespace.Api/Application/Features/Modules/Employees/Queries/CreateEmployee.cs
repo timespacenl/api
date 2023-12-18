@@ -1,18 +1,50 @@
-﻿using Timespace.Api.Infrastructure.Persistence;
+﻿using Microsoft.AspNetCore.Mvc;
+using Timespace.Api.Application.Features.Modules.Employees.Common;
+using Timespace.Api.Infrastructure.Persistence;
 using Timespace.SourceGenerators;
+// ReSharper disable NotAccessedPositionalProperty.Global
 
 namespace Timespace.Api.Application.Features.Modules.Employees.Queries;
 
 [GenerateMediatr]
 public static partial class CreateEmployee
 {
-    public partial record Command();
+    public partial record Command(
+        [property: FromQuery(Name = "name")] string Name,
+        [property: FromQuery(Name = "prop2")] string Prop2
+        );
+    
+    public record Command2(
+        [property: FromQuery(Name = "name")] string Name,
+        [property: FromQuery(Name = "prop2")] string Prop2,
+        [property: FromBody] CommandBody Body
+        );
+    
+    public record Command3(
+        [property: FromQuery(Name = "name")] string Name,
+        [property: FromQuery(Name = "prop2")] string Prop2,
+        [property: FromForm] CommandBody Body
+        );
 
-    public record Response();
+    public record CommandBody(
+        string Email,
+        string Password,
+        SharedType SharedType,
+        List<SharedType> SharedTypes,
+        Dictionary<string, SharedType> SharedTypesDictionary
+        );
 
-    private static async Task<Response> Handle(Command request, AppDbContext db, ILogger<Handler> logger, CancellationToken cancellationToken)
+    public record Response(
+        string Name,
+        string Email,
+        SharedType SharedType,
+        List<SharedType> SharedTypes,
+        Dictionary<string, SharedType> SharedTypesDictionary
+        );
+
+    private static async Task<PaginatedResult<Response>> Handle(Command request, AppDbContext db, ILogger<Handler> logger, CancellationToken cancellationToken)
     {
-        return new Response();
+        return new(new(), 0, 0, 0);
     }
 
     public partial class Validator
