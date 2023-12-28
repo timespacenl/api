@@ -6,24 +6,24 @@
 &lt;/AssemblyExplorer&gt;</s:String>
 	
 	
-	
-	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=6280002d_002Dbb60_002D443c_002Da001_002D864c1d7b71f6/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GenerateMediatr_HappyPath #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=961943cb_002D4be9_002D429b_002D8400_002D0305ff0a1cb0/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1 #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::F977EE1F-A96C-498E-82B6-1751F3F10BD4::net7.0::Timespace.SourceGenerators.Tests.MediatrGeneratorTests.GenerateMediatr_HappyPath&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a657667f_002D0fa5_002D40c9_002D9b7a_002D8c076e01bf7d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::64A78046-E5F5-479D-8E67-E2163C660296::net8.0::Timespace.Api.UnitTests.UnitTest1.Test1&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::1745EE7C-E66D-4AAD-A9A0-37D9A5E1B865::net8.0::Timespace.TypescriptGenerators.Tests.TypescriptTypeGeneratorTests.Test1&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=abf48003_002De3e0_002D4a55_002D8074_002Dc3a782d0c79e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="GenerateMediatr_HappyPath" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::F977EE1F-A96C-498E-82B6-1751F3F10BD4::net7.0::Timespace.SourceGenerators.Tests.MediatrGeneratorTests.GenerateMediatr_HappyPath&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
-&lt;/SessionState&gt;</s:String>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

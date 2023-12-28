@@ -15,9 +15,21 @@ public static partial class CreateEmployee
         );
     
     public record Command2(
-        [property: FromQuery(Name = "name")] string Name,
-        [property: FromQuery(Name = "prop2")] string Prop2,
+        [property: FromQuery] CommandQuery Query,
         [property: FromBody] CommandBody Body
+        );
+
+    public record CommandQuery(
+        [property: FromQuery(Name = "name")] string Name,
+        [property: FromQuery(Name = "prop2")] string Prop2
+        );
+    
+    public record CommandBody(
+        [property: FromQuery(Name = "name")] string Email,
+        string Password,
+        SharedType SharedType,
+        List<SharedType> SharedTypes,
+        Dictionary<string, SharedType> SharedTypesDictionary
         );
     
     public record Command3(
@@ -26,13 +38,6 @@ public static partial class CreateEmployee
         [property: FromForm] CommandBody Body
         );
 
-    public record CommandBody(
-        string Email,
-        string Password,
-        SharedType SharedType,
-        List<SharedType> SharedTypes,
-        Dictionary<string, SharedType> SharedTypesDictionary
-        );
 
     public record Response(
         string Name,

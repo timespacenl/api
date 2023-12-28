@@ -13,11 +13,11 @@ public partial class TypescriptMappingGenerator : IExternalSourceGenerator
     private readonly ILogger<TypescriptMappingGenerator> _logger;
     private readonly IReadOnlyList<EndpointDescription> _endpoints;
     
-    public TypescriptMappingGenerator(Compilation compilation, ILogger<TypescriptMappingGenerator> logger)
+    public TypescriptMappingGenerator(Compilation compilation, ILogger<TypescriptMappingGenerator> logger, IReadOnlyList<EndpointDescription>? endpoints = null)
     {
         _compilation = compilation;
         _logger = logger;
-        _endpoints = JsonSerializer.Deserialize<List<EndpointDescription>>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "api-details.json"))) ?? [];
+        _endpoints = endpoints ?? JsonSerializer.Deserialize<List<EndpointDescription>>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "api-details.json"))) ?? [];
     }
 
     public void Execute()

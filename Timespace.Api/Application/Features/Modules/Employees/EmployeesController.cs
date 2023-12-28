@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Timespace.Api.Application.Common.Attributes;
 using Timespace.Api.Application.Features.Modules.Employees.Common;
 using Timespace.Api.Application.Features.Modules.Employees.Queries;
 
@@ -19,7 +20,7 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet("{employeeId:int}")]
-    public async Task<PaginatedResult<UserDto>?> GetEmployeeAsync(int employeeId, [FromBody] SharedType query, string test)
+    public async Task<PaginatedResult<UserDto>?> GetEmployeeAsync(int employeeId, [FromBody] SharedType body, string test)
     {
         return null;
     }
@@ -49,7 +50,7 @@ public class EmployeesController : ControllerBase
     }
     
     [HttpGet("get2")]
-    public async Task<PaginatedResult<UserDto>> GetEmployee6Async([FromQuery] CreateEmployee.Command2 command)
+    public async Task<PaginatedResult<UserDto>> GetEmployee6Async(CreateEmployee.Command2 command)
     {
         return null;
     }

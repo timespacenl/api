@@ -14,15 +14,15 @@ public static class Constants
             {"IFormFile", "File"}
         };
 
-    public static readonly List<string> BuiltInTypes = [
-        "int",
-        "string",
-        "bool",
-        "byte",
+    public static readonly List<string> DefaultMappableTypes = [
+        "global::System.Int32",
+        "global::System.String",
+        "global::System.Boolean",
+        "global::System.Byte",
         "sbyte",
         "char",
         "decimal",
-        "double",
+        "global::System.Double",
         "float",
         "int",
         "uint",
@@ -31,7 +31,14 @@ public static class Constants
         "long",
         "ulong",
         "short",
-        "ushort"
+        "ushort",
+        "global::NodaTime.Instant",
+        "global::NodaTime.LocalDate",
+    ];
+
+    public static readonly List<string> PassthroughTypes =
+    [
+        "global::System.Threading.Tasks.Task<TResult>"
     ];
 
     public static readonly string ApiClientHeaders = 

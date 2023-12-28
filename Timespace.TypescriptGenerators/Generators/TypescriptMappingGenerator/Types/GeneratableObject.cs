@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.CodeAnalysis;
 
 namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.Types;
 
@@ -21,18 +22,40 @@ public class GeneratableEndpoint
     }
 }
 
-public class GeneratableObject
+public record GeneratableObject
 {
-    public string Name { get; set; } = null!;
-    public Type? ObjectType { get; set; } = null!;
-    public List<GeneratableMember> Members { get; set; } = new();
+    public string Name { get; init; } = null!;
+    public ITypeSymbol? ObjectType { get; init; } = null!;
+    public List<GeneratableMember> Members { get; init; } = new();
 }
 
-public record GeneratableMember
+public interface IGeneratableMember
 {
-    public string Name { get; set; } = null!;
-    public Type? MemberType { get; set; } = null!;
-    public List<GeneratableMember> Members { get; } = new();
-    public bool IsNullable { get; set; }
-    public bool IsList { get; set; }
+    public ITypeSymbol? MemberType { get; init; }
+    public List<IGeneratableMember> Members { get; init; }
+    public CollectionType CollectionType { get; init; }
+    public bool IsNullable => MemberType is not null && MemberType?.NullableAnnotation == NullableAnnotation.Annotated;
+}
+
+public record GeneratableMember : IGeneratableMember
+{
+    public string Name { get; init; } = null!;
+    public ITypeSymbol? MemberType { get; init; } = null!;
+    public List<IGeneratableMember> Members { get; init; } = new();
+    public CollectionType CollectionType { get; init; }
+}
+
+public record GeneratableTypeArgument : IGeneratableMember
+{
+    public ITypeSymbol? MemberType { get; init; } = null!;
+    public List<IGeneratableMember> Members { get; init; } = new();
+    public CollectionType CollectionType { get; init; }
+    public int ArgumentPosition { get; init; }
+}
+
+public enum CollectionType
+{
+    None,
+    List,
+    Dictionary
 }
