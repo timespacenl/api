@@ -3,6 +3,7 @@ using Castle.Core.Logging;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using TimeSpace.Shared.TypescriptGenerator;
 using Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator;
@@ -59,14 +60,28 @@ public class TypescriptTypeGeneratorTests
                       public record CommandBody(
                           string Email,
                           string Password
+                          TestEnum TestEnum
                           );
+                      
+                      public enum TestEnum
+                      {
+                          Test1 = TestEnum2.Test2,
+                          Test2
+                      }
+                      
+                      public enum TestEnum2
+                      {
+                          Test1,
+                          Test2
+                      }
                       """;
 
         var compilation = CreateCompilation(source);
         var logger = Substitute.For<ILogger<TypescriptMappingGenerator>>();
+        var options = Substitute.For<IOptions<ExternalSourceGenerationSettings>>();
         
         // SUT
-        var generator = new TypescriptMappingGenerator(compilation, logger, new List<EndpointDescription>());
+        var generator = new TypescriptMappingGenerator(compilation, logger, new(), new List<EndpointDescription>());
 
         var endpointDescription = new EndpointDescription()
         {

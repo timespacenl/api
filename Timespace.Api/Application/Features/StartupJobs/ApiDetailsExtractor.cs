@@ -36,12 +36,6 @@ public class ApiDetailsExtractor(IApiDescriptionGroupCollectionProvider apiExplo
     {
         if (apiDescription.ActionDescriptor is not ControllerActionDescriptor controllerActionDescriptor)
             throw new Exception($"The action descriptor is not a controller action descriptor for path {apiDescription.RelativePath}.");
-            
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (apiDescription.ParameterDescriptions.Any(x => x.Type == null))
-            throw new Exception($"Couldn't find type for parameter in route with url {apiDescription.RelativePath}");
-
-        var paramsTest = apiDescription.ParameterDescriptions.Where(x => x.Source == BindingSource.Path || x.Source == BindingSource.Query).ToList();
         
         var endpointDescription = new EndpointDescription()
         {

@@ -20,43 +20,19 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet("{employeeId:int}")]
-    public async Task<PaginatedResult<UserDto>?> GetEmployeeAsync(int employeeId, [FromBody] SharedType body, string test)
+    public async Task<PaginatedResult<UserDto>?> GetEmployeeAsync([FromQuery] CreateEmployee.Command command)
     {
         return null;
     }
     
-    [HttpGet("{employeeId:int}/2")]
-    public async Task<PaginatedResult<UserDto>> GetEmployee2Async(int employeeId, [FromBody] UserDto body)
+    [HttpPost("users")]
+    public async Task<PaginatedResult<UserDto>> GetEmployeeUsersAsync([FromQuery] CreateEmployee.Command2 command)
     {
         return null;
     }
     
-    [HttpGet("{employeeId:int}/3")]
-    public async Task<PaginatedResult<UserDto>> GetEmployee3Async(int employeeId, [FromBody] PaginatedResult<UserDto> body)
-    {
-        return null;
-    }
-    
-    [HttpGet("")]
-    public async Task<PaginatedResult<UserDto>> GetEmployee4Async([FromQuery] CreateEmployee.Command command, [FromBody] CreateEmployee.CommandBody body)
-    {
-        return null;
-    }
-    
-    [HttpGet("get")]
-    public async Task<PaginatedResult<UserDto>> GetEmployee5Async([FromQuery] CreateEmployee.Command command, [FromForm] CreateEmployee.CommandBody body, [FromForm] string Test)
-    {
-        return null;
-    }
-    
-    [HttpGet("get2")]
-    public async Task<PaginatedResult<UserDto>> GetEmployee6Async(CreateEmployee.Command2 command)
-    {
-        return null;
-    }
-    
-    [HttpGet("get3")]
-    public async Task<PaginatedResult<UserDto>> GetEmployee7Async([FromQuery] CreateEmployee.Command3 command, SharedType sharedType)
+    [HttpPost("managers")]
+    public async Task<PaginatedResult<UserDto>> GetEmployeeManagersAsync([FromQuery] CreateEmployee.Command3 command)
     {
         return null;
     }

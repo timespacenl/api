@@ -1,10 +1,11 @@
 namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.Types;
 
 public record SharedType(
-    Type? OriginalType,
-    string InterfaceName,
-    string ToMappingFunction,
-    string FromMappingFunction,
+    string TypeName,
+    string RequestZodType,
+    string RequestZodTypeStringified,
+    string ResponseZodType,
+    string ResponseZodTypeStringified,
     string ImportPath,
-    string ImportString
+    bool IsEnum
     );

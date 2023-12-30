@@ -13,8 +13,8 @@ public static class TypeSymbolExtensions
     
     public static bool IsWrappedNullable(this ITypeSymbol typeSymbol) => typeSymbol is INamedTypeSymbol {IsGenericType: true} namedTypeSymbol && namedTypeSymbol.ConstructedFrom.ToFullyQualifiedDisplayString() == "global::System.Nullable<T>";
     
-    public static bool IsDefaultMappable(this ITypeSymbol? typeSymbol) => typeSymbol is not null && Constants.DefaultMappableTypes.Contains(typeSymbol.ToFullyQualifiedDisplayString().Replace("?", ""));
-    public static bool IsDefaultMappable(string typeSymbol) => Constants.DefaultMappableTypes.Contains(typeSymbol.Replace("?", ""));
+    public static bool IsDefaultMappable(this ITypeSymbol? typeSymbol) => typeSymbol is not null && Constants.DefaultTypeMappings.Keys.Contains(typeSymbol.ToFullyQualifiedDisplayString().Replace("?", ""));
+    
     public static string ToFullyQualifiedDisplayString(this ITypeSymbol typeSymbol) => typeSymbol.ToDisplayString(
         SymbolDisplayFormat.FullyQualifiedFormat
         .WithMiscellaneousOptions(

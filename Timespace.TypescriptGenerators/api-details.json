@@ -4,55 +4,20 @@
     "HttpMethod": "GET",
     "Version": "v1",
     "ActionName": "GetEmployeeAsync",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
-    "Parameters": []
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController"
   },
   {
-    "RelativePath": "v1/employees/{employeeId}/2",
-    "HttpMethod": "GET",
+    "RelativePath": "v1/employees/users",
+    "HttpMethod": "POST",
     "Version": "v1",
-    "ActionName": "GetEmployee2Async",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
-    "Parameters": []
+    "ActionName": "GetEmployeeUsersAsync",
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController"
   },
   {
-    "RelativePath": "v1/employees/{employeeId}/3",
-    "HttpMethod": "GET",
+    "RelativePath": "v1/employees/managers",
+    "HttpMethod": "POST",
     "Version": "v1",
-    "ActionName": "GetEmployee3Async",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
-    "Parameters": []
-  },
-  {
-    "RelativePath": "v1/employees",
-    "HttpMethod": "GET",
-    "Version": "v1",
-    "ActionName": "GetEmployee4Async",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
-    "Parameters": []
-  },
-  {
-    "RelativePath": "v1/employees/get",
-    "HttpMethod": "GET",
-    "Version": "v1",
-    "ActionName": "GetEmployee5Async",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
-    "Parameters": []
-  },
-  {
-    "RelativePath": "v1/employees/get2",
-    "HttpMethod": "GET",
-    "Version": "v1",
-    "ActionName": "GetEmployee6Async",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
-    "Parameters": []
-  },
-  {
-    "RelativePath": "v1/employees/get3",
-    "HttpMethod": "GET",
-    "Version": "v1",
-    "ActionName": "GetEmployee7Async",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController",
-    "Parameters": []
+    "ActionName": "GetEmployeeManagersAsync",
+    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController"
   }
 ]

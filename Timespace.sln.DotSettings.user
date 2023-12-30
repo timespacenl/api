@@ -8,7 +8,7 @@
 	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=961943cb_002D4be9_002D429b_002D8400_002D0305ff0a1cb0/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1 #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::1745EE7C-E66D-4AAD-A9A0-37D9A5E1B865::net8.0::Timespace.TypescriptGenerators.Tests.TypescriptTypeGeneratorTests.Test1&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::1745EE7C-E66D-4AAD-A9A0-37D9A5E1B865::net8.0::Timespace.TypescriptGenerators.Tests.TypescriptTypeGeneratorTests&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	

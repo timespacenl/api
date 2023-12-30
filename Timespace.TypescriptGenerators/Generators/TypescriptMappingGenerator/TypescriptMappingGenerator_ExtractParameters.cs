@@ -29,12 +29,12 @@ public partial class TypescriptMappingGenerator
                 source)
             );
         else 
-            GetParametersFromTypeSymbol(actionParameter.Type, actionParameter.Type, transformedParameters);
+            GetParametersFromTypeSymbol(actionParameter.Type, actionParameter.Type, transformedParameters, routeUrl);
         
         return transformedParameters;
     }
     
-    private void GetParametersFromTypeSymbol(ITypeSymbol root, ITypeSymbol typeSymbol, List<EndpointParameter> transformedParameters)
+    private void GetParametersFromTypeSymbol(ITypeSymbol root, ITypeSymbol typeSymbol, List<EndpointParameter> transformedParameters, string routeUrl)
     {
         var typeMembers = typeSymbol.GetMembers().OfType<IPropertySymbol>().ToList();
         foreach (var typeMember in typeMembers)
@@ -50,8 +50,21 @@ public partial class TypescriptMappingGenerator
                     typeMember.Type,
                      root.Name != typeMember.ContainingType.Name ? typeMember.ContainingType : null,
                     source));
+            else if (source is ParameterSource.Query or ParameterSource.Path)
+            {
+                var rootTypePropertyTypeNames = root.GetMembers().OfType<IPropertySymbol>().Select(x => x.Type.ToFullyQualifiedDisplayString()).ToList();
+                if (rootTypePropertyTypeNames.Contains(typeMember.Type.ToFullyQualifiedDisplayString()))
+                {
+                    GetParametersFromTypeSymbol(root, typeMember.Type, transformedParameters, routeUrl);
+                }
+                else
+                {
+                    _logger.LogError("Complex nested types are not supported in query or path parameters. Route: {RouteUrl}", routeUrl);
+                    throw new ArgumentException("Complex nested types are not supported in query or path parameters.");
+                }
+            }
             else
-                GetParametersFromTypeSymbol(root, typeMember.Type, transformedParameters);
+                GetParametersFromTypeSymbol(root, typeMember.Type, transformedParameters, routeUrl);
         }
     }
 }

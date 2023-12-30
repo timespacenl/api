@@ -26,6 +26,13 @@ public static class ExternalSourceGeneratorExtensions
 
         if (compilation is null)
             throw new NullReferenceException("Compilation is null");
+
+        var errorDiagnostics = compilation.GetDiagnostics().Where(x => x.WarningLevel == 0).ToList();
+        if (errorDiagnostics.Any())
+        {
+            errorDiagnostics.ForEach(x => Console.WriteLine($"{x.GetMessage()} @ {x.Location.GetLineSpan().ToString()}"));
+            throw new Exception("Compilation failed");
+        }
         
         foreach (var externalGenerator in types)
         {

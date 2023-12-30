@@ -1,6 +1,5 @@
-﻿using Microsoft.Build.Framework;
+﻿using System.Runtime.InteropServices.ComTypes;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 using TimeSpace.Shared.TypescriptGenerator;
 using Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.Extensions;
@@ -12,8 +11,6 @@ public partial class TypescriptMappingGenerator
 {
     public ApiEndpoint? TransformEndpointDescription(EndpointDescription description)
     {
-        var allNodes = _compilation.SyntaxTrees.SelectMany(x => x.GetRoot().DescendantNodes()).ToList();
-
         var declaringType = _compilation.GetTypeByMetadataName(description.ControllerTypeName);
 
         if (declaringType is null)
@@ -45,6 +42,13 @@ public partial class TypescriptMappingGenerator
         string? bodyTypeName = null;
         if (bodyParams.Count > 0)
         {
+            var firstBodyParam = bodyParams.First();
+            if (bodyParams.Any(x => x.Source != firstBodyParam.Source))
+            {
+                _logger.LogError("All body parameters must have the same source type for route {Route} (body or form).", description.RelativePath);
+                throw new ArgumentException("All body parameters must have the same source type.");
+            }
+            
             if (bodyParams.Count == 1)
                 bodyTypeName = bodyParams.First().TypeSymbol.ToFullyQualifiedDisplayString();
             else
@@ -81,33 +85,25 @@ public partial class TypescriptMappingGenerator
         Dictionary<string, ApiType> responseTypes = new();
         var responseTypeName = UnwrapType(returnType).ToFullyQualifiedDisplayString();
         
-        GenerateApiTypeFromTypeSymbol(returnType, actionName, responseTypes);
+        GenerateApiTypeFromTypeSymbol(returnType, responseTypes);
 
-        var endpoint = new ApiEndpoint()
+        var endpoint = new ApiEndpoint
         {
+            Parameters = endpointParameters,
             RequestTypes = requestTypes,
             ResponseTypes = responseTypes,
             BodyTypeName = bodyTypeName,
             QueryTypeName = queryTypeName,
             PathTypeName = pathTypeName,
             ResponseTypeName = responseTypeName,
-            HttpMethod = description.HttpMethod!,
+            HttpMethod = description.HttpMethod!.ToUpper(),
             RouteUrl = description.RelativePath,
-            Version = description.Version ?? "v1"
+            Version = description.Version ?? "v1",
+            ActionName = actionName,
+            FormData = bodyParams.Any(x => x.Source == ParameterSource.Form)
         };
 
         return endpoint;
-        
-        // var props = new List<ApiClassProperty>();
-        // props.AddRange(_generatableTypes.Values.OfType<ApiTypeWrapper>().SelectMany(x => x.Properties));
-        // props.AddRange(_generatableTypes.Values.OfType<ApiTypeClass>().SelectMany(x => x.Properties));
-        // var sharedTypeNames = props.DistinctBy(x => x.FullyQualifiedTypeName.Replace("?", "")).Where(x => !TypeSymbolExtensions.IsDefaultMappable(x.FullyQualifiedTypeName)).Select(x => new
-        // {
-        //     Name = x.FullyQualifiedTypeName,
-        //     Count = props.Count(y => y.FullyQualifiedTypeName == x.FullyQualifiedTypeName)
-        // }).Where(x => x.Count > 1).Select(x => x.Name).ToList();
-        //
-        // var sharedTypes = _generatableTypes.Where(x => sharedTypeNames.Contains(x.Key)).ToList();
 
         void ProcessEndpointParameters(List<EndpointParameter> parameters, string typeNameSuffix, Dictionary<string, ApiType> generatableTypes)
         {
@@ -115,13 +111,13 @@ public partial class TypescriptMappingGenerator
             {
                 var typeSymbol = UnwrapType(parameters[0].TypeSymbol);
 
-                GenerateApiTypeFromTypeSymbol(typeSymbol, actionName, generatableTypes);
+                GenerateApiTypeFromTypeSymbol(typeSymbol, generatableTypes);
             }
             else
             {
                 var firstParamTypeDefinedBy = parameters.First().DefinedBy;
-                if (parameters.DistinctBy(x => x.DefinedBy).Count() > 1 && firstParamTypeDefinedBy is not null)
-                    GenerateApiTypeFromTypeSymbol(firstParamTypeDefinedBy, actionName, generatableTypes);
+                if (parameters.DistinctBy(x => x.DefinedBy).Count() == 1 && firstParamTypeDefinedBy is not null)
+                    GenerateApiTypeFromTypeSymbol(firstParamTypeDefinedBy, generatableTypes);
                 else
                     GenerateApiTypeFromEndpointParameters(parameters, actionName, typeNameSuffix, generatableTypes);
             }
@@ -142,7 +138,7 @@ public partial class TypescriptMappingGenerator
             var paramName = paramType.GetNameFromBindingAttributeIfExists() ?? endpointParameter.Name;
             if (paramType.IsDefaultMappable())
             {
-                properties.Add(GetClassPropertyFromTypeSymbol(paramType, paramName, typeNamePrefix));
+                properties.Add(GetClassPropertyFromTypeSymbol(paramType, paramName));
             }
             else
             {
@@ -152,13 +148,14 @@ public partial class TypescriptMappingGenerator
                     if(typeMember.Name == "EqualityContract")
                         continue;
                     
-                    properties.Add(GetClassPropertyFromPropertySymbol(typeMember, typeNamePrefix));
+                    properties.Add(GetClassPropertyFromPropertySymbol(typeMember));
                 }
             }
         }
         
-        var apiType = new ApiTypeWrapper()
+        var apiType = new ApiTypeClass()
         {
+            FullyQualifiedTypeName = typeNamePrefix + typeName,
             TypeName = typeNamePrefix + typeName,
             Properties = properties
         };
@@ -191,35 +188,63 @@ public partial class TypescriptMappingGenerator
         return CollectionInfoHelpers.None;
     }
 
-    private void GenerateApiTypeFromTypeSymbol(ITypeSymbol typeSymbol, string typeNamePrefix, Dictionary<string, ApiType> generatableTypes)
+    private void GenerateApiTypeFromTypeSymbol(ITypeSymbol typeSymbol, Dictionary<string, ApiType> generatableTypes)
     {
         typeSymbol = UnwrapType(typeSymbol);
         var properties = new List<ApiClassProperty>();
         var propertySymbols = typeSymbol.GetMembers().OfType<IPropertySymbol>().ToList();
-        
-        foreach (var propertySymbol in propertySymbols)
+
+        ApiType apiType;
+        if (typeSymbol is INamedTypeSymbol {TypeKind: TypeKind.Enum})
         {
-            if(propertySymbol.Name == "EqualityContract")
-                continue;
-            
-            properties.Add(GetClassPropertyFromPropertySymbol(propertySymbol, typeNamePrefix));
-            var resolvedPropertySymbolType = UnwrapType(propertySymbol.Type);
-            if (!propertySymbol.Type.IsDefaultMappable() && 
-                !resolvedPropertySymbolType.IsDefaultMappable() && 
-                resolvedPropertySymbolType.Name != typeSymbol.Name && 
-                !generatableTypes.ContainsKey(resolvedPropertySymbolType.ToFullyQualifiedDisplayString().Replace("?", "")))
+            var enumMembers = typeSymbol.GetMembers().OfType<IFieldSymbol>().ToList();
+            var enumValues = enumMembers.Select(x => new ApiEnumValue
             {
-                GenerateApiTypeFromTypeSymbol(propertySymbol.Type, typeNamePrefix, generatableTypes);
+                Name = x.Name,
+                Value = x.ConstantValue?.ToString()
+            }).ToList();
+            
+            
+            apiType = new ApiTypeEnum()
+            {
+                FullyQualifiedTypeName = typeSymbol.ToFullyQualifiedDisplayString(),
+                TypeName = GetTypeSymbolName(typeSymbol),
+                Values = enumValues
+            };
+        }
+        else
+        {
+            foreach (var propertySymbol in propertySymbols)
+            {
+                if(propertySymbol.Name == "EqualityContract")
+                    continue;
+                
+                properties.Add(GetClassPropertyFromPropertySymbol(propertySymbol));
+                var resolvedPropertySymbolType = UnwrapType(propertySymbol.Type);
+
+                if (resolvedPropertySymbolType.Name == typeSymbol.Name)
+                {
+                    _logger.LogError("Type {TypeName} has a property of type {PropertyTypeName} which is the same as the parent type. This is not supported.", typeSymbol.Name, resolvedPropertySymbolType.Name);
+                    throw new Exception("Type has a property of the same type as itself.");
+                }
+                
+                if (!propertySymbol.Type.IsDefaultMappable() && 
+                    !resolvedPropertySymbolType.IsDefaultMappable() && 
+                    resolvedPropertySymbolType.Name != typeSymbol.Name && 
+                    !generatableTypes.ContainsKey(resolvedPropertySymbolType.ToFullyQualifiedDisplayString().Replace("?", "")))
+                {
+                    GenerateApiTypeFromTypeSymbol(propertySymbol.Type, generatableTypes);
+                }
             }
+            
+            apiType = new ApiTypeClass()
+            {
+                TypeName = typeSymbol.GetNameFromBindingAttributeIfExists() ?? GetTypeSymbolName(typeSymbol),
+                FullyQualifiedTypeName = typeSymbol.ToFullyQualifiedDisplayString(),
+                Properties = properties
+            };
         }
         
-        var apiType = new ApiTypeClass()
-        {
-            TypeName = typeSymbol.GetNameFromBindingAttributeIfExists() ?? GetTypeSymbolName(typeSymbol),
-            TypePrefix = typeNamePrefix,
-            FullyQualifiedTypeName = typeSymbol.ToFullyQualifiedDisplayString(),
-            Properties = properties
-        };
         
         _ = generatableTypes.TryAdd(typeSymbol.ToFullyQualifiedDisplayString(), apiType);
     }
@@ -231,7 +256,7 @@ public partial class TypescriptMappingGenerator
             if (!namedTypeSymbol.IsCollectionType())
             {
                 var firstTypeArg = namedTypeSymbol.TypeArguments[0];
-
+                
                 var typeName = firstTypeArg.Name;
                 
                 if(namedTypeSymbol.IsWrappedNullable())
@@ -239,14 +264,22 @@ public partial class TypescriptMappingGenerator
                 if(namedTypeSymbol.IsPassthroughType())
                     return typeName;
                 
+                if(typeSymbol.ContainingType is not null)
+                    return namedTypeSymbol.ContainingType.Name + namedTypeSymbol.Name + "Of" + string.Join("And", namedTypeSymbol.TypeArguments.Select(GetTypeSymbolName));
+                
                 return namedTypeSymbol.Name + "Of" + string.Join("And", namedTypeSymbol.TypeArguments.Select(GetTypeSymbolName));
             }
+        } 
+        else
+        {
+            if(typeSymbol.ContainingType is not null)
+                return typeSymbol.ContainingType.Name + typeSymbol.Name;
         }
         
         return typeSymbol.Name;
     }
 
-    private ApiClassProperty GetClassPropertyFromPropertySymbol(IPropertySymbol propertySymbol, string typeNamePrefix)
+    private ApiClassProperty GetClassPropertyFromPropertySymbol(IPropertySymbol propertySymbol)
     {
         var propertyName = propertySymbol.GetNameFromBindingAttributeIfExists() ?? propertySymbol.Name;
         var propertyType = UnwrapType(propertySymbol.Type);
@@ -258,12 +291,11 @@ public partial class TypescriptMappingGenerator
             Name = propertyName,
             IsNullable = propertyType.IsNullable(),
             TypeName = GetTypeSymbolName(propertyType),
-            TypePrefix = typeNamePrefix,
             FullyQualifiedTypeName = propertyFqtn
         };
     }
     
-    private ApiClassProperty GetClassPropertyFromTypeSymbol(ITypeSymbol typeSymbol, string propertyName, string typeNamePrefix)
+    private ApiClassProperty GetClassPropertyFromTypeSymbol(ITypeSymbol typeSymbol, string propertyName)
     {
         var propertyType = UnwrapType(typeSymbol);
         var propertyFqtn = propertyType.ToFullyQualifiedDisplayString();
@@ -274,7 +306,6 @@ public partial class TypescriptMappingGenerator
             Name = propertyName,
             IsNullable = propertyType.IsNullable(),
             TypeName = GetTypeSymbolName(propertyType),
-            TypePrefix = typeNamePrefix,
             FullyQualifiedTypeName = propertyFqtn
         };
     }
@@ -286,14 +317,7 @@ public partial class TypescriptMappingGenerator
         {
             if (namedTypeSymbol.IsCollectionType())
             {
-                if (namedTypeSymbol.IsDictionaryType())
-                {
-                    returnable = namedTypeSymbol.TypeArguments[1];
-                }
-                else
-                {
-                    returnable = namedTypeSymbol.TypeArguments[0];
-                }
+                returnable = namedTypeSymbol.IsDictionaryType() ? namedTypeSymbol.TypeArguments[1] : namedTypeSymbol.TypeArguments[0];
 
             } else if (namedTypeSymbol.IsPassthroughType())
             {

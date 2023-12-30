@@ -9,16 +9,10 @@ public record EndpointParameter(string Name, ITypeSymbol TypeSymbol, ITypeSymbol
 public abstract record ApiType
 {
     public required string TypeName { get; init; } = null!;
+    public required string FullyQualifiedTypeName { get; init; } = null!;
 }
 
 public record ApiTypeClass : ApiType
-{
-    public required string FullyQualifiedTypeName { get; init; } = null!;
-    public required string TypePrefix { get; init; } = null!;
-    public required List<ApiClassProperty> Properties { get; init; } = new();
-}
-
-public record ApiTypeWrapper : ApiType
 {
     public required List<ApiClassProperty> Properties { get; init; } = new();
 }
@@ -67,7 +61,6 @@ public record ApiClassProperty
     public required CollectionInfo CollectionInfo { get; init; } = null!;
     public required bool IsNullable { get; init; }
     public required string Name { get; init; } = null!;
-    public required string TypePrefix { get; init; }
     public required string TypeName { get; init; } = null!;
     public required string FullyQualifiedTypeName { get; init; } = null!;
 }
@@ -75,11 +68,12 @@ public record ApiClassProperty
 public record ApiEnumValue
 {
     public required string Name { get; init; } = null!;
-    public required string Value { get; init; } = null!;
+    public required string? Value { get; init; } = null!;
 }
 
 public record ApiEndpoint
 {
+    public required List<EndpointParameter> Parameters { get; init; } = new();
     public required Dictionary<string, ApiType> RequestTypes { get; init; } = new();
     public required Dictionary<string, ApiType> ResponseTypes { get; init; } = new();
     public required string? BodyTypeName { get; init; } = null;
@@ -89,4 +83,6 @@ public record ApiEndpoint
     public required string HttpMethod { get; init; } = null!;
     public required string RouteUrl { get; init; } = null!;
     public required string Version { get; init; } = null!;
+    public required string ActionName { get; init; } = null!;
+    public required bool FormData { get; init; }
 }
