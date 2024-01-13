@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Timespace.Api;
-using Timespace.Api.Application.Features.StartupJobs;
 using Timespace.Api.Infrastructure.Middleware;
 using Timespace.Api.Infrastructure.Persistence;
 
@@ -45,7 +44,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(opt =>
     {
         var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-        
+
         foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
         {
             opt.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",

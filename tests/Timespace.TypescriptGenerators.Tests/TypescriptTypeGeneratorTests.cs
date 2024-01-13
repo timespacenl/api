@@ -1,21 +1,15 @@
 using System.Reflection;
 using Castle.Core.Logging;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
-using TimeSpace.Shared.TypescriptGenerator;
-using Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator;
 
 namespace Timespace.TypescriptGenerators.Tests;
 
 public class TypescriptTypeGeneratorTests
 {
-    [Fact]
-    public void Test1()
-    {
-        var source = $$"""
+	[Fact]
+	public void Test1()
+	{
+		var source = $$"""
                       using NodaTime;
                       {{SourceConstants.AspNetAttributes}}
                       {{SourceConstants.SharedType}}
@@ -76,28 +70,36 @@ public class TypescriptTypeGeneratorTests
                       }
                       """;
 
-        var compilation = CreateCompilation(source);
-        var logger = Substitute.For<ILogger<TypescriptMappingGenerator>>();
-        var options = Substitute.For<IOptions<ExternalSourceGenerationSettings>>();
-        
-        // SUT
-        var generator = new TypescriptMappingGenerator(compilation, logger, new(), new List<EndpointDescription>());
+		var compilation = CreateCompilation(source);
+		var logger = Substitute.For<ILogger>();
+		var options = Substitute.For<IOptions<ExternalSourceGenerationSettings>>();
 
-        var endpointDescription = new EndpointDescription()
-        {
-            ActionName = "Test",
-            ControllerTypeName = "Test.TestClass",
-            Version = "v1",
-            HttpMethod = "GET",
-            RelativePath = "v1/employees/{employeeId}"
-        };
+		// SUT
+		var generator = new TypescriptMappingGenerator(compilation, logger, new(), new List<EndpointDescription>());
 
-        var endpoint = generator.TransformEndpointDescription(endpointDescription);
-    }
-    
-    private static Compilation CreateCompilation(string source)
-        => CSharpCompilation.Create("compilation",
-            new[] { CSharpSyntaxTree.ParseText(source) },
-            new[] { MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location) },
-            new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+		var endpointDescription = new EndpointDescription
+		{
+			ActionName = "Test",
+			ControllerTypeName = "Test.TestClass",
+			Version = "v1",
+			HttpMethod = "GET",
+			RelativePath = "v1/employees/{employeeId}",
+		};
+
+		var endpoint = generator.TransformEndpointDescription(endpointDescription);
+	}
+
+	private static Compilation CreateCompilation(string source)
+	{
+		return CSharpCompilation.Create("compilation",
+			new[]
+			{
+				CSharpSyntaxTree.ParseText(source),
+			},
+			new[]
+			{
+				MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location),
+			},
+			new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+	}
 }

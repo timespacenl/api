@@ -2,11 +2,11 @@
 
 public enum ImportType
 {
-    Type,
-    Dayjs,
-    Formdata,
-    Zod,
-    FetchType,
-    ProblemDetails,
-    BaseUrl
+	Type,
+	Dayjs,
+	Formdata,
+	Zod,
+	FetchType,
+	ProblemDetails,
+	BaseUrl,
 }

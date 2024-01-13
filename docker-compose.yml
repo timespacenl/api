@@ -1,24 +1,24 @@
 version: '3.5'
 
 services:
-  postgres:
-    container_name: timespace-db
-    image: postgres:16.1
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
-      PGDATA: /data/postgres
-    volumes:
-       - postgres:/data/postgres
-    ports:
-      - "5432:5432"
-    networks:
-      - timespace
-    restart: unless-stopped
+	postgres:
+		container_name: timespace-db
+		image: postgres:16.1
+		environment:
+			POSTGRES_USER: ${POSTGRES_USER:-postgres}
+			POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+			PGDATA: /data/postgres
+		volumes:
+			- postgres:/data/postgres
+		ports:
+			- "5432:5432"
+		networks:
+			- timespace
+		restart: unless-stopped
 
 networks:
-  timespace:
-    driver: bridge
+	timespace:
+		driver: bridge
 
 volumes:
-    postgres:
+	postgres:

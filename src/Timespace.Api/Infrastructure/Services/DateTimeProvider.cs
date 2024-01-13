@@ -1,6 +1,9 @@
-﻿namespace Timespace.Api.Infrastructure.Services;
+namespace Timespace.Api.Infrastructure.Services;
 
-public class DateTimeProvider : IClock
+internal sealed class DateTimeProvider : IClock
 {
-    public Instant GetCurrentInstant() => SystemClock.Instance.GetCurrentInstant();
+    public Instant GetCurrentInstant()
+    {
+        return SystemClock.Instance.GetCurrentInstant();
+    }
 }

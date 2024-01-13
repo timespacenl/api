@@ -2,21 +2,19 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Infrastructure.Persistence.Common;
-using Timespace.Api.Infrastructure.Services;
 
 namespace Timespace.Api.Infrastructure.Persistence;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
+internal sealed class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
     private readonly IClock _clock;
     private readonly IUsageContext _usageContext;
-    
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
-    
+
     public AppDbContext(DbContextOptions<AppDbContext> options, IClock clock, IUsageContext usageContext) : base(options)
     {
         _clock = clock;
@@ -35,7 +33,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>
     {
         var entries = ChangeTracker
             .Entries()
-            .Where(e => e is { Entity: IEntity, State: EntityState.Added or EntityState.Modified });
+            .Where(e => e is {Entity: IEntity, State: EntityState.Added or EntityState.Modified});
 
         foreach (var entityEntry in entries)
         {
@@ -49,16 +47,16 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>
 
         var softdeleteEntries = ChangeTracker
             .Entries()
-            .Where(e => e is { Entity: ISoftDeletable, State: EntityState.Deleted });
+            .Where(e => e is {Entity: ISoftDeletable, State: EntityState.Deleted});
 
         foreach (var entityEntry in softdeleteEntries)
         {
             ((ISoftDeletable)entityEntry.Entity).DeletedAt = _clock.GetCurrentInstant();
         }
-        
+
         return await base.SaveChangesAsync(cancellationToken);
     }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -67,13 +65,16 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>
 
         Expression<Func<ITenantEntity, bool>> tenantExpression = entity => _usageContext.TenantId == null || entity.TenantId == _usageContext.GetGuaranteedTenantId();
         Expression<Func<ISoftDeletable, bool>> softDeleteExpression = entity => entity.DeletedAt == null;
-        
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes()) {
-            if (entityType.ClrType.IsAssignableTo(typeof(ITenantEntity))) {
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (entityType.ClrType.IsAssignableTo(typeof(ITenantEntity)))
+            {
                 modelBuilder.Entity(entityType.ClrType).AppendQueryFilter(tenantExpression);
             }
-            
-            if (entityType.ClrType.IsAssignableTo(typeof(ISoftDeletable))) {
+
+            if (entityType.ClrType.IsAssignableTo(typeof(ISoftDeletable)))
+            {
                 modelBuilder.Entity(entityType.ClrType).AppendQueryFilter(softDeleteExpression);
             }
         }

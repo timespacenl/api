@@ -2,7 +2,7 @@ namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.T
 
 public enum CollectionType
 {
-    None,
-    List,
-    Dictionary
+	None,
+	List,
+	Dictionary,
 }

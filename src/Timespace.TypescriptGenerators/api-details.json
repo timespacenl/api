@@ -1,23 +1,23 @@
 [
-  {
-    "RelativePath": "v1/employees/{employeeId}",
-    "HttpMethod": "GET",
-    "Version": "v1",
-    "ActionName": "GetEmployeeAsync",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController"
-  },
-  {
-    "RelativePath": "v1/employees/users",
-    "HttpMethod": "POST",
-    "Version": "v1",
-    "ActionName": "GetEmployeeUsersAsync",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController"
-  },
-  {
-    "RelativePath": "v1/employees/managers",
-    "HttpMethod": "POST",
-    "Version": "v1",
-    "ActionName": "GetEmployeeManagersAsync",
-    "ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController"
-  }
+	{
+		"RelativePath": "v1/employees/{employeeId}",
+		"HttpMethod": "GET",
+		"Version": "v1",
+		"ActionName": "GetEmployeeAsync",
+		"ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController"
+	},
+	{
+		"RelativePath": "v1/employees/users",
+		"HttpMethod": "POST",
+		"Version": "v1",
+		"ActionName": "GetEmployeeUsersAsync",
+		"ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController"
+	},
+	{
+		"RelativePath": "v1/employees/managers",
+		"HttpMethod": "POST",
+		"Version": "v1",
+		"ActionName": "GetEmployeeManagersAsync",
+		"ControllerTypeName": "Timespace.Api.Application.Features.Modules.Employees.EmployeesController"
+	}
 ]

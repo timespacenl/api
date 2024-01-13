@@ -1,32 +1,31 @@
-using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Timespace.TypescriptGenerators.Tests;
 
 public class XUnitLogger<T> : ILogger<T>, IDisposable
 {
-    private ITestOutputHelper _output;
+	private readonly ITestOutputHelper _output;
 
-    public XUnitLogger(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception, string> formatter)
-    {
-        _output.WriteLine(state.ToString());
-    }
+	public XUnitLogger(ITestOutputHelper output)
+	{
+		_output = output;
+	}
 
-    public bool IsEnabled(LogLevel logLevel)
-    {
-        return true;
-    }
+	public void Dispose()
+	{
+	}
+	public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception, string> formatter)
+	{
+		_output.WriteLine(state.ToString());
+	}
 
-    public IDisposable BeginScope<TState>(TState state)
-    {
-        return this;
-    }
+	public bool IsEnabled(LogLevel logLevel)
+	{
+		return true;
+	}
 
-    public void Dispose()
-    {
-    }
+	public IDisposable BeginScope<TState>(TState state)
+	{
+		return this;
+	}
 }

@@ -8,29 +8,31 @@ using Timespace.TypescriptGenerators.Helpers;
 
 MSBuildLocator.RegisterDefaults();
 
-static IHost AppStartup() {
-    var builder = new ConfigurationBuilder();
+static IHost AppStartup()
+{
+	var builder = new ConfigurationBuilder();
 
-    builder.SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        .AddEnvironmentVariables();
+	builder.SetBasePath(Directory.GetCurrentDirectory())
+		.AddJsonFile("appsettings.json", false, true)
+		.AddEnvironmentVariables();
 
-    // now we can setup serilog, reads from appsettings, and creates logger
-    Log.Logger = new LoggerConfiguration()
-        .ReadFrom.Configuration(builder.Build())
-        .CreateLogger();
+	// now we can setup serilog, reads from appsettings, and creates logger
+	Log.Logger = new LoggerConfiguration()
+		.ReadFrom.Configuration(builder.Build())
+		.CreateLogger();
 
-    Log.Logger.Information("Starting typescript generator...");
+	Log.Logger.Information("Starting typescript generator...");
 
-    var host = Host.CreateDefaultBuilder()
-        .ConfigureServices((context, services) => {
-            services.Configure<ExternalSourceGenerationSettings>(
-                context.Configuration.GetSection(ExternalSourceGenerationSettings.SectionName));
-        })
-        .UseSerilog()
-        .Build();
+	var host = Host.CreateDefaultBuilder()
+		.ConfigureServices((context, services) =>
+		{
+			services.Configure<ExternalSourceGenerationSettings>(
+				context.Configuration.GetSection(ExternalSourceGenerationSettings.SectionName));
+		})
+		.UseSerilog()
+		.Build();
 
-    return host;
+	return host;
 }
 
 var host = AppStartup();

@@ -1,6 +1,6 @@
 ﻿namespace Timespace.Api.Infrastructure.Errors;
 
-public interface IBaseException
+internal interface IBaseException
 {
     public string Type { get; }
     public int StatusCode { get; }

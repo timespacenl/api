@@ -4,57 +4,61 @@ namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator;
 
 public static class Constants
 {
-    public static readonly IReadOnlyDictionary<string, DefaultTypeMapping> DefaultTypeMappings = new Dictionary<string, DefaultTypeMapping>()
-    {
-        {
-            "global::System.Int32", new DefaultTypeMapping("number", "z.number().int()", "z.number().int()")
-        },
-        {
-            "global::System.Guid", new DefaultTypeMapping("string", "z.string()", "z.string()")
-        },
-        {
-            "global::System.String", new DefaultTypeMapping("string", "z.string()", "z.string()")
-        },
-        {
-            "global::System.Boolean", new DefaultTypeMapping("bool", "z.boolean()", "z.boolean()")
-        },
-        {
-            "global::System.Double", new DefaultTypeMapping("number", "z.number()", "z.number()")  
-        },
-        {
-            "global::NodaTime.Instant", new DefaultTypeMapping("Dayjs", "z.string().transform(v => dayjs(v))", "z.instanceof(dayjs as unknown as typeof Dayjs).transform(v => v.toISOString())")
-        },
-        {
-            "global::NodaTime.LocalDate", new DefaultTypeMapping("Dayjs", "z.string().transform(v => dayjs(v))", "z.instanceof(dayjs as unknown as typeof Dayjs).transform(v => v.format('YYYY-MM-DD'))")
-        },
-        {
-            "global::Microsoft.AspNetCore.Http.IFormFile", new DefaultTypeMapping("File", "z.instanceof(File)", "z.instanceof(File)")
-        }
-    };
-    
-    public static readonly List<string> PassthroughTypes =
-    [
-        "global::System.Threading.Tasks.Task<TResult>"
-    ];
+	public static readonly IReadOnlyDictionary<string, DefaultTypeMapping> DefaultTypeMappings = new Dictionary<string, DefaultTypeMapping>
+	{
+		{
+			"global::System.Int32", new DefaultTypeMapping("number", "z.number().int()", "z.number().int()")
+		},
+		{
+			"global::System.Guid", new DefaultTypeMapping("string", "z.string()", "z.string()")
+		},
+		{
+			"global::System.String", new DefaultTypeMapping("string", "z.string()", "z.string()")
+		},
+		{
+			"global::System.Boolean", new DefaultTypeMapping("bool", "z.boolean()", "z.boolean()")
+		},
+		{
+			"global::System.Double", new DefaultTypeMapping("number", "z.number()", "z.number()")
+		},
+		{
+			"global::NodaTime.Instant",
+			new DefaultTypeMapping("Dayjs", "z.string().transform(v => dayjs(v))",
+				"z.instanceof(dayjs as unknown as typeof Dayjs).transform(v => v.toISOString())")
+		},
+		{
+			"global::NodaTime.LocalDate",
+			new DefaultTypeMapping("Dayjs", "z.string().transform(v => dayjs(v))",
+				"z.instanceof(dayjs as unknown as typeof Dayjs).transform(v => v.format('YYYY-MM-DD'))")
+		},
+		{
+			"global::Microsoft.AspNetCore.Http.IFormFile", new DefaultTypeMapping("File", "z.instanceof(File)", "z.instanceof(File)")
+		},
+	};
 
-    public static readonly string ApiClientHeaders = 
-         """
+	public static readonly List<string> PassthroughTypes =
+	[
+		"global::System.Threading.Tasks.Task<TResult>",
+	];
+
+	public static readonly string ApiClientHeaders =
+		"""
          import { genericPost, genericGet } from '../api-generics';
          import type { FetchType } from '../api-generics';
          import type { Dayjs } from 'dayjs';
 
          """;
-    
-    private static readonly string FetchTypeSource = "export type FetchType = typeof fetch";
 
-    public static readonly TypescriptSourceFile FetchTypeFile = new(
-        "helpers",
-        "fetchType.ts",
-        FetchTypeSource
-    );
+	private static readonly string FetchTypeSource = "export type FetchType = typeof fetch";
 
-    private static readonly string ConvertFormDataSource =
-        """
+	public static readonly TypescriptSourceFile FetchTypeFile = new(
+		"helpers",
+		"fetchType.ts",
+		FetchTypeSource
+	);
+
+	private static readonly string ConvertFormDataSource =
+		"""
           function appendFormData(formData: any, data: any, rootName: any) {
           
               let root = rootName || '';
@@ -90,14 +94,14 @@ public static class Constants
           }
           """;
 
-    public static readonly TypescriptSourceFile ConvertFormDataFile = new(
-        "helpers",
-        "getFormData.ts",
-        ConvertFormDataSource
-    );
-    
-    private static readonly string ProblemDetailsSource =
-        """
+	public static readonly TypescriptSourceFile ConvertFormDataFile = new(
+		"helpers",
+		"getFormData.ts",
+		ConvertFormDataSource
+	);
+
+	private static readonly string ProblemDetailsSource =
+		"""
         export interface IProblemDetails {
             type?: string;
             title?: string;
@@ -107,11 +111,11 @@ public static class Constants
         }
         """;
 
-    public static readonly TypescriptSourceFile ProblemDetailsFile = new(
-        "helpers",
-        "problemDetails.ts",
-        ProblemDetailsSource
-    );
+	public static readonly TypescriptSourceFile ProblemDetailsFile = new(
+		"helpers",
+		"problemDetails.ts",
+		ProblemDetailsSource
+	);
 }
 
 public record DefaultTypeMapping(string TypescriptType, string ZodToMapping, string ZodFromMapping);

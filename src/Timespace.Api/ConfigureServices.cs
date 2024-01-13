@@ -11,16 +11,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using NodaTime.Serialization.SystemTextJson;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using Timespace.Api.Application.Common.Behaviours;
-using Timespace.Api.Application.Features.StartupJobs;
-using Timespace.Api.Application.Features.Users.Common.Entities;
 using Timespace.Api.Infrastructure;
-using Timespace.Api.Infrastructure.Configuration;
 using Timespace.Api.Infrastructure.Errors;
 using Timespace.Api.Infrastructure.Middleware;
 using Timespace.Api.Infrastructure.Persistence;
 using Timespace.Api.Infrastructure.Services;
-using Timespace.Api.Infrastructure.Swagger;
 using ProblemDetailsOptions = Hellang.Middleware.ProblemDetails.ProblemDetailsOptions;
 
 namespace Timespace.Api;
@@ -34,30 +29,22 @@ public static class ConfigureServices
             options.SuppressModelStateInvalidFilter = true;
         });
 
-        services.AddSingleton<IClock, DateTimeProvider>();
-        services.AddScoped<IAuthenticationTokenProvider, AuthenticationTokenProvider>();
-        services.AddScoped<IUsageContext, UsageContext>();
-        services.AddScoped<ICaptchaVerificationService, CaptchaVerificationService>();
-        services.AddSingleton<ApiDetailsExtractor>();
+        _ = services.AddSingleton<IClock, DateTimeProvider>();
 
         services.ConfigureIdentity();
-        
+
         services.AddProblemDetails(ConfigureProblemDetails);
         services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"), 
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
                 opt => opt.UseNodaTime())
         );
 
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<IAssemblyMarker>());
         services.AddValidatorsFromAssembly(typeof(IAssemblyMarker).Assembly);
         services.RegisterBehaviours();
 
         services.AddHttpClient();
-        
+
         services.AddDistributedMemoryCache();
-        
-        // Middleware
-        services.AddTransient<AuthenticationTokenExtractor>();
     }
 
     private static void ConfigureIdentity(this IServiceCollection services)
@@ -98,14 +85,14 @@ public static class ConfigureServices
                 o.Cookie.Name = IdentityConstants.TwoFactorUserIdScheme;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(5);
             });
-        
+
         services.AddIdentityCore<ApplicationUser>(options =>
             {
                 options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<AppDbContext>();
     }
-    
+
     private static void ConfigureProblemDetails(ProblemDetailsOptions options)
     {
         options.IncludeExceptionDetails = (_, _) => false;
@@ -115,10 +102,10 @@ public static class ConfigureServices
         options.MapToStatusCode<NotImplementedException>(StatusCodes.Status501NotImplemented);
 
         options.MapToStatusCode<HttpRequestException>(StatusCodes.Status503ServiceUnavailable);
-        
+
         options.Map<Exception>((context, ex) =>
         {
-            if(ex is IBaseException baseException)
+            if (ex is IBaseException baseException)
             {
                 var problemDetails = new ProblemDetails
                 {
@@ -128,8 +115,8 @@ public static class ConfigureServices
                     Instance = context.Request.Path,
                     Detail = baseException.Detail
                 };
-                
-                foreach(var kvpair in baseException.MapExtensions())
+
+                foreach (var kvpair in baseException.MapExtensions())
                 {
                     problemDetails.Extensions.Add(kvpair);
                 }
@@ -158,7 +145,7 @@ public static class ConfigureServices
             o.DefaultApiVersion = new ApiVersion(1, 0);
             o.ApiVersionReader = new UrlSegmentApiVersionReader();
         });
-        
+
         apiVersioningBuilder.AddApiExplorer(options =>
         {
             // add the versioned api explorer, which also adds IApiVersionDescriptionProvider service
@@ -177,10 +164,10 @@ public static class ConfigureServices
             opt.DocumentFilter<GlobalTagsDocumentFilter>();
             opt.ConfigureForNodaTime();
         });
-        
+
         services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
     }
-    
+
     public static void AddAspnetServices(this IServiceCollection services)
     {
         services.AddControllers(options =>
@@ -191,7 +178,7 @@ public static class ConfigureServices
             {
                 options.JsonSerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
             });
-        
+
         services.AddSwagger();
         services.AddHttpContextAccessor();
 
@@ -207,20 +194,18 @@ public static class ConfigureServices
                 });
         });
     }
-    
+
     public static void AddConfiguration(this IServiceCollection services, ConfigurationManager configuration)
     {
         services.Configure<AuthenticationConfiguration>(configuration.GetSection(AuthenticationConfiguration.SectionName));
         services.Configure<UserSettingsConfiguration>(configuration.GetSection(UserSettingsConfiguration.SectionName));
         services.Configure<CaptchaConfiguration>(configuration.GetSection(CaptchaConfiguration.SectionName));
     }
-    
+
     public static void AddApiExplorerServices(this IServiceCollection services)
     {
         services.TryAddSingleton<IApiDescriptionGroupCollectionProvider, ApiDescriptionGroupCollectionProvider>();
         services.TryAddEnumerable(
             ServiceDescriptor.Transient<IApiDescriptionProvider, DefaultApiDescriptionProvider>());
     }
-
 }
-

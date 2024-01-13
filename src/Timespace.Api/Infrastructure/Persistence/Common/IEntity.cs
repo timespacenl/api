@@ -1,6 +1,6 @@
 ﻿namespace Timespace.Api.Infrastructure.Persistence.Common;
 
-public interface IEntity
+internal interface IEntity
 {
     public int Id { get; set; }
 }

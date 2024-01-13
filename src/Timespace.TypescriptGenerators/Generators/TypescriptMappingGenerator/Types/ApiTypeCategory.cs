@@ -2,7 +2,7 @@ namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.T
 
 public enum ApiTypeCategory
 {
-    Shared,
-    Request,
-    Response
+	Shared,
+	Request,
+	Response,
 }
