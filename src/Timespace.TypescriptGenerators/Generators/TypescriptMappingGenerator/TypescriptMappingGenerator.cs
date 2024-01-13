@@ -1,14 +1,17 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Timespace.Api.Infrastructure.ExternalSourceGeneration;
 using TimeSpace.Shared.TypescriptGenerator;
 using Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.Types;
+using Timespace.TypescriptGenerators.Helpers;
 
 namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator;
 
-public partial class TypescriptMappingGenerator : IExternalSourceGenerator
+[SuppressMessage("ReSharper", "UnusedType.Global", Justification = "Used through DI")]
+[SuppressMessage("Performance", "CA1812", Justification = "Used through DI")]
+internal sealed partial class TypescriptMappingGenerator : IExternalSourceGenerator
 {
 	private readonly Compilation _compilation;
 	private readonly IReadOnlyList<EndpointDescription> _endpoints;
@@ -34,10 +37,14 @@ public partial class TypescriptMappingGenerator : IExternalSourceGenerator
 			var generatableEndpoint = TransformEndpointDescription(endpoint);
 
 			if (generatableEndpoint == null)
+			{
 				_logger.LogWarning(
 					$"Endpoint {endpoint.ControllerTypeName}.{endpoint.ActionName} was not generated because something went wrong during the discovery process.");
+			}
 			else
+			{
 				endpoints.Add(generatableEndpoint);
+			}
 		}
 
 		var typescriptSourceFiles = GenerateTypescriptCode(endpoints);
@@ -47,7 +54,7 @@ public partial class TypescriptMappingGenerator : IExternalSourceGenerator
 
 		foreach (var sourceFile in typescriptSourceFiles)
 		{
-			Directory.CreateDirectory(Path.Combine(_settings.TypescriptGenerator.GenerationRoot, sourceFile.DirectoryPath));
+			_ = Directory.CreateDirectory(Path.Combine(_settings.TypescriptGenerator.GenerationRoot, sourceFile.DirectoryPath));
 			File.WriteAllText(Path.Combine(_settings.TypescriptGenerator.GenerationRoot, sourceFile.DirectoryPath, sourceFile.FileName),
 				sourceFile.Content);
 		}

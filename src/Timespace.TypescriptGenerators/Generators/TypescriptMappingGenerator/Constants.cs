@@ -36,7 +36,7 @@ public static class Constants
 		},
 	};
 
-	public static readonly List<string> PassthroughTypes =
+	public static readonly IReadOnlyList<string> PassthroughTypes =
 	[
 		"global::System.Threading.Tasks.Task<TResult>",
 	];
@@ -49,7 +49,7 @@ public static class Constants
 
          """;
 
-	private static readonly string FetchTypeSource = "export type FetchType = typeof fetch";
+	private const string FetchTypeSource = "export type FetchType = typeof fetch";
 
 	public static readonly TypescriptSourceFile FetchTypeFile = new(
 		"helpers",
@@ -57,7 +57,7 @@ public static class Constants
 		FetchTypeSource
 	);
 
-	private static readonly string ConvertFormDataSource =
+	private const string ConvertFormDataSource =
 		"""
           function appendFormData(formData: any, data: any, rootName: any) {
           
@@ -100,7 +100,7 @@ public static class Constants
 		ConvertFormDataSource
 	);
 
-	private static readonly string ProblemDetailsSource =
+	private const string ProblemDetailsSource =
 		"""
         export interface IProblemDetails {
             type?: string;

@@ -6,7 +6,7 @@ using Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.Types
 
 namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator;
 
-public partial class TypescriptMappingGenerator
+internal partial class TypescriptMappingGenerator
 {
 	private List<EndpointParameter> TransformParameters(IMethodSymbol actionSymbol, string routeUrl)
 	{
@@ -21,14 +21,18 @@ public partial class TypescriptMappingGenerator
 			?? (actionParameter.Type.IsDefaultMappable() ? ParameterSource.Query : ParameterSource.Body);
 
 		if (source != ParameterSource.Query)
+		{
 			transformedParameters.Add(new EndpointParameter(
 				actionParameter.GetNameFromBindingAttributeIfExists() ?? actionParameter.Name,
 				actionParameter.Type,
 				null,
 				source)
 			);
+		}
 		else
+		{
 			GetParametersFromTypeSymbol(actionParameter.Type, actionParameter.Type, transformedParameters, routeUrl);
+		}
 
 		return transformedParameters;
 	}
@@ -44,11 +48,13 @@ public partial class TypescriptMappingGenerator
 			var source = typeMember.GetSymbolBindingSource() ?? ParameterSource.Query;
 
 			if (typeMember.Type.IsDefaultMappable() || source is ParameterSource.Body or ParameterSource.Form)
+			{
 				transformedParameters.Add(new EndpointParameter(
 					typeMember.GetNameFromBindingAttributeIfExists() ?? typeMember.Name,
 					typeMember.Type,
 					root.Name != typeMember.ContainingType.Name ? typeMember.ContainingType : null,
 					source));
+			}
 			else if (source is ParameterSource.Query or ParameterSource.Path)
 			{
 				var rootTypePropertyTypeNames =
@@ -64,7 +70,9 @@ public partial class TypescriptMappingGenerator
 				}
 			}
 			else
+			{
 				GetParametersFromTypeSymbol(root, typeMember.Type, transformedParameters, routeUrl);
+			}
 		}
 	}
 }

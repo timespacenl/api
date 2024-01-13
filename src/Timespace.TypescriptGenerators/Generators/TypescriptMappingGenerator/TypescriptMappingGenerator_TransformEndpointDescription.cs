@@ -6,9 +6,9 @@ using Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.Types
 
 namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator;
 
-public partial class TypescriptMappingGenerator
+internal partial class TypescriptMappingGenerator
 {
-	public ApiEndpoint? TransformEndpointDescription(EndpointDescription description)
+	private ApiEndpoint? TransformEndpointDescription(EndpointDescription description)
 	{
 		var declaringType = _compilation.GetTypeByMetadataName(description.ControllerTypeName);
 
@@ -28,13 +28,13 @@ public partial class TypescriptMappingGenerator
 			return null;
 		}
 
-		var actionName = actionSym.Name.Replace("Async", "");
+		var actionName = actionSym.Name.Replace("Async", "", StringComparison.InvariantCulture);
 
 		var returnType = actionSym.ReturnType;
 
 		var endpointParameters = TransformParameters(actionSym, description.RelativePath);
 
-		Dictionary<string, ApiType> requestTypes = new();
+		Dictionary<string, ApiType> requestTypes = [];
 
 		var bodyParams = endpointParameters.Where(x => x.Source is ParameterSource.Body or ParameterSource.Form).ToList();
 		var pathParams = endpointParameters.Where(x => x.Source == ParameterSource.Path).ToList();
@@ -50,10 +50,7 @@ public partial class TypescriptMappingGenerator
 				throw new ArgumentException("All body parameters must have the same source type.");
 			}
 
-			if (bodyParams.Count == 1)
-				bodyTypeName = bodyParams.First().TypeSymbol.ToFullyQualifiedDisplayString();
-			else
-				bodyTypeName = actionName + "RequestBody";
+			bodyTypeName = bodyParams.Count == 1 ? bodyParams.First().TypeSymbol.ToFullyQualifiedDisplayString() : actionName + "RequestBody";
 
 			ProcessEndpointParameters(bodyParams, "RequestBody", requestTypes);
 		}
@@ -62,10 +59,9 @@ public partial class TypescriptMappingGenerator
 		if (pathParams.Count > 0)
 		{
 			var firstParamTypeDefinedBy = pathParams.First().DefinedBy;
-			if (pathParams.DistinctBy(x => x.DefinedBy).Count() == 1 && firstParamTypeDefinedBy is not null)
-				pathTypeName = firstParamTypeDefinedBy.ToFullyQualifiedDisplayString();
-			else
-				pathTypeName = actionName + "RequestPath";
+			pathTypeName = pathParams.DistinctBy(x => x.DefinedBy).Count() == 1 && firstParamTypeDefinedBy is not null
+				? firstParamTypeDefinedBy.ToFullyQualifiedDisplayString()
+				: actionName + "RequestPath";
 
 			ProcessEndpointParameters(pathParams, "RequestPath", requestTypes);
 		}
@@ -74,16 +70,15 @@ public partial class TypescriptMappingGenerator
 		if (queryParams.Count > 0)
 		{
 			var firstParamTypeDefinedBy = queryParams.First().DefinedBy;
-			if (queryParams.DistinctBy(x => x.DefinedBy?.Name).Count() == 1 && firstParamTypeDefinedBy is not null)
-				queryTypeName = firstParamTypeDefinedBy.ToFullyQualifiedDisplayString();
-			else
-				queryTypeName = actionName + "RequestQuery";
+			queryTypeName = queryParams.DistinctBy(x => x.DefinedBy?.Name).Count() == 1 && firstParamTypeDefinedBy is not null
+				? firstParamTypeDefinedBy.ToFullyQualifiedDisplayString()
+				: actionName + "RequestQuery";
 
 
 			ProcessEndpointParameters(queryParams, "RequestQuery", requestTypes);
 		}
 
-		Dictionary<string, ApiType> responseTypes = new();
+		Dictionary<string, ApiType> responseTypes = [];
 		var responseTypeName = UnwrapType(returnType).ToFullyQualifiedDisplayString();
 
 		GenerateApiTypeFromTypeSymbol(returnType, responseTypes);
@@ -97,8 +92,8 @@ public partial class TypescriptMappingGenerator
 			QueryTypeName = queryTypeName,
 			PathTypeName = pathTypeName,
 			ResponseTypeName = responseTypeName,
-			HttpMethod = description.HttpMethod!.ToUpper(),
-			RouteUrl = description.RelativePath,
+			HttpMethod = description.HttpMethod!.ToUpperInvariant(),
+			Route = description.RelativePath,
 			Version = description.Version ?? "v1",
 			ActionName = actionName,
 			FormData = bodyParams.Any(x => x.Source == ParameterSource.Form),
@@ -157,13 +152,15 @@ public partial class TypescriptMappingGenerator
 
 		var apiType = new ApiTypeClass
 		{
-			FullyQualifiedTypeName = typeNamePrefix + typeName, TypeName = typeNamePrefix + typeName, Properties = properties,
+			FullyQualifiedTypeName = typeNamePrefix + typeName,
+			TypeName = typeNamePrefix + typeName,
+			Properties = properties,
 		};
 
 		generatableTypes.Add(typeNamePrefix + typeName, apiType);
 	}
 
-	private CollectionInfo GetCollectionInfoFromTypeSymbol(ITypeSymbol typeSymbol)
+	private static CollectionInfo GetCollectionInfoFromTypeSymbol(ITypeSymbol typeSymbol)
 	{
 		if (typeSymbol is not INamedTypeSymbol namedTypeSymbol)
 			return CollectionInfoHelpers.None;
@@ -173,15 +170,19 @@ public partial class TypescriptMappingGenerator
 			if (namedTypeSymbol.IsDictionaryType())
 			{
 				if (namedTypeSymbol.TypeArguments[0].IsDefaultMappable() && !namedTypeSymbol.TypeArguments[1].IsCollectionType())
+				{
 					return CollectionInfoHelpers.Dictionary(namedTypeSymbol.TypeArguments[0].Name,
 						namedTypeSymbol.TypeArguments[0].ToFullyQualifiedDisplayString(), namedTypeSymbol.TypeArguments[1].Name,
 						namedTypeSymbol.TypeArguments[1].ToFullyQualifiedDisplayString());
+				}
 			}
 			else
 			{
 				if (!namedTypeSymbol.TypeArguments[0].IsCollectionType())
+				{
 					return CollectionInfoHelpers.List(namedTypeSymbol.TypeArguments[0].Name,
 						namedTypeSymbol.TypeArguments[0].ToFullyQualifiedDisplayString());
+				}
 			}
 
 			throw new Exception("Nested collections are not supported.");
@@ -197,18 +198,21 @@ public partial class TypescriptMappingGenerator
 		var propertySymbols = typeSymbol.GetMembers().OfType<IPropertySymbol>().ToList();
 
 		ApiType apiType;
-		if (typeSymbol is INamedTypeSymbol {TypeKind: TypeKind.Enum})
+		if (typeSymbol is INamedTypeSymbol { TypeKind: TypeKind.Enum })
 		{
 			var enumMembers = typeSymbol.GetMembers().OfType<IFieldSymbol>().ToList();
 			var enumValues = enumMembers.Select(x => new ApiEnumValue
 			{
-				Name = x.Name, Value = x.ConstantValue?.ToString(),
+				Name = x.Name,
+				Value = x.ConstantValue?.ToString(),
 			}).ToList();
 
 
 			apiType = new ApiTypeEnum
 			{
-				FullyQualifiedTypeName = typeSymbol.ToFullyQualifiedDisplayString(), TypeName = GetTypeSymbolName(typeSymbol), Values = enumValues,
+				FullyQualifiedTypeName = typeSymbol.ToFullyQualifiedDisplayString(),
+				TypeName = GetTypeSymbolName(typeSymbol),
+				Values = enumValues,
 			};
 		}
 		else
@@ -232,7 +236,7 @@ public partial class TypescriptMappingGenerator
 				if (!propertySymbol.Type.IsDefaultMappable() &&
 					!resolvedPropertySymbolType.IsDefaultMappable() &&
 					resolvedPropertySymbolType.Name != typeSymbol.Name &&
-					!generatableTypes.ContainsKey(resolvedPropertySymbolType.ToFullyQualifiedDisplayString().Replace("?", "")))
+					!generatableTypes.ContainsKey(resolvedPropertySymbolType.ToFullyQualifiedDisplayString().Replace("?", "", StringComparison.InvariantCultureIgnoreCase)))
 				{
 					GenerateApiTypeFromTypeSymbol(propertySymbol.Type, generatableTypes);
 				}
@@ -252,7 +256,7 @@ public partial class TypescriptMappingGenerator
 
 	private string GetTypeSymbolName(ITypeSymbol typeSymbol)
 	{
-		if (typeSymbol is INamedTypeSymbol {IsGenericType: true} namedTypeSymbol)
+		if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
 		{
 			if (!namedTypeSymbol.IsCollectionType())
 			{
@@ -266,8 +270,10 @@ public partial class TypescriptMappingGenerator
 					return typeName;
 
 				if (typeSymbol.ContainingType is not null)
+				{
 					return namedTypeSymbol.ContainingType.Name + namedTypeSymbol.Name + "Of"
 						+ string.Join("And", namedTypeSymbol.TypeArguments.Select(GetTypeSymbolName));
+				}
 
 				return namedTypeSymbol.Name + "Of" + string.Join("And", namedTypeSymbol.TypeArguments.Select(GetTypeSymbolName));
 			}
@@ -312,7 +318,7 @@ public partial class TypescriptMappingGenerator
 		};
 	}
 
-	private ITypeSymbol UnwrapType(ITypeSymbol typeSymbol)
+	private static ITypeSymbol UnwrapType(ITypeSymbol typeSymbol)
 	{
 		var returnable = typeSymbol;
 		if (typeSymbol is INamedTypeSymbol namedTypeSymbol)

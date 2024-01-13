@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using TimeSpace.Shared.TypescriptGenerator;
 
@@ -13,12 +14,13 @@ public abstract record ApiType
 
 public record ApiTypeClass : ApiType
 {
-	public required List<ApiClassProperty> Properties { get; init; } = new();
+	public required IList<ApiClassProperty> Properties { get; init; } = [];
 }
 
+[SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "This is an enum type")]
 public record ApiTypeEnum : ApiType
 {
-	public required List<ApiEnumValue> Values { get; init; } = new();
+	public required IList<ApiEnumValue> Values { get; init; } = [];
 }
 
 public record CollectionInfo
@@ -42,7 +44,9 @@ public static class CollectionInfoHelpers
 	{
 		return new CollectionInfo
 		{
-			CollectionType = CollectionType.List, ValueTypeName = valueTypeName, FullyQualifiedValueTypeName = fullyQualifiedValueTypeName,
+			CollectionType = CollectionType.List,
+			ValueTypeName = valueTypeName,
+			FullyQualifiedValueTypeName = fullyQualifiedValueTypeName,
 		};
 	}
 
@@ -77,15 +81,15 @@ public record ApiEnumValue
 
 public record ApiEndpoint
 {
-	public required List<EndpointParameter> Parameters { get; init; } = new();
-	public required Dictionary<string, ApiType> RequestTypes { get; init; } = new();
-	public required Dictionary<string, ApiType> ResponseTypes { get; init; } = new();
-	public required string? BodyTypeName { get; init; } = null;
-	public required string? QueryTypeName { get; init; } = null;
-	public required string? PathTypeName { get; init; } = null;
+	public required IList<EndpointParameter> Parameters { get; init; } = [];
+	public required Dictionary<string, ApiType> RequestTypes { get; init; } = [];
+	public required Dictionary<string, ApiType> ResponseTypes { get; init; } = [];
+	public required string? BodyTypeName { get; init; }
+	public required string? QueryTypeName { get; init; }
+	public required string? PathTypeName { get; init; }
 	public required string ResponseTypeName { get; init; } = null!;
 	public required string HttpMethod { get; init; } = null!;
-	public required string RouteUrl { get; init; } = null!;
+	public required string Route { get; init; } = null!;
 	public required string Version { get; init; } = null!;
 	public required string ActionName { get; init; } = null!;
 	public required bool FormData { get; init; }

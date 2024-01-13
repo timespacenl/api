@@ -1,9 +1,9 @@
 ﻿namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.Types;
 
-public record TypescriptImportable(ImportType ImportType, SharedType? ImportableType, ImportFlags? ImportFlags);
+public record TypescriptImportable(ImportType ImportType, SharedType? ImportableType, ImportableTypes? ImportFlags);
 
 [Flags]
-public enum ImportFlags
+public enum ImportableTypes
 {
 	Type = 1 << 0,
 	Request = 1 << 1,

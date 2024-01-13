@@ -3,16 +3,16 @@ using TimeSpace.Shared.TypescriptGenerator;
 
 namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.Extensions;
 
-public static class TypeExtensions
+internal static class TypeExtensions
 {
 	public static bool IsCollectionType(this ITypeSymbol type)
 	{
-		return type is INamedTypeSymbol {IsGenericType: true} namedTypeSymbol && namedTypeSymbol.Interfaces.Any(x => x.Name == "IEnumerable");
+		return type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol.Interfaces.Any(x => x.Name == "IEnumerable");
 	}
 
 	public static bool IsDictionaryType(this ITypeSymbol type)
 	{
-		return type is INamedTypeSymbol {IsGenericType: true} namedTypeSymbol && namedTypeSymbol.Interfaces.Any(x => x.Name == "IDictionary");
+		return type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol.Interfaces.Any(x => x.Name == "IDictionary");
 	}
 
 	private static string? GetName(IEnumerable<AttributeData> attributes)

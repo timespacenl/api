@@ -2,6 +2,6 @@
 
 public interface ITimestamped
 {
-    public Instant CreatedAt { get; set; }
-    public Instant UpdatedAt { get; set; }
+	public Instant CreatedAt { get; set; }
+	public Instant UpdatedAt { get; set; }
 }

@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reflection;
 
-namespace Timespace.Api.Application.Features.ExternalSourceGeneration.Generators.TypescriptApiClientGenerator.Extensions;
+namespace Timespace.TypescriptGenerators.Generators.TypescriptMappingGenerator.Extensions;
 
-public static class TypeMemberExtensions
+internal static class TypeMemberExtensions
 {
 	public static bool IsNullable(this PropertyInfo property)
 	{

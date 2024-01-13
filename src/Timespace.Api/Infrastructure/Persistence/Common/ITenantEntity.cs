@@ -2,9 +2,9 @@
 
 public interface ITenantEntity
 {
-    public Tenant Tenant { get; set; }
-    /// <remarks>
-    ///     Make this required in the implementation
-    /// </remarks>
-    public Guid TenantId { get; set; }
+	//public Tenant Tenant { get; set; }
+	/// <remarks>
+	///     Make this required in the implementation
+	/// </remarks>
+	public Guid TenantId { get; set; }
 }

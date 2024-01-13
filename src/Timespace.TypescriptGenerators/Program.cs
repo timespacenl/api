@@ -12,7 +12,7 @@ static IHost AppStartup()
 {
 	var builder = new ConfigurationBuilder();
 
-	builder.SetBasePath(Directory.GetCurrentDirectory())
+	_ = builder.SetBasePath(Directory.GetCurrentDirectory())
 		.AddJsonFile("appsettings.json", false, true)
 		.AddEnvironmentVariables();
 
@@ -26,7 +26,7 @@ static IHost AppStartup()
 	var host = Host.CreateDefaultBuilder()
 		.ConfigureServices((context, services) =>
 		{
-			services.Configure<ExternalSourceGenerationSettings>(
+			_ = services.Configure<ExternalSourceGenerationSettings>(
 				context.Configuration.GetSection(ExternalSourceGenerationSettings.SectionName));
 		})
 		.UseSerilog()

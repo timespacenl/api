@@ -63,5 +63,7 @@ Global
 		{14544174-4411-403F-8F56-2975AB142952}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14544174-4411-403F-8F56-2975AB142952}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14544174-4411-403F-8F56-2975AB142952}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91FBB679-2AAE-4A5C-BF8A-51EC68D5F5E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91FBB679-2AAE-4A5C-BF8A-51EC68D5F5E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal
