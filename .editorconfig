@@ -6,9 +6,10 @@ root = true
 charset = utf-8
 end_of_line = lf
 indent_style = tab
-insert_final_newline = false
+insert_final_newline = true
 trim_trailing_whitespace = false
 indent_size = 4
+tab_width = 4
 
 # Microsoft .NET properties
 csharp_indent_braces = false
@@ -1888,7 +1889,6 @@ tab_width = unset
 
 # Code files
 [*.cs]
-tab_width = 4
 max_line_length = 150
 
 ## Dotnet code style settings:
